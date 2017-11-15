@@ -1,0 +1,66 @@
+{
+  "Version": 2,
+  "Monday": [
+    "08:10-08:55-Algebra",
+    "09:15-09:55-Geography",
+    "10:00-10:40-Algebra",
+    "10:55-11:35-Kaz lang",
+    "11:50-12:30-Physics",
+    "12:45-13:25-Eng lang",
+    "13:30-14:10-Kaz history",
+    "14:15-14:55-Chemistry",
+    "15:00-15:40-PE"
+  ],
+  "Tuesday": [
+    "08:10-08:50-Chemistry",
+    "09:00-09:40-Kaz history",
+    "09:45-10:25-Physics",
+    "10:40-11:20-Rus lang",
+    "11:35-12:15-Geometry",
+    "12:30-13:10-World history",
+    "13:15-13:55-Biology",
+    "14:00-14:40-Religious studies",
+    "14:45-15:30-Physics"
+  ],
+  "Wednesday": [
+    "08:10-08:50-Physics",
+    "09:00-09:40-Drawing",
+    "09:45-10:25-Eng lang",
+    "10:40-11:20-Kaz lang",
+    "11:35-12:15-Rus lit",
+    "12:30-13:10-SK",
+    "13:15-13:55-Biology",
+    "14:00-14:40-Technology",
+    "14:45-15:30-Self knowledge",
+    "15:35-16:15-PE"
+  ],
+  "Thursday": [
+    "08:10-08:50-Physics",
+    "09:00-09:40-Geography",
+    "09:45-10:25-Algebra",
+    "10:40-11:20-Chemistry",
+    "11:35-12:15-Algebra",
+    "12:30-13:10-PE",
+    "13:15-13:55-Physics pr",
+    "14:00-14:40-Kaz lit",
+    "14:45-15:25-Rus lit"
+  ],
+  "Friday": [
+    "08:10-08:50-Kaz lang",
+    "09:00-09:40-Informatics",
+    "09:45-10:25-Geometry",
+    "10:40-11:20-Kaz lang",
+    "11:35-12:15-Rus lang",
+    "12:30-13:10-HSR",
+    "13:15-13:55-Drawing",
+    "14:00-14:40-SK"
+  ],
+  "Saturday": [
+    "08:10-08:50-Rus lang",
+    "09:00-09:40-Drawing",
+    "09:45-10:25-Kaz lit",
+    "10:40-11:20-Kaz history"
+  ],
+  "Sunday": [
+  ]
+}
