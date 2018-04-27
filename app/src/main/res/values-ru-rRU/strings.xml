@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LessonCountdown</string>
+    <string name="on">Сервис онлайн</string>
+    <string name="off">Сервис оффлайн</string>
+    <string name="save">Сохранить</string>
+    <string name="settings">Настройки</string>
+    <string name="customCfg">Свой конфиг (Отключает авто-скачивание)</string>
+    <string name="monday">Понедельник</string>
+    <string name="tuesday">Вторник</string>
+    <string name="wednesday">Среда</string>
+    <string name="thursday">Четверг</string>
+    <string name="friday">Пятница</string>
+    <string name="pasteSchedule">Вставьте расписание уроков</string>
+    <string name="pasteBells">Вставьте расписание звонков</string>
+    <string name="dev"><a href="https://vk.com/dibrin">Евгений Бондаренко</a></string>
+    <string name="about">О программе</string>
+    <string name="networkErr">Сеть недоступна</string>
+    <string name="configErr">Ошибка в конфиге</string>
+    <string name="cancel">Отмена</string>
+    <string name="clear">Стереть</string>
+    <string name="homework">Домашнее задание</string>
+    <string name="curr">Сейчас</string>
+    <string name="next">Затем</string>
+    <string name="sec">сек</string>
+    <string name="min">мин</string>
+    <string name="lesson">Урок</string>
+    <string name="time">Время</string>
+    <string name="add">Добавить</string>
+    <string name="remove">Удалить</string>
+    <string name="timeErr">xxxое поле ввода времени должно выглядеть так: Часы:Минуты-Часы:Минуты</string>
+    <string name="lessonErr">xxxое поле ввода урока пустое</string>
+    <string name="saturday">Суббота</string>
+    <string name="indexErr">Вы ввели число больше возможного</string>
+    <string name="editMode">Режим редактирования</string>
+    <string name="removeIndex">Удалить:</string>
+    <string name="addIndex">Добавить после:</string>
+    <string name="chooseClass">Выбрать класс</string>
+    <string name="searchClass">Поиск класса</string>
+    <string name="notNumErr">Вы ввели не число</string>
+    <string name="chooseServer">Выберите сервер:</string>
+    <string name="ownServer">Свой сервер</string>
+    <string name="address">Адрес</string>
+    <string name="mainServer">Главный сервер</string>
+</resources>

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "681910423171",
+    "firebase_url": "https://lessoncountdown-b5f5d.firebaseio.com",
+    "project_id": "lessoncountdown-b5f5d",
+    "storage_bucket": "lessoncountdown-b5f5d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:681910423171:android:d227e9933bdfb0e3",
+        "android_client_info": {
+          "package_name": "pro.eugw.lessoncountdown"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "681910423171-ob6ag32u5i92nc29ukrimk5j76dck145.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pro.eugw.lessoncountdown",
+            "certificate_hash": "0aa0f6502cefacb1530199c80bfe70d53d2b138a"
+          }
+        },
+        {
+          "client_id": "681910423171-4054h4g02io131s5usgltu1tn5ec76f7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSlz-H3STIMvdgiLz1FXOUtmuo_LQxfVs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "681910423171-4054h4g02io131s5usgltu1tn5ec76f7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
