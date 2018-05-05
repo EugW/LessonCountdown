@@ -10,7 +10,7 @@ import android.support.v4.content.LocalBroadcastManager
 
 class MainApp : Application() {
 
-    var running: Boolean = false
+    var running = false
 
     override fun onCreate() {
         LocalBroadcastManager.getInstance(this).registerReceiver(object : BroadcastReceiver() {

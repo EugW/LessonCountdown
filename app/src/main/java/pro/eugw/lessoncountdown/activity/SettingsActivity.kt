@@ -97,7 +97,7 @@ class SettingsActivity : BaseActivity() {
                         val b = JsonParser().parse(bells).asJsonObject
                         PrintWriter(FileWriter(File(filesDir, "bells.json")), true).println(b)
                     } catch (e: Exception) {
-                        runOnUiThread { Toast.makeText(this, "${getString(R.string.configErr)} settings", Toast.LENGTH_LONG).show() }
+                        runOnUiThread { Toast.makeText(this, R.string.configErr, Toast.LENGTH_LONG).show() }
                         return@Thread
                     }
                 }

@@ -26,11 +26,15 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.util.*
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
 
 class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener {
 
 
     private lateinit var prefs: SharedPreferences
+    var clazz = JsonObject()
+    var homework = JsonObject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +57,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 toggleButton.isChecked = p1!!.getBooleanExtra("isRun", false)
             }
         }, filter)
+        val futureClass = Executors.newSingleThreadExecutor().submit(Callable<JsonObject>({
+            return@Callable initClass()
+        }))
+        clazz = futureClass.get() as JsonObject
+        homework = initHomework()
         val intent = Intent(this, MService::class.java)
         toggleButton.setOnClickListener {
             if (toggleButton.isChecked)
@@ -103,7 +112,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             jsonObject.add("bells", bellsJ)
             jsonObject
         } catch (e: Exception) {
-            runOnUiThread { Toast.makeText(this, "${getString(R.string.configErr)} main", Toast.LENGTH_LONG).show() }
+            runOnUiThread { Toast.makeText(this, R.string.configErr, Toast.LENGTH_LONG).show() }
             JsonObject()
         }
     }
@@ -117,18 +126,12 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
 
     private fun inflateFragment(day: Int, dayName: String) {
-        Thread {
-            val bundle = Bundle()
-            bundle.putString("day", day.toString())
-            bundle.putString("dayName", dayName)
-            val job = initClass()
-            bundle.putString("schedule", job["schedule"].toString())
-            bundle.putString("bells", job["bells"].toString())
-            bundle.putString("homework", initHomework().toString())
-            val fragment = DayOfWeekFragment()
-            fragment.arguments = bundle
-            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit()
-        }.start()
+        val bundle = Bundle()
+        bundle.putString("day", day.toString())
+        bundle.putString("dayName", dayName)
+        val fragment = DayOfWeekFragment()
+        fragment.arguments = bundle
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit()
     }
 
     override fun onBackPressed() {

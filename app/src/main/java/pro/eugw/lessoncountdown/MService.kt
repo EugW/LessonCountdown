@@ -54,13 +54,13 @@ class MService : Service() {
         val schedule = try {
             JsonParser().parse(FileReader(File(filesDir, "schedule.json"))).asJsonObject
         } catch (e: Exception) {
-            Toast.makeText(this, "${getString(R.string.configErr)} service 1", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.configErr, Toast.LENGTH_LONG).show()
             JsonObject()
         }
         val bells = try {
             JsonParser().parse(FileReader(File(filesDir, "bells.json"))).asJsonObject
         } catch (e: Exception) {
-            Toast.makeText(this, "${getString(R.string.configErr)} service 2", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.configErr, Toast.LENGTH_LONG).show()
             JsonObject()
         }
         val dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK).toString()

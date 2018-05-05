@@ -15,7 +15,9 @@ import android.widget.EditText
 import android.widget.Toast
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import pro.eugw.lessoncountdown.MainApp
 import pro.eugw.lessoncountdown.R
+import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.list.schedule.MAdapter
 import pro.eugw.lessoncountdown.list.schedule.MLesson
 import java.io.File
@@ -52,18 +54,22 @@ class DayOfWeekFragment: Fragment() {
         dialogView.adapter = adapter
         dialogView.layoutManager = LinearLayoutManager(activity)
         dialogView.addItemDecoration(DividerItemDecoration(dialogView.context, LinearLayoutManager(activity).orientation))
-        schedule = JsonParser().parse(bundle.getString("schedule", JsonObject().toString())).asJsonObject
-        bells = JsonParser().parse(bundle.getString("bells", JsonObject().toString())).asJsonObject
+        val job = (activity as MainActivity).clazz
+        schedule = job["schedule"].asJsonObject //JsonParser().parse(bundle.getString("schedule", JsonObject().toString())).asJsonObject
+        bells = job["bells"].asJsonObject //JsonParser().parse(bundle.getString("bells", JsonObject().toString())).asJsonObject
         day = bundle.getString("day")
         val homework = JsonParser().parse(bundle.getString("homework", JsonObject().toString())).asJsonObject
         if (!schedule.has(day) || !bells.has(day))
             return
-        (0 until schedule.get(bundle.getString("day")).asJsonArray.size()).map {
+        schedule.get(day).asJsonArray.forEachIndexed { index, jsonElement ->
+            list.add(MLesson(jsonElement.asString, bells.get(day).asJsonArray[index].asString, if (homework.has(jsonElement.asString)) homework.get(jsonElement.asString).asString else ""))
+        }
+        /*(0 until schedule.get(bundle.getString("day")).asJsonArray.size()).map {
             val s = schedule.get(bundle.getString("day")).asJsonArray[it].asString
             val homeworkS = if (homework.has(s)) homework.get(s).asString else ""
             list.add(MLesson(s, bells.get(bundle.getString("day")).asJsonArray[it].asString, homeworkS))
-        }
-        adapterEdit.notifyDataSetChanged()
+        }*/
+        //adapterEdit.notifyDataSetChanged()
         adapter.notifyDataSetChanged()
         toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
