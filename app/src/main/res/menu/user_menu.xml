@@ -2,23 +2,29 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/menuMonday"
-        android:title="@string/monday" />
-    <item
-        android:id="@+id/menuTuesday"
-        android:title="@string/tuesday" />
-    <item
-        android:id="@+id/menuWednesday"
-        android:title="@string/wednesday" />
-    <item
-        android:id="@+id/menuThursday"
-        android:title="@string/thursday" />
-    <item
-        android:id="@+id/menuFriday"
-        android:title="@string/friday" />
-    <item
-        android:id="@+id/menuSaturday"
-        android:title="@string/saturday" />
+        android:title="@string/dowTitle">
+        <menu>
+            <item
+                android:id="@+id/menuMonday"
+                android:title="@string/monday" />
+            <item
+                android:id="@+id/menuTuesday"
+                android:title="@string/tuesday" />
+            <item
+                android:id="@+id/menuWednesday"
+                android:title="@string/wednesday" />
+            <item
+                android:id="@+id/menuThursday"
+                android:title="@string/thursday" />
+            <item
+                android:id="@+id/menuFriday"
+                android:title="@string/friday" />
+            <item
+                android:id="@+id/menuSaturday"
+                android:title="@string/saturday" />
+        </menu>
+    </item>
+
     <item
         android:id="@+id/menuSettings"
         android:title="@string/settings" />

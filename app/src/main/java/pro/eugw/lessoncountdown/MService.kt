@@ -54,13 +54,13 @@ class MService : Service() {
         val schedule = try {
             JsonParser().parse(FileReader(File(filesDir, "schedule.json"))).asJsonObject
         } catch (e: Exception) {
-            Toast.makeText(this, R.string.configErr, Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "${getString(R.string.configErr)} service 1", Toast.LENGTH_LONG).show()
             JsonObject()
         }
         val bells = try {
             JsonParser().parse(FileReader(File(filesDir, "bells.json"))).asJsonObject
         } catch (e: Exception) {
-            Toast.makeText(this, R.string.configErr, Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "${getString(R.string.configErr)} service 2", Toast.LENGTH_LONG).show()
             JsonObject()
         }
         val dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK).toString()
@@ -89,19 +89,16 @@ class MService : Service() {
                         title.append(getString(R.string.curr) + ": ").append(lessArr[i].asString)
                         if (i < lessArr.size() - 1)
                             title.append(" - " + getString(R.string.next) + ": ").append(lessArr[i + 1].asString)
-                        //text.append((end - current) / 60000).append(" " + getString(R.string.min) + " ").append(DecimalFormat("##").format((end - current) / 1000 % 60)).append(" " + getString(R.string.sec))
                         text.append(appendable(end, current))
                     } else if (i < lessArr.size() - 1) {
                         val nexEl = epochArr.get(i + 1).asString.split("-")
                         val nexS = nexEl[0].toLong()
                         if (current in (end + 1)..(nexS - 1)) {
-                            //text.append((nexS - current) / 60000).append(" " + getString(R.string.min) + " ").append(DecimalFormat("##").format((nexS - current) / 1000 % 60)).append(" " + getString(R.string.sec))
                             text.append(appendable(nexS, current))
                             title.append(getString(R.string.next) + ": ").append(lessArr[i + 1].asString)
                         } else if (current < epochArr.first().asString.split("-")[0].toLong() && i == 0) {
                             val nolEl = epochArr.first().asString.split("-")
                             val nolS = nolEl[0].toLong()
-                            //text.append((nolS - current) / 60000).append(" " + getString(R.string.min) + " ").append(DecimalFormat("##").format((nolS - current) / 1000 % 60)).append(" " + getString(R.string.sec))
                             text.append(appendable(nolS, current))
                             title.append(getString(R.string.next) + ": ").append(lessArr.first().asString)
                         }

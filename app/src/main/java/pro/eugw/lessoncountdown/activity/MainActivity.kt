@@ -1,23 +1,23 @@
 package pro.eugw.lessoncountdown.activity
 
-import android.app.Activity
 import android.content.*
 import android.os.Bundle
+import android.support.design.widget.NavigationView
 import android.support.v4.content.LocalBroadcastManager
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.view.Menu
+import android.support.v4.view.GravityCompat
+import android.support.v7.app.ActionBarDrawerToggle
 import android.view.MenuItem
 import android.widget.Toast
 import android.widget.ToggleButton
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.main_toolbar.*
+import pro.eugw.lessoncountdown.BaseActivity
 import pro.eugw.lessoncountdown.MService
 import pro.eugw.lessoncountdown.MainApp
 import pro.eugw.lessoncountdown.R
-import pro.eugw.lessoncountdown.list.schedule.MAdapter
-import pro.eugw.lessoncountdown.list.schedule.MLesson
+import pro.eugw.lessoncountdown.fragment.DayOfWeekFragment
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
@@ -26,69 +26,48 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.util.*
-import kotlin.collections.ArrayList
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-    private val list = ArrayList<MLesson>()
-    private val adapter = MAdapter(list, this, false)
+
     private lateinit var prefs: SharedPreferences
-    private lateinit var host: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
         prefs = getSharedPreferences("newPrefs", Context.MODE_PRIVATE)
         if (!prefs.contains("class") && !prefs.getBoolean("CustomCfg", false)) {
             startActivity(Intent(this, SettingsActivity::class.java))
             finish()
             return
         }
-        host = prefs.getString("cAddress", getString(R.string.host))
-        val toggle = findViewById<ToggleButton>(R.id.toggleButton)
-        toggle.isChecked = (application as MainApp).running
+        val toggle = ActionBarDrawerToggle(this, drawer_layout, main_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        drawer_layout.addDrawerListener(toggle)
+        toggle.syncState()
+        nav_view.setNavigationItemSelectedListener(this)
+        val toggleButton = nav_view.getHeaderView(0).findViewById<ToggleButton>(R.id.toggleButton)
+        toggleButton.isChecked = (application as MainApp).running
         val filter = IntentFilter(baseContext.packageName + ".SERVICE_STATE")
         LocalBroadcastManager.getInstance(this).registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent?) {
-                toggle.isChecked = p1!!.getBooleanExtra("isRun", false)
+                toggleButton.isChecked = p1!!.getBooleanExtra("isRun", false)
             }
         }, filter)
         val intent = Intent(this, MService::class.java)
-        toggle.setOnClickListener {
-            if (toggle.isChecked)
+        toggleButton.setOnClickListener {
+            if (toggleButton.isChecked)
                 startService(intent)
             else
                 stopService(intent)
         }
-        Thread {
-            updateView()
-            startService(intent)
-        }.start()
+        startService(intent)
+        inflateFragment(Calendar.getInstance().get(Calendar.DAY_OF_WEEK), resources.getStringArray(R.array.days)[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1])
     }
 
-
-
-    private fun updateView() {
-        list.clear()
-        val job = initClass()
-        val schedule = job["schedule"].asJsonObject
-        val bells = job["bells"].asJsonObject
-        val homework = initHomework()
-        val dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK).toString()
-        if (!schedule.has(dayOfWeek) || !bells.has(dayOfWeek))
-            return
-        (0 until schedule.get(dayOfWeek).asJsonArray.size()).map {
-            val b = bells.get(dayOfWeek).asJsonArray[it].asString.split("-")
-            val s = schedule.get(dayOfWeek).asJsonArray[it].asString
-            var homeworkS = ""
-            if (homework.has(s))
-                homeworkS = homework.get(s).asString
-            list.add(MLesson(s, b[0] + "-" + b[1], homeworkS))
-        }
-        runOnUiThread { adapter.notifyDataSetChanged() }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == 0)
+            if (resultCode == RESULT_OK)
+                inflateFragment(Calendar.getInstance().get(Calendar.DAY_OF_WEEK), resources.getStringArray(R.array.days)[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1])
     }
 
     private fun initClass(): JsonObject {
@@ -96,8 +75,10 @@ class MainActivity : AppCompatActivity() {
         val bells = File(filesDir, "bells.json")
         try {
             if (!prefs.getBoolean("CustomCfg", false)) {
-                val url = URL("http://" + host + "/class?school_id=" + prefs.getString("school_id", "") + "&clazz=" + URLEncoder.encode(prefs.getString("class", ""), "UTF-8"))
+                val url = URL("http://" + prefs.getString("cAddress", getString(R.string.host)) + "/class?school_id=" + prefs.getString("school_id", "") + "&clazz=" + URLEncoder.encode(prefs.getString("class", ""), "UTF-8"))
                 val conn = url.openConnection() as HttpURLConnection
+                conn.connectTimeout = resources.getInteger(R.integer.timeout)
+                conn.readTimeout = resources.getInteger(R.integer.timeout)
                 conn.connect()
                 val reader = JsonParser().parse(conn.inputStream.reader())
                 PrintWriter(FileWriter(schedule), true).println(try {
@@ -113,7 +94,6 @@ class MainActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             runOnUiThread { Toast.makeText(this, R.string.networkErr, Toast.LENGTH_LONG).show() }
-            e.printStackTrace()
         }
         return try {
             val jsonObject = JsonObject()
@@ -123,7 +103,7 @@ class MainActivity : AppCompatActivity() {
             jsonObject.add("bells", bellsJ)
             jsonObject
         } catch (e: Exception) {
-            runOnUiThread { Toast.makeText(this, R.string.configErr, Toast.LENGTH_LONG).show() }
+            runOnUiThread { Toast.makeText(this, "${getString(R.string.configErr)} main", Toast.LENGTH_LONG).show() }
             JsonObject()
         }
     }
@@ -135,120 +115,43 @@ class MainActivity : AppCompatActivity() {
         return JsonParser().parse(FileReader(file)).asJsonObject
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == 0)
-            if (resultCode == Activity.RESULT_OK)
-                Thread { updateView() }.start()
+
+    private fun inflateFragment(day: Int, dayName: String) {
+        Thread {
+            val bundle = Bundle()
+            bundle.putString("day", day.toString())
+            bundle.putString("dayName", dayName)
+            val job = initClass()
+            bundle.putString("schedule", job["schedule"].toString())
+            bundle.putString("bells", job["bells"].toString())
+            bundle.putString("homework", initHomework().toString())
+            val fragment = DayOfWeekFragment()
+            fragment.arguments = bundle
+            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit()
+        }.start()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater = menuInflater
-        inflater.inflate(R.menu.user_menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.menuMonday -> {
-                Thread {
-                    val intent = Intent(this, DayOfWeekActivity::class.java)
-                    val bundle = Bundle()
-                    bundle.putString("day", "2")
-                    bundle.putString("dayName", item.title.toString())
-                    val job = initClass()
-                    bundle.putString("schedule", job["schedule"].toString())
-                    bundle.putString("bells", job["bells"].toString())
-                    bundle.putString("homework", initHomework().toString())
-                    intent.putExtras(bundle)
-                    startActivityForResult(intent, 0)
-                }.start()
-                true
-            }
-            R.id.menuTuesday -> {
-                Thread {
-                    val intent = Intent(this, DayOfWeekActivity::class.java)
-                    val bundle = Bundle()
-                    bundle.putString("day", "3")
-                    bundle.putString("dayName", item.title.toString())
-                    val job = initClass()
-                    bundle.putString("schedule", job["schedule"].toString())
-                    bundle.putString("bells", job["bells"].toString())
-                    bundle.putString("homework", initHomework().toString())
-                    intent.putExtras(bundle)
-                    startActivityForResult(intent, 0)
-                }.start()
-                true
-            }
-            R.id.menuWednesday -> {
-                Thread {
-                    val intent = Intent(this, DayOfWeekActivity::class.java)
-                    val bundle = Bundle()
-                    bundle.putString("day", "4")
-                    bundle.putString("dayName", item.title.toString())
-                    val job = initClass()
-                    bundle.putString("schedule", job["schedule"].toString())
-                    bundle.putString("bells", job["bells"].toString())
-                    bundle.putString("homework", initHomework().toString())
-                    intent.putExtras(bundle)
-                    startActivityForResult(intent, 0)
-                }.start()
-                true
-            }
-            R.id.menuThursday -> {
-                Thread {
-                    val intent = Intent(this, DayOfWeekActivity::class.java)
-                    val bundle = Bundle()
-                    bundle.putString("day", "5")
-                    bundle.putString("dayName", item.title.toString())
-                    val job = initClass()
-                    bundle.putString("schedule", job["schedule"].toString())
-                    bundle.putString("bells", job["bells"].toString())
-                    bundle.putString("homework", initHomework().toString())
-                    intent.putExtras(bundle)
-                    startActivityForResult(intent, 0)
-                }.start()
-                true
-            }
-            R.id.menuFriday -> {
-                Thread {
-                    val intent = Intent(this, DayOfWeekActivity::class.java)
-                    val bundle = Bundle()
-                    bundle.putString("day", "6")
-                    bundle.putString("dayName", item.title.toString())
-                    val job = initClass()
-                    bundle.putString("schedule", job["schedule"].toString())
-                    bundle.putString("bells", job["bells"].toString())
-                    bundle.putString("homework", initHomework().toString())
-                    intent.putExtras(bundle)
-                    startActivityForResult(intent, 0)
-                }.start()
-                true
-            }
-            R.id.menuSaturday -> {
-                Thread {
-                    val intent = Intent(this, DayOfWeekActivity::class.java)
-                    val bundle = Bundle()
-                    bundle.putString("day", "7")
-                    bundle.putString("dayName", item.title.toString())
-                    val job = initClass()
-                    bundle.putString("schedule", job["schedule"].toString())
-                    bundle.putString("bells", job["bells"].toString())
-                    bundle.putString("homework", initHomework().toString())
-                    intent.putExtras(bundle)
-                    startActivityForResult(intent, 0)
-                }.start()
-                true
-            }
-            R.id.menuSettings -> {
-                startActivity(Intent(this, SettingsActivity::class.java))
-                true
-            }
-            R.id.menuAbout -> {
-                startActivity(Intent(this, AboutActivity::class.java))
-                true
-            }
-            else -> true
+    override fun onBackPressed() {
+        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+            drawer_layout.closeDrawer(GravityCompat.START)
+        } else {
+            super.onBackPressed()
         }
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.menuMonday -> inflateFragment(2, item.title.toString())
+            R.id.menuTuesday -> inflateFragment(3, item.title.toString())
+            R.id.menuWednesday -> inflateFragment(4, item.title.toString())
+            R.id.menuThursday -> inflateFragment(5, item.title.toString())
+            R.id.menuFriday -> inflateFragment(6, item.title.toString())
+            R.id.menuSaturday -> inflateFragment(7, item.title.toString())
+            R.id.menuSettings -> startActivity(Intent(this, SettingsActivity::class.java))
+            R.id.menuAbout -> startActivity(Intent(this, AboutActivity::class.java))
+        }
+        drawer_layout.closeDrawer(GravityCompat.START)
+        return true
     }
 
 }

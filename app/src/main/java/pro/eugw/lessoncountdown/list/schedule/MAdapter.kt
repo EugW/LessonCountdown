@@ -1,6 +1,5 @@
 package pro.eugw.lessoncountdown.list.schedule
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.support.v7.widget.RecyclerView
 import android.text.Editable
@@ -11,14 +10,14 @@ import android.view.ViewGroup
 import android.widget.EditText
 import com.google.gson.JsonParser
 import pro.eugw.lessoncountdown.R
-import pro.eugw.lessoncountdown.activity.DayOfWeekActivity
+import pro.eugw.lessoncountdown.fragment.DayOfWeekFragment
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import java.io.PrintWriter
 
 
-internal class MAdapter(private var list: List<MLesson>, private var context: Activity, private val edit: Boolean) : RecyclerView.Adapter<MHolder>() {
+internal class MAdapter(private var list: List<MLesson>, private var fragment: DayOfWeekFragment, private val edit: Boolean) : RecyclerView.Adapter<MHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MHolder {
         val view = if (edit) LayoutInflater.from(parent.context).inflate(R.layout.lesson_view_edit, parent, false) else LayoutInflater.from(parent.context).inflate(R.layout.lesson_view, parent, false)
@@ -36,33 +35,33 @@ internal class MAdapter(private var list: List<MLesson>, private var context: Ac
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: Editable?) {
-                    (context as DayOfWeekActivity).list[holder.adapterPosition] = MLesson(s.toString(), list[holder.adapterPosition].time, homework)
+                    fragment.list[holder.adapterPosition] = MLesson(s.toString(), list[holder.adapterPosition].time, homework)
                 }
             })
             holder.time.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: Editable?) {
-                    (context as DayOfWeekActivity).list[holder.adapterPosition] = MLesson(list[holder.adapterPosition].lesson, s.toString(), homework)
+                    fragment.list[holder.adapterPosition] = MLesson(list[holder.adapterPosition].lesson, s.toString(), homework)
                 }
             })
         } else
             holder.layout.setOnClickListener {
-                val builder = AlertDialog.Builder(context)
-                builder.setTitle(context.getString(R.string.homework) + " - " + name)
-                val input = EditText(context)
+                val builder = AlertDialog.Builder(fragment.activity)
+                builder.setTitle(fragment.getString(R.string.homework) + " - " + name)
+                val input = EditText(fragment.activity)
                 if (!homework.isEmpty())
                     input.setText(homework)
                 builder.setView(input)
                 builder.setPositiveButton("OK") { _, _ -> setList(name, input.text.toString(), position) }
-                builder.setNegativeButton(context.getString(R.string.cancel)) { dialogInterface, _ -> dialogInterface.cancel() }
-                builder.setNeutralButton(context.getString(R.string.clear)) { _, _ -> setList(name, "", position) }
+                builder.setNegativeButton(fragment.getString(R.string.cancel)) { dialogInterface, _ -> dialogInterface.cancel() }
+                builder.setNeutralButton(fragment.getString(R.string.clear)) { _, _ -> setList(name, "", position) }
                 builder.show()
             }
     }
 
     private fun setList(prop: String, homework: String, position: Int) {
-        val file = File(context.filesDir, "homework.json")
+        val file = File(fragment.activity.filesDir, "homework.json")
         val jsonObject = JsonParser().parse(FileReader(file)).asJsonObject
         list[position].homework = homework
         jsonObject.addProperty(prop, homework)

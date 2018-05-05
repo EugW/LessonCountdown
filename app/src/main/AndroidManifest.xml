@@ -16,12 +16,14 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <service android:name=".MService" />
+
         <activity android:name=".activity.AboutActivity" />
         <activity android:name=".activity.SettingsActivity" />
-        <activity android:name=".activity.DayOfWeekActivity" />
+        <activity android:name=".BaseActivity" />
         <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

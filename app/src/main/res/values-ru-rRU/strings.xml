@@ -38,8 +38,18 @@
     <string name="chooseClass">Выбрать класс</string>
     <string name="searchClass">Поиск класса</string>
     <string name="notNumErr">Вы ввели не число</string>
-    <string name="chooseServer">Выберите сервер:</string>
-    <string name="ownServer">Свой сервер</string>
+    <string name="ownServer">Установить собственный адрес сервера</string>
     <string name="address">Адрес</string>
-    <string name="mainServer">Главный сервер</string>
+    <string name="dowTitle">Дни недели</string>
+    <string-array name="days">
+        <item>Воскресенье</item>
+        <item>@string/monday</item>
+        <item>@string/tuesday</item>
+        <item>@string/wednesday</item>
+        <item>@string/thursday</item>
+        <item>@string/friday</item>
+        <item>@string/saturday</item>
+    </string-array>
+    <string name="darkTheme">Темная тема</string>
+    <string name="dev_button">DEV BUTTON</string>
 </resources>

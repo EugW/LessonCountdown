@@ -7,7 +7,6 @@
     <string name="timeErr">The xxx time entry field should look like: Hours:Minutes-Hours:Minutes</string>
     <string name="lessonErr">The xxx lesson entry field is blank</string>
     <string name="indexErr">You entered a number more than possible</string>
-    <string name="chooseServer">Choose server:</string>
     <string name="notNumErr">You entered not a number</string>
     <string name="editMode">Edit mode</string>
     <string name="lesson">Lesson</string>
@@ -38,9 +37,21 @@
     <string name="pasteBells">Paste Bells</string>
     <string name="chooseClass">Choose class</string>
     <string name="searchClass">Search class</string>
-    <string name="ownServer">Own server</string>
-    <string name="mainServer">Main server</string>
+    <string name="ownServer">Set own server address</string>
     <string name="address">Address</string>
+    <string name="navigation_drawer_open" translatable="false">Open navigation drawer</string>
+    <string name="navigation_drawer_close" translatable="false">Close navigation drawer</string>
+    <string name="dowTitle">Day of week</string>
+    <string-array name="days">
+        <item>Sunday</item>
+        <item>@string/monday</item>
+        <item>@string/tuesday</item>
+        <item>@string/wednesday</item>
+        <item>@string/thursday</item>
+        <item>@string/friday</item>
+        <item>@string/saturday</item>
+    </string-array>
+    <string name="darkTheme">Dark theme</string>
     <string name="host" translatable="false">lcsrv.brin.pw</string>
-    <!--<string name="host" translatable="false">http://192.168.8.101:46479</string>-->
+    <string name="dev_button">DEV BUTTON</string>
 </resources>
