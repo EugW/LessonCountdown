@@ -26,8 +26,8 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.util.*
-import java.util.concurrent.Callable
-import java.util.concurrent.Executors
+import kotlin.concurrent.thread
+
 
 class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -40,44 +40,44 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         prefs = getSharedPreferences("newPrefs", Context.MODE_PRIVATE)
-        if (!prefs.contains("class") && !prefs.getBoolean("CustomCfg", false)) {
-            startActivity(Intent(this, SettingsActivity::class.java))
-            finish()
-            return
-        }
         val toggle = ActionBarDrawerToggle(this, drawer_layout, main_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
         nav_view.setNavigationItemSelectedListener(this)
         val toggleButton = nav_view.getHeaderView(0).findViewById<ToggleButton>(R.id.toggleButton)
         toggleButton.isChecked = (application as MainApp).running
-        val filter = IntentFilter(baseContext.packageName + ".SERVICE_STATE")
-        LocalBroadcastManager.getInstance(this).registerReceiver(object : BroadcastReceiver() {
+        val instance = LocalBroadcastManager.getInstance(this)
+        instance.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent?) {
                 toggleButton.isChecked = p1!!.getBooleanExtra("isRun", false)
             }
-        }, filter)
-        val futureClass = Executors.newSingleThreadExecutor().submit(Callable<JsonObject>({
-            return@Callable initClass()
-        }))
-        clazz = futureClass.get() as JsonObject
-        homework = initHomework()
-        val intent = Intent(this, MService::class.java)
+        }, IntentFilter(baseContext.packageName + ".SERVICE_STATE"))
+        instance.registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                thread(true) {
+                    clazz = initClass()
+                    homework = initHomework()
+                    try {
+                        inflateFragment()
+                    } catch (e: Exception) { }
+                }
+            }
+        }, IntentFilter(baseContext.packageName + ".CLASS_UPDATE"))
+        val service = Intent(this, MService::class.java)
         toggleButton.setOnClickListener {
             if (toggleButton.isChecked)
-                startService(intent)
+                startService(service)
             else
-                stopService(intent)
+                stopService(service)
         }
-        startService(intent)
-        inflateFragment(Calendar.getInstance().get(Calendar.DAY_OF_WEEK), resources.getStringArray(R.array.days)[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1])
+        startService(service)
+        thread(true) {
+            clazz = initClass()
+            homework = initHomework()
+            inflateFragment()
+        }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == 0)
-            if (resultCode == RESULT_OK)
-                inflateFragment(Calendar.getInstance().get(Calendar.DAY_OF_WEEK), resources.getStringArray(R.array.days)[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1])
-    }
 
     private fun initClass(): JsonObject {
         val schedule = File(filesDir, "schedule.json")
@@ -124,6 +124,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         return JsonParser().parse(FileReader(file)).asJsonObject
     }
 
+    private fun inflateFragment() {
+        inflateFragment(Calendar.getInstance().get(Calendar.DAY_OF_WEEK), resources.getStringArray(R.array.days)[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1])
+    }
 
     private fun inflateFragment(day: Int, dayName: String) {
         val bundle = Bundle()

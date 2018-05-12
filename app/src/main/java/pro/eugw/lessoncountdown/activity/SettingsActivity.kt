@@ -2,17 +2,20 @@ package pro.eugw.lessoncountdown.activity
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
+import android.graphics.Color
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
+import android.support.v4.content.LocalBroadcastManager
 import android.view.View
 import android.widget.*
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.jaredrummler.android.colorpicker.ColorPickerDialog
+import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
 import pro.eugw.lessoncountdown.BaseActivity
 import pro.eugw.lessoncountdown.MService
 import pro.eugw.lessoncountdown.R
@@ -27,6 +30,10 @@ class SettingsActivity : BaseActivity() {
 
     private lateinit var prefs: SharedPreferences
     private lateinit var host: String
+    private var colorTitle = Color.parseColor("#000000")
+    private var colorTime = Color.parseColor("#999999")
+    private var colorLessons = Color.parseColor("#999999")
+    private var colorBackground = Color.parseColor("#ffffff")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,10 +45,11 @@ class SettingsActivity : BaseActivity() {
         initCustomCfg()
         initOwnServer()
         initTheme()
+        initCustomColors()
         val client = BillingClient.newBuilder(this).setListener { responseCode, purchases ->
             if (responseCode == BillingClient.BillingResponse.OK && purchases?.any { it.sku == "use_own_server" } == true) {
                 findViewById<ConstraintLayout>(R.id.ownServer).setOnClickListener {
-                    showDialog()
+                    showDialogAddress()
                 }
             }
         }.build()
@@ -50,7 +58,7 @@ class SettingsActivity : BaseActivity() {
                 if (responseCode == BillingClient.BillingResponse.OK) {
                     if (client.queryPurchases(BillingClient.SkuType.INAPP).purchasesList.any { it.sku == "use_own_server" }) {
                         findViewById<ConstraintLayout>(R.id.ownServer).setOnClickListener {
-                            showDialog()
+                            showDialogAddress()
                         }
                     } else {
                         findViewById<ConstraintLayout>(R.id.ownServer).setOnClickListener {
@@ -86,30 +94,6 @@ class SettingsActivity : BaseActivity() {
 
             })
         }
-        findViewById<View>(R.id.buttonSave).setOnClickListener({
-            Thread {
-                if (findViewById<Switch>(R.id.switchCustomCfg).isChecked) {
-                    val schedule = (findViewById<EditText>(R.id.editTextCustomSchedule)).text.toString()
-                    val bells = (findViewById<EditText>(R.id.editTextCustomBells)).text.toString()
-                    try {
-                        val s = JsonParser().parse(schedule).asJsonObject
-                        PrintWriter(FileWriter(File(filesDir, "schedule.json")), true).println(s)
-                        val b = JsonParser().parse(bells).asJsonObject
-                        PrintWriter(FileWriter(File(filesDir, "bells.json")), true).println(b)
-                    } catch (e: Exception) {
-                        runOnUiThread { Toast.makeText(this, R.string.configErr, Toast.LENGTH_LONG).show() }
-                        return@Thread
-                    }
-                }
-                prefs.edit().putBoolean("CustomCfg", findViewById<Switch>(R.id.switchCustomCfg).isChecked).apply()
-                prefs.edit().putString("cAddress", host).apply()
-                prefs.edit().putBoolean("darkTheme", findViewById<Switch>(R.id.switchDarkTheme).isChecked).apply()
-                stopService(Intent(this, MService::class.java))
-                val i = baseContext.packageManager.getLaunchIntentForPackage(baseContext.packageName)
-                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                startActivity(i)
-            }.start()
-        })
     }
 
     private fun initClass() {
@@ -133,15 +117,37 @@ class SettingsActivity : BaseActivity() {
                 findViewById<ConstraintLayout>(R.id.customLayout).visibility = View.VISIBLE
             else
                 findViewById<ConstraintLayout>(R.id.customLayout).visibility = View.GONE
+            prefs.edit().putBoolean("CustomCfg", state).apply()
         }
-        if (File(filesDir, "schedule.json").exists())
-            (findViewById<EditText>(R.id.editTextCustomSchedule)).setText(FileReader(File(filesDir, "schedule.json")).readText())
-        if (File(filesDir, "bells.json").exists())
-            (findViewById<EditText>(R.id.editTextCustomBells)).setText(FileReader(File(filesDir, "bells.json")).readText())
+        findViewById<Button>(R.id.buttonCopy).setOnClickListener {
+            val jObject = JsonObject()
+            jObject.add("schedule", JsonParser().parse(FileReader(File(filesDir, "schedule.json"))))
+            jObject.add("bells", JsonParser().parse(FileReader(File(filesDir, "bells.json"))))
+            val clip = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            clip.primaryClip = ClipData.newPlainText("lcConfig", jObject.toString())
+        }
+        findViewById<Button>(R.id.buttonPaste).setOnClickListener {
+            val clip = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            try {
+                val jObject = JsonParser().parse(clip.primaryClip.getItemAt(0).text.toString()).asJsonObject
+                PrintWriter(FileWriter(File(filesDir, "schedule.json")), true).println(jObject["schedule"])
+                PrintWriter(FileWriter(File(filesDir, "bells.json")), true).println(jObject["bells"])
+            } catch (e: Exception) {
+                Toast.makeText(this, R.string.pasteErr, Toast.LENGTH_LONG).show()
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun initTheme() {
-        findViewById<Switch>(R.id.switchDarkTheme).isChecked = prefs.getBoolean("darkTheme", false)
+        val themeSwitch = findViewById<Switch>(R.id.switchDarkTheme)
+        themeSwitch.isChecked = prefs.getBoolean("darkTheme", false)
+        themeSwitch.setOnCheckedChangeListener { _, state ->
+            prefs.edit().putBoolean("darkTheme", state).apply()
+            val localIntent = Intent(baseContext.packageName + ".THEME_UPDATE")
+            val sender = LocalBroadcastManager.getInstance(this)
+            sender.sendBroadcast(localIntent)
+        }
     }
 
     private fun initOwnServer() {
@@ -152,7 +158,89 @@ class SettingsActivity : BaseActivity() {
         }
     }
 
-    private fun showDialog() {
+    private fun initCustomColors() {
+        val localIntent = Intent(baseContext.packageName + ".NOTIFICATION_COLOR_UPDATE")
+        val sender = LocalBroadcastManager.getInstance(this)
+        findViewById<Switch>(R.id.switchNotificationColor).isChecked = prefs.getBoolean("CustomColor", false)
+        findViewById<ConstraintLayout>(R.id.customColors).visibility = if (prefs.getBoolean("CustomColor", false)) View.VISIBLE else View.GONE
+        findViewById<Switch>(R.id.switchNotificationColor).setOnCheckedChangeListener { _, state ->
+            if (state)
+                findViewById<ConstraintLayout>(R.id.customColors).visibility = View.VISIBLE
+            else
+                findViewById<ConstraintLayout>(R.id.customColors).visibility = View.GONE
+            prefs.edit().putBoolean("CustomColor", state).apply()
+        }
+        val title = findViewById<Button>(R.id.buttonChooseDialogTitle)
+        colorTitle = prefs.getInt("titleColor", Color.parseColor("#000000"))
+        title.setBackgroundColor(colorTitle)
+        title.setOnClickListener {
+            val builder = ColorPickerDialog.newBuilder().setAllowPresets(false).setDialogType(0).setColor(colorTitle).create()
+            builder.setColorPickerDialogListener(object : ColorPickerDialogListener {
+                override fun onDialogDismissed(dialogId: Int) {}
+
+                override fun onColorSelected(dialogId: Int, color: Int) {
+                    colorTitle = color
+                    title.setBackgroundColor(color)
+                    prefs.edit().putInt("titleColor", colorTitle).apply()
+                    sender.sendBroadcast(localIntent)
+                }
+            })
+            builder.show(fragmentManager, "color-picker-dialog")
+        }
+        val textTime = findViewById<Button>(R.id.buttonChooseDialogTime)
+        colorTime = prefs.getInt("timeColor", Color.parseColor("#999999"))
+        textTime.setBackgroundColor(colorTime)
+        textTime.setOnClickListener {
+            val builder = ColorPickerDialog.newBuilder().setAllowPresets(false).setDialogType(0).setColor(colorTime).create()
+            builder.setColorPickerDialogListener(object : ColorPickerDialogListener {
+                override fun onDialogDismissed(dialogId: Int) {}
+
+                override fun onColorSelected(dialogId: Int, color: Int) {
+                    colorTime = color
+                    textTime.setBackgroundColor(color)
+                    prefs.edit().putInt("timeColor", colorTime).apply()
+                    sender.sendBroadcast(localIntent)
+                }
+            })
+            builder.show(fragmentManager, "color-picker-dialog")
+        }
+        val textLessons = findViewById<Button>(R.id.buttonChooseDialogLessons)
+        colorLessons = prefs.getInt("lessonsColor", Color.parseColor("#999999"))
+        textLessons.setBackgroundColor(colorLessons)
+        textLessons.setOnClickListener {
+            val builder = ColorPickerDialog.newBuilder().setAllowPresets(false).setDialogType(0).setColor(colorLessons).create()
+            builder.setColorPickerDialogListener(object : ColorPickerDialogListener {
+                override fun onDialogDismissed(dialogId: Int) {}
+
+                override fun onColorSelected(dialogId: Int, color: Int) {
+                    colorLessons = color
+                    textLessons.setBackgroundColor(color)
+                    prefs.edit().putInt("lessonsColor", colorLessons).apply()
+                    sender.sendBroadcast(localIntent)
+                }
+            })
+            builder.show(fragmentManager, "color-picker-dialog")
+        }
+        val background = findViewById<Button>(R.id.buttonChooseDialogBackground)
+        colorBackground = prefs.getInt("backgroundColor", Color.parseColor("#ffffff"))
+        background.setBackgroundColor(colorBackground)
+        background.setOnClickListener {
+            val builder = ColorPickerDialog.newBuilder().setAllowPresets(false).setDialogType(0).setColor(colorBackground).create()
+            builder.setColorPickerDialogListener(object : ColorPickerDialogListener {
+                override fun onDialogDismissed(dialogId: Int) {}
+
+                override fun onColorSelected(dialogId: Int, color: Int) {
+                    colorBackground = color
+                    background.setBackgroundColor(color)
+                    prefs.edit().putInt("backgroundColor", colorBackground).apply()
+                    sender.sendBroadcast(localIntent)
+                }
+            })
+            builder.show(fragmentManager, "color-picker-dialog")
+        }
+    }
+
+    private fun showDialogAddress() {
         val ab = AlertDialog.Builder(this@SettingsActivity)
         ab.setTitle(R.string.address)
         val input = EditText(this@SettingsActivity)
@@ -172,6 +260,7 @@ class SettingsActivity : BaseActivity() {
             } catch (e: Exception) {
                 getString(R.string.host)
             }
+            prefs.edit().putString("cAddress", host).apply()
         })
         ab.show()
     }
@@ -183,6 +272,11 @@ class SettingsActivity : BaseActivity() {
             val text = findViewById<TextView>(R.id.selectedClass)
             text.visibility = View.VISIBLE
             text.text = (extras["class"] as String).replace(".", "")
+            val localIntent = Intent(baseContext.packageName + ".CLASS_UPDATE")
+            val sender = LocalBroadcastManager.getInstance(this)
+            stopService(Intent(this, MService::class.java))
+            sender.sendBroadcast(localIntent)
         }
     }
+
 }

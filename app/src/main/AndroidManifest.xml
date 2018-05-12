@@ -16,11 +16,21 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <service android:name=".MService" />
-
+        <activity android:name=".activity.ServiceActivity"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:enabled="true"
+            android:allowTaskReparenting="true"
+            android:noHistory="true"
+            android:excludeFromRecents="true"
+            android:alwaysRetainTaskState="false"
+            android:stateNotNeeded="true"
+            android:clearTaskOnLaunch="true"
+            android:finishOnTaskLaunch="true" />
         <activity android:name=".activity.AboutActivity" />
         <activity android:name=".activity.SettingsActivity" />
         <activity android:name=".BaseActivity" />
-        <activity android:name=".activity.MainActivity">
+        <activity android:name=".activity.MainActivity"
+            android:theme="@style/AppTheme.Launcher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

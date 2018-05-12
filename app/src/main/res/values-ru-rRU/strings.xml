@@ -3,7 +3,6 @@
     <string name="app_name">LessonCountdown</string>
     <string name="on">Сервис онлайн</string>
     <string name="off">Сервис оффлайн</string>
-    <string name="save">Сохранить</string>
     <string name="settings">Настройки</string>
     <string name="customCfg">Свой конфиг (Отключает авто-скачивание)</string>
     <string name="monday">Понедельник</string>
@@ -11,8 +10,6 @@
     <string name="wednesday">Среда</string>
     <string name="thursday">Четверг</string>
     <string name="friday">Пятница</string>
-    <string name="pasteSchedule">Вставьте расписание уроков</string>
-    <string name="pasteBells">Вставьте расписание звонков</string>
     <string name="dev"><a href="https://vk.com/dibrin">Евгений Бондаренко</a></string>
     <string name="about">О программе</string>
     <string name="networkErr">Сеть недоступна</string>
@@ -52,4 +49,13 @@
     </string-array>
     <string name="darkTheme">Темная тема</string>
     <string name="dev_button">DEV BUTTON</string>
+    <string name="lessonsLeft">Уроков осталось</string>
+    <string name="titleColor">Цвет урока</string>
+    <string name="timeColor">Цвет времени</string>
+    <string name="lessonsColor">Цвет счетчика</string>
+    <string name="notificationColor">Свои цвета уведомления</string>
+    <string name="backgroundColor">Цвет фона</string>
+    <string name="copyTo">Копировать конфиг в буфер обмена</string>
+    <string name="pasteFrom">Вставить конфиг из буфера обмена</string>
+    <string name="pasteErr">Невозможно разобрать конфиг из буфера обмена</string>
 </resources>

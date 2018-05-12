@@ -20,6 +20,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.concurrent.thread
 
 class SearchActivity: BaseActivity() {
 
@@ -36,7 +37,7 @@ class SearchActivity: BaseActivity() {
         recyclerView = findViewById(R.id.searchRecycler)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.context, LinearLayoutManager(this).orientation))
-        Thread {
+        thread(true) {
             try {
                 val url = URL("http://" + host + "/classes?lang=${Locale.getDefault().language}")
                 val conn = url.openConnection() as HttpURLConnection
@@ -54,7 +55,7 @@ class SearchActivity: BaseActivity() {
                 runOnUiThread { Toast.makeText(this@SearchActivity, R.string.networkErr, Toast.LENGTH_LONG).show() }
                 finish()
             }
-        }.start()
+        }
         findViewById<EditText>(R.id.searchEditText).addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
