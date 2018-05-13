@@ -9,9 +9,9 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.text.Editable
 import android.text.TextWatcher
-import android.widget.EditText
 import android.widget.Toast
 import com.google.gson.JsonParser
+import kotlinx.android.synthetic.main.activity_search.*
 import pro.eugw.lessoncountdown.BaseActivity
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.list.search.SearchAdapter
@@ -34,7 +34,7 @@ class SearchActivity: BaseActivity() {
         host = getSharedPreferences("newPrefs", Context.MODE_PRIVATE).getString("cAddress", getString(R.string.host))
         if (host.isBlank())
             host = getString(R.string.host)
-        recyclerView = findViewById(R.id.searchRecycler)
+        recyclerView = searchRecycler
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.context, LinearLayoutManager(this).orientation))
         thread(true) {
@@ -56,7 +56,7 @@ class SearchActivity: BaseActivity() {
                 finish()
             }
         }
-        findViewById<EditText>(R.id.searchEditText).addTextChangedListener(object : TextWatcher {
+        searchEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {

@@ -2,6 +2,7 @@ package pro.eugw.lessoncountdown.activity
 
 import android.content.*
 import android.os.Bundle
+import android.os.Handler
 import android.support.design.widget.NavigationView
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v4.view.GravityCompat
@@ -12,12 +13,11 @@ import android.widget.ToggleButton
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.main_toolbar.*
 import pro.eugw.lessoncountdown.BaseActivity
 import pro.eugw.lessoncountdown.MService
-import pro.eugw.lessoncountdown.MainApp
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.fragment.DayOfWeekFragment
+import pro.eugw.lessoncountdown.fragment.SettingsFragment
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
@@ -31,46 +31,33 @@ import kotlin.concurrent.thread
 
 class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-
-    private lateinit var prefs: SharedPreferences
+    lateinit var prefs: SharedPreferences
+    lateinit var broadcastManager: LocalBroadcastManager
     var clazz = JsonObject()
     var homework = JsonObject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        prefs = getSharedPreferences("newPrefs", Context.MODE_PRIVATE)
         val toggle = ActionBarDrawerToggle(this, drawer_layout, main_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
         nav_view.setNavigationItemSelectedListener(this)
+        broadcastManager = LocalBroadcastManager.getInstance(this)
+        prefs = getSharedPreferences("newPrefs", Context.MODE_PRIVATE)
         val toggleButton = nav_view.getHeaderView(0).findViewById<ToggleButton>(R.id.toggleButton)
-        toggleButton.isChecked = (application as MainApp).running
-        val instance = LocalBroadcastManager.getInstance(this)
-        instance.registerReceiver(object : BroadcastReceiver() {
+        broadcastManager.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent?) {
                 toggleButton.isChecked = p1!!.getBooleanExtra("isRun", false)
             }
         }, IntentFilter(baseContext.packageName + ".SERVICE_STATE"))
-        instance.registerReceiver(object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                thread(true) {
-                    clazz = initClass()
-                    homework = initHomework()
-                    try {
-                        inflateFragment()
-                    } catch (e: Exception) { }
-                }
-            }
-        }, IntentFilter(baseContext.packageName + ".CLASS_UPDATE"))
-        val service = Intent(this, MService::class.java)
         toggleButton.setOnClickListener {
             if (toggleButton.isChecked)
-                startService(service)
+                broadcastManager.sendBroadcast(Intent(baseContext.packageName + ".SERVICE_SIGNAL").putExtra("START", true))
             else
-                stopService(service)
+                broadcastManager.sendBroadcast(Intent(baseContext.packageName + ".SERVICE_SIGNAL").putExtra("START", false))
         }
-        startService(service)
+        startService(Intent(this, MService::class.java))
         thread(true) {
             clazz = initClass()
             homework = initHomework()
@@ -78,8 +65,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         }
     }
 
-
-    private fun initClass(): JsonObject {
+    fun initClass(): JsonObject {
         val schedule = File(filesDir, "schedule.json")
         val bells = File(filesDir, "bells.json")
         try {
@@ -117,7 +103,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         }
     }
 
-    private fun initHomework(): JsonObject {
+    fun initHomework(): JsonObject {
         val file = File(filesDir, "homework.json")
         if (!file.exists())
             PrintWriter(FileWriter(file), true).println(JsonObject())
@@ -132,9 +118,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         val bundle = Bundle()
         bundle.putString("day", day.toString())
         bundle.putString("dayName", dayName)
-        val fragment = DayOfWeekFragment()
-        fragment.arguments = bundle
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit()
+        Handler(mainLooper).postDelayed({
+            val fragment = DayOfWeekFragment()
+            fragment.arguments = bundle
+            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit()
+        }, 500)
     }
 
     override fun onBackPressed() {
@@ -146,6 +134,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        drawer_layout.closeDrawer(GravityCompat.START)
         when (item.itemId) {
             R.id.menuMonday -> inflateFragment(2, item.title.toString())
             R.id.menuTuesday -> inflateFragment(3, item.title.toString())
@@ -153,10 +142,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             R.id.menuThursday -> inflateFragment(5, item.title.toString())
             R.id.menuFriday -> inflateFragment(6, item.title.toString())
             R.id.menuSaturday -> inflateFragment(7, item.title.toString())
-            R.id.menuSettings -> startActivity(Intent(this, SettingsActivity::class.java))
+            R.id.menuSettings -> Handler(mainLooper).postDelayed({ fragmentManager.beginTransaction().replace(R.id.content_frame, SettingsFragment()).commit() }, 500)
             R.id.menuAbout -> startActivity(Intent(this, AboutActivity::class.java))
         }
-        drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
 

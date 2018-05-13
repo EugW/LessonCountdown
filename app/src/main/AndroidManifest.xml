@@ -7,7 +7,6 @@
     <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
-        android:name=".MainApp"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -16,18 +15,21 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <service android:name=".MService" />
-        <activity android:name=".activity.ServiceActivity"
-            android:theme="@android:style/Theme.NoDisplay"
-            android:enabled="true"
+
+        <activity
+            android:name=".activity.ServiceActivity"
             android:allowTaskReparenting="true"
-            android:noHistory="true"
-            android:excludeFromRecents="true"
             android:alwaysRetainTaskState="false"
-            android:stateNotNeeded="true"
             android:clearTaskOnLaunch="true"
-            android:finishOnTaskLaunch="true" />
-        <activity android:name=".activity.AboutActivity" />
-        <activity android:name=".activity.SettingsActivity" />
+            android:enabled="true"
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true"
+            android:noHistory="true"
+            android:stateNotNeeded="true"
+            android:theme="@android:style/Theme.NoDisplay" />
+        <activity
+            android:name=".activity.AboutActivity"
+            android:label="@string/about" />
         <activity android:name=".BaseActivity" />
         <activity android:name=".activity.MainActivity"
             android:theme="@style/AppTheme.Launcher">

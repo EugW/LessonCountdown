@@ -2,12 +2,10 @@ package pro.eugw.lessoncountdown.fragment
 
 import android.app.AlertDialog
 import android.app.Fragment
-import android.content.Context
 import android.os.Bundle
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.Toolbar
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +13,8 @@ import android.widget.EditText
 import android.widget.Toast
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.fragment_day_of_week.view.*
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.list.schedule.MAdapter
@@ -24,7 +24,7 @@ import java.io.FileWriter
 import java.io.PrintWriter
 import java.util.*
 
-class DayOfWeekFragment: Fragment() {
+class DayOfWeekFragment : Fragment() {
 
     val list = ArrayList<MLesson>()
     private lateinit var adapter: MAdapter
@@ -37,16 +37,16 @@ class DayOfWeekFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val v = inflater.inflate(R.layout.fragment_day_of_week, container, false)
-        dialogView = v.findViewById(R.id.dialogRecycler)
+        dialogView = v.dialogRecycler
         return v
     }
 
     override fun onStart() {
         super.onStart()
         val bundle = arguments
-        val toolbar = activity.findViewById<Toolbar>(R.id.main_toolbar)
+        val toolbar = activity.main_toolbar
         toolbar.title = bundle.getString("dayName")
-        if (activity.getSharedPreferences("newPrefs", Context.MODE_PRIVATE).getBoolean("CustomCfg", false))
+        if ((activity as MainActivity).prefs.getBoolean("CustomCfg", false))
             if (toolbar.menu.size() <= 0)
                 toolbar.inflateMenu(R.menu.dayofweek_menu)
         adapter = MAdapter(list, this, false)

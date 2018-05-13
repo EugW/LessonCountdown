@@ -56,7 +56,6 @@
     <string name="lessonsColor">Counter color</string>
     <string name="backgroundColor">Background color</string>
     <string name="host" translatable="false">lcsrv.brin.pw</string>
-    <string name="dev_button">DEV BUTTON</string>
     <string name="copyTo">Copy config to clipboard</string>
     <string name="pasteFrom">Paste config from clipboard</string>
     <string name="pasteErr">Could not parse config from clipboard</string>

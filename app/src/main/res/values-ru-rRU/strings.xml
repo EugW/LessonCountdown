@@ -48,7 +48,6 @@
         <item>@string/saturday</item>
     </string-array>
     <string name="darkTheme">Темная тема</string>
-    <string name="dev_button">DEV BUTTON</string>
     <string name="lessonsLeft">Уроков осталось</string>
     <string name="titleColor">Цвет урока</string>
     <string name="timeColor">Цвет времени</string>
