@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">LessonCountdown</string>
-    <string name="dev"><a href="https://vk.com/dibrin">Evgeny Bondarenko</a></string>
-    <string name="about">About</string>
+    <string name="dev"><a href="https://vk.com/dibrin">Developer page in VK</a></string>
+    <string name="appVk"><a href="https://vk.com/brin_apps">LessonCountdown group in VK</a></string>
+    <string name="help">Help</string>
     <string name="networkErr">Network is unreachable</string>
     <string name="configErr">Wrong config</string>
     <string name="timeErr">The xxx time entry field should look like: Hours:Minutes-Hours:Minutes</string>
@@ -24,6 +25,7 @@
     <string name="homework">Homework</string>
     <string name="on">Service online</string>
     <string name="off">Service offline</string>
+    <string name="sunday">Sunday</string>
     <string name="monday">Monday</string>
     <string name="tuesday">Tuesday</string>
     <string name="wednesday">Wednesday</string>
@@ -36,11 +38,11 @@
     <string name="searchClass">Search class</string>
     <string name="ownServer">Set own server address</string>
     <string name="address">Address</string>
-    <string name="navigation_drawer_open" translatable="false">Open navigation drawer</string>
-    <string name="navigation_drawer_close" translatable="false">Close navigation drawer</string>
-    <string name="dowTitle">Day of week</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="dowTitle">Days of the week</string>
     <string-array name="days">
-        <item>Sunday</item>
+        <item>@string/sunday</item>
         <item>@string/monday</item>
         <item>@string/tuesday</item>
         <item>@string/wednesday</item>
@@ -49,7 +51,6 @@
         <item>@string/saturday</item>
     </string-array>
     <string name="darkTheme">Dark theme</string>
-    <string name="lessonsLeft">Lessons left</string>
     <string name="notificationColor">Custom notification colors</string>
     <string name="titleColor">Color of the lesson</string>
     <string name="timeColor">Time color</string>
@@ -59,4 +60,12 @@
     <string name="copyTo">Copy config to clipboard</string>
     <string name="pasteFrom">Paste config from clipboard</string>
     <string name="pasteErr">Could not parse config from clipboard</string>
+    <string name="dozeWhitelist">Add app to Doze ignore list</string>
+    <string name="suWarn">Warning</string>
+    <string name="suWarnDozeAdd">Now the application will be added in Doze ignore list. After successful installation, the device will be rebooted</string>
+    <string name="rootMode">Root mode</string>
+    <string name="enableRoot">Enable root mode</string>
+    <string name="dozeRemoveWhitelist">Remove app from Doze ignore list</string>
+    <string name="suWarnDozeRemove">Now the application will be removed from Doze ignore list. After successful installation, the device will be rebooted</string>
+    <string name="lessonsRemaining">Lessons remaining</string>
 </resources>

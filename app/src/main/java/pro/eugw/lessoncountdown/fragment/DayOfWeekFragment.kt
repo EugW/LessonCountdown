@@ -1,8 +1,8 @@
 package pro.eugw.lessoncountdown.fragment
 
 import android.app.AlertDialog
-import android.app.Fragment
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -34,6 +34,7 @@ class DayOfWeekFragment : Fragment() {
     private var bells = JsonObject()
     private var day = "0"
     private lateinit var dialogView: RecyclerView
+    private lateinit var mActivity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val v = inflater.inflate(R.layout.fragment_day_of_week, container, false)
@@ -43,10 +44,11 @@ class DayOfWeekFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+        mActivity = activity as MainActivity
         val bundle = arguments
-        val toolbar = activity.main_toolbar
-        toolbar.title = bundle.getString("dayName")
-        if ((activity as MainActivity).prefs.getBoolean("CustomCfg", false))
+        val toolbar = activity!!.main_toolbar
+        toolbar.title = bundle!!.getString("dayName")
+        if (mActivity.prefs.getBoolean("CustomCfg", false))
             if (toolbar.menu.size() <= 0)
                 toolbar.inflateMenu(R.menu.dayofweek_menu)
         adapter = MAdapter(list, this, false)
@@ -54,7 +56,7 @@ class DayOfWeekFragment : Fragment() {
         dialogView.adapter = adapter
         dialogView.layoutManager = LinearLayoutManager(activity)
         dialogView.addItemDecoration(DividerItemDecoration(dialogView.context, LinearLayoutManager(activity).orientation))
-        val job = (activity as MainActivity).clazz
+        val job = mActivity.clazz
         if (!job.has("schedule") || !job.has("bells")) {
             return
         }
@@ -91,8 +93,8 @@ class DayOfWeekFragment : Fragment() {
                             schedule[day].asJsonArray.add(it.lesson)
                             bells[day].asJsonArray.add(it.time)
                         }
-                        PrintWriter(FileWriter(File(activity.filesDir, "schedule.json")), true).println(schedule)
-                        PrintWriter(FileWriter(File(activity.filesDir, "bells.json")), true).println(bells)
+                        PrintWriter(FileWriter(File(mActivity.filesDir, "schedule.json")), true).println(schedule)
+                        PrintWriter(FileWriter(File(mActivity.filesDir, "bells.json")), true).println(bells)
                     }
                     edit = !edit
                     dialogView.adapter = if (edit) adapterEdit else adapter

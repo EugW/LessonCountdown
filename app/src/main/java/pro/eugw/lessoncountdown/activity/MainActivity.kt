@@ -3,7 +3,9 @@ package pro.eugw.lessoncountdown.activity
 import android.content.*
 import android.os.Bundle
 import android.os.Handler
+import android.os.IBinder
 import android.support.design.widget.NavigationView
+import android.support.v4.app.FragmentActivity
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
@@ -13,10 +15,10 @@ import android.widget.ToggleButton
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlinx.android.synthetic.main.activity_main.*
-import pro.eugw.lessoncountdown.BaseActivity
 import pro.eugw.lessoncountdown.MService
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.fragment.DayOfWeekFragment
+import pro.eugw.lessoncountdown.fragment.RootModeFragment
 import pro.eugw.lessoncountdown.fragment.SettingsFragment
 import java.io.File
 import java.io.FileReader
@@ -29,7 +31,7 @@ import java.util.*
 import kotlin.concurrent.thread
 
 
-class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     lateinit var prefs: SharedPreferences
     lateinit var broadcastManager: LocalBroadcastManager
@@ -38,6 +40,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setTheme(if (getSharedPreferences("newPrefs", Context.MODE_PRIVATE).getBoolean("darkTheme", false)) R.style.AppTheme_Dark else R.style.AppTheme)
         setContentView(R.layout.activity_main)
         val toggle = ActionBarDrawerToggle(this, drawer_layout, main_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawer_layout.addDrawerListener(toggle)
@@ -57,12 +60,21 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             else
                 broadcastManager.sendBroadcast(Intent(baseContext.packageName + ".SERVICE_SIGNAL").putExtra("START", false))
         }
-        startService(Intent(this, MService::class.java))
         thread(true) {
             clazz = initClass()
             homework = initHomework()
             inflateFragment()
         }
+        val service = Intent(this, MService::class.java)
+        startService(service)
+        bindService(service, object : ServiceConnection {
+            override fun onServiceDisconnected(p0: ComponentName?) {}
+
+            override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
+                toggleButton.isChecked = (p1 as MService.MBinder).service.running
+                unbindService(this)
+            }
+        }, Context.BIND_AUTO_CREATE)
     }
 
     fun initClass(): JsonObject {
@@ -119,9 +131,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         bundle.putString("day", day.toString())
         bundle.putString("dayName", dayName)
         Handler(mainLooper).postDelayed({
-            val fragment = DayOfWeekFragment()
-            fragment.arguments = bundle
-            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit()
+            try {
+                val fragment = DayOfWeekFragment()
+                fragment.arguments = bundle
+                supportFragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit()
+            } catch (e: Exception) { }
         }, 500)
     }
 
@@ -142,8 +156,10 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             R.id.menuThursday -> inflateFragment(5, item.title.toString())
             R.id.menuFriday -> inflateFragment(6, item.title.toString())
             R.id.menuSaturday -> inflateFragment(7, item.title.toString())
-            R.id.menuSettings -> Handler(mainLooper).postDelayed({ fragmentManager.beginTransaction().replace(R.id.content_frame, SettingsFragment()).commit() }, 500)
-            R.id.menuAbout -> startActivity(Intent(this, AboutActivity::class.java))
+            R.id.menuSunday -> inflateFragment(1, item.title.toString())
+            R.id.menuSettings -> Handler(mainLooper).postDelayed({ supportFragmentManager.beginTransaction().replace(R.id.content_frame, SettingsFragment()).commit() }, 500)
+            R.id.menuRoot -> Handler(mainLooper).postDelayed({ supportFragmentManager.beginTransaction().replace(R.id.content_frame, RootModeFragment()).commit() }, 500)
+            R.id.menuAbout -> startActivity(Intent(this, HelpActivity::class.java))
         }
         return true
     }

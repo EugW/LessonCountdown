@@ -12,7 +12,6 @@ import android.text.TextWatcher
 import android.widget.Toast
 import com.google.gson.JsonParser
 import kotlinx.android.synthetic.main.activity_search.*
-import pro.eugw.lessoncountdown.BaseActivity
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.list.search.SearchAdapter
 import pro.eugw.lessoncountdown.list.search.SearchItem
@@ -22,7 +21,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
 
-class SearchActivity: BaseActivity() {
+class SearchActivity : Activity() {
 
     private lateinit var recyclerView: RecyclerView
     private var arrayList = ArrayList<SearchItem>()
@@ -30,6 +29,7 @@ class SearchActivity: BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setTheme(if (getSharedPreferences("newPrefs", Context.MODE_PRIVATE).getBoolean("darkTheme", false)) R.style.AppTheme_Dark else R.style.AppTheme)
         setContentView(R.layout.activity_search)
         host = getSharedPreferences("newPrefs", Context.MODE_PRIVATE).getString("cAddress", getString(R.string.host))
         if (host.isBlank())

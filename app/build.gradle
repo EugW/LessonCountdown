@@ -9,14 +9,16 @@ android {
         applicationId "pro.eugw.lessoncountdown"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 46
-        versionName "1.9.5"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        versionCode 52
+        versionName "1.9.7"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
     compileOptions {
-        targetCompatibility 1.8
-        sourceCompatibility 1.8
+        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+    }
+    productFlavors {
     }
 }
 
@@ -31,8 +33,9 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation 'com.android.support:recyclerview-v7:27.1.1'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.jaredrummler:colorpicker:1.0.2'
-    implementation 'com.android.billingclient:billing:1.0'
+    implementation 'com.android.billingclient:billing:1.1'
+    implementation 'eu.chainfire:libsuperuser:1.0.0.201704021214'
 }

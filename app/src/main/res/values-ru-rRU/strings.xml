@@ -10,8 +10,7 @@
     <string name="wednesday">Среда</string>
     <string name="thursday">Четверг</string>
     <string name="friday">Пятница</string>
-    <string name="dev"><a href="https://vk.com/dibrin">Евгений Бондаренко</a></string>
-    <string name="about">О программе</string>
+    <string name="dev"><a href="https://vk.com/dibrin">Страница разработчика в ВК</a></string>
     <string name="networkErr">Сеть недоступна</string>
     <string name="configErr">Ошибка в конфиге</string>
     <string name="cancel">Отмена</string>
@@ -38,17 +37,8 @@
     <string name="ownServer">Установить собственный адрес сервера</string>
     <string name="address">Адрес</string>
     <string name="dowTitle">Дни недели</string>
-    <string-array name="days">
-        <item>Воскресенье</item>
-        <item>@string/monday</item>
-        <item>@string/tuesday</item>
-        <item>@string/wednesday</item>
-        <item>@string/thursday</item>
-        <item>@string/friday</item>
-        <item>@string/saturday</item>
-    </string-array>
     <string name="darkTheme">Темная тема</string>
-    <string name="lessonsLeft">Уроков осталось</string>
+    <string name="lessonsRemaining">Уроков осталось</string>
     <string name="titleColor">Цвет урока</string>
     <string name="timeColor">Цвет времени</string>
     <string name="lessonsColor">Цвет счетчика</string>
@@ -57,4 +47,16 @@
     <string name="copyTo">Копировать конфиг в буфер обмена</string>
     <string name="pasteFrom">Вставить конфиг из буфера обмена</string>
     <string name="pasteErr">Невозможно разобрать конфиг из буфера обмена</string>
+    <string name="sunday">Воскресенье</string>
+    <string name="navigation_drawer_open">Открыть меню</string>
+    <string name="navigation_drawer_close">Закрыть меню</string>
+    <string name="suWarn">Внимание</string>
+    <string name="suWarnDozeAdd">Cейчас приложение будет добавлено в список исключений Doze. После успешной установки девайс будет перезагружен</string>
+    <string name="rootMode">Root режим</string>
+    <string name="enableRoot">Включить root режим</string>
+    <string name="dozeWhitelist">Добавить приложение в исключения Doze</string>
+    <string name="dozeRemoveWhitelist">Убрать приложение из исключений Doze</string>
+    <string name="suWarnDozeRemove">Cейчас приложение будет убрано из исключений Doze. После успешной установки девайс будет перезагружен</string>
+    <string name="appVk"><a href="https://vk.com/brin_apps">Группа LessonCountdown в ВК </a></string>
+    <string name="help">Помощь</string>
 </resources>

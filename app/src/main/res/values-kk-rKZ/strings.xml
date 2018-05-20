@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LessonCountdown</string>
+    <string name="dev"><a href="https://vk.com/dibrin">Бағдарламашы парақшам VK</a></string>
+    <string name="appVk"><a href="https://vk.com/brin_apps">LessonCountdown бірлестік VK</a></string>
+    <string name="help">Жәрдем</string>
+    <string name="networkErr">Желіге қол жеткізу мүмкін емес</string>
+    <string name="configErr">Конфигдағы қате</string>
+    <string name="timeErr">xxx уақыт енгізу өрісі келесідей болуы керек: Сағат:Минут-Сағат:Минут</string>
+    <string name="lessonErr">xxx сабақ енгізу өрісі бос</string>
+    <string name="indexErr">Тым көп сандарды енгіздіңіз</string>
+    <string name="notNumErr">Сіз нөмірді енгізген жоқсыз</string>
+    <string name="editMode">Өңдеу режимі</string>
+    <string name="lesson">Сабақ</string>
+    <string name="time">Уақытта</string>
+    <string name="add">Қосу</string>
+    <string name="addIndex">Кейін қосыңыз:</string>
+    <string name="remove">Жою</string>
+    <string name="removeIndex">Жою:</string>
+    <string name="curr">Ағымдағы</string>
+    <string name="next">Келесі</string>
+    <string name="sec">сек</string>
+    <string name="min">мин</string>
+    <string name="cancel">Болдырмау</string>
+    <string name="clear">Өшіру</string>
+    <string name="homework">Үй жұмысы</string>
+    <string name="on">Қызмет онлайн</string>
+    <string name="off">Қызмет оффлайн</string>
+    <string name="sunday">Жексенбі</string>
+    <string name="monday">Дүйсенбі</string>
+    <string name="tuesday">Сейсенбі</string>
+    <string name="wednesday">Сәрсенбі</string>
+    <string name="thursday">Бейсенбі</string>
+    <string name="friday">Жұма</string>
+    <string name="saturday">Сенбі</string>
+    <string name="settings">Параметрлер</string>
+    <string name="customCfg">Таңдамалы теңшелім (Автоматты жүктеуді өшіреді)</string>
+    <string name="chooseClass">Сыныпты таңдаңыз</string>
+    <string name="searchClass">Іздеу сыныпты</string>
+    <string name="ownServer">Жеке сервер мекенжайын орнатыңыз</string>
+    <string name="address">Мекенжай</string>
+    <string name="navigation_drawer_open">Шарлау тартпасын ашу</string>
+    <string name="navigation_drawer_close">Шарлау тартпасын жабыңыз</string>
+    <string name="dowTitle">Апта күндері</string>
+    <string name="darkTheme">Қараңғы тақырып</string>
+    <string name="lessonsRemaining">Қалған сабақтар</string>
+    <string name="notificationColor">Өзгертпелі хабарландыру түстері</string>
+    <string name="titleColor">Сабақтың түсі</string>
+    <string name="timeColor">Уақыт түсі</string>
+    <string name="lessonsColor">Қарсы түсті</string>
+    <string name="backgroundColor">Фондық түс</string>
+    <string name="copyTo">Алмасу буферге көшіріңіз</string>
+    <string name="pasteFrom">Алмасу буферінен салыңыз</string>
+    <string name="pasteErr">Аралық сақтағыштан конфигурациялау мүмкін емес</string>
+    <string name="dozeWhitelist">Қолданбаны Doze ерекше жағдайлары үшін қосыңыз</string>
+    <string name="suWarn">Назар аударыңыз</string>
+    <string name="suWarnDozeAdd">Енді бағдарлама Doze ерекшеліктер тізіміне қосылады. Сәтті орнатудан кейін құрылғы қайта жүктеледі</string>
+    <string name="rootMode">Root режимі</string>
+    <string name="enableRoot">Root режимін қосыңыз</string>
+    <string name="dozeRemoveWhitelist">Қолданбаны Doze ерекшеліктерінен алып тастаңыз</string>
+    <string name="suWarnDozeRemove">Қолданба енді Doze ерекшеліктерінен жойылады. Сәтті орнатудан кейін құрылғы қайта жүктеледі</string>
+</resources>

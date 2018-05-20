@@ -61,7 +61,7 @@ internal class MAdapter(private var list: List<MLesson>, private var fragment: D
     }
 
     private fun setList(prop: String, homework: String, position: Int) {
-        val file = File(fragment.activity.filesDir, "homework.json")
+        val file = File(fragment.activity!!.filesDir, "homework.json")
         val jsonObject = JsonParser().parse(FileReader(file)).asJsonObject
         list[position].homework = homework
         jsonObject.addProperty(prop, homework)
