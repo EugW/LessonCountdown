@@ -55,16 +55,21 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             }
         }, IntentFilter(baseContext.packageName + ".SERVICE_STATE"))
         toggleButton.setOnClickListener {
-            if (toggleButton.isChecked)
+            if (toggleButton.isChecked) {
+                File(filesDir, "service.pid").createNewFile()
                 broadcastManager.sendBroadcast(Intent(baseContext.packageName + ".SERVICE_SIGNAL").putExtra("START", true))
-            else
+            }
+            else {
+                File(filesDir, "service.pid").delete()
                 broadcastManager.sendBroadcast(Intent(baseContext.packageName + ".SERVICE_SIGNAL").putExtra("START", false))
+            }
         }
         thread(true) {
             clazz = initClass()
             homework = initHomework()
             inflateFragment()
         }
+        File(filesDir, "service.pid").createNewFile()
         val service = Intent(this, MService::class.java)
         startService(service)
         bindService(service, object : ServiceConnection {

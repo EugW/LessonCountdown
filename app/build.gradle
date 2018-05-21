@@ -9,16 +9,14 @@ android {
         applicationId "pro.eugw.lessoncountdown"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 52
-        versionName "1.9.7"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        versionCode 54
+        versionName "1.9.8"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_8
         sourceCompatibility JavaVersion.VERSION_1_8
-    }
-    productFlavors {
     }
 }
 
