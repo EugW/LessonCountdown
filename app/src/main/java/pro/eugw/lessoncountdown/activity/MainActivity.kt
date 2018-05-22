@@ -61,7 +61,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             }
             else {
                 File(filesDir, "service.pid").delete()
-                broadcastManager.sendBroadcast(Intent(baseContext.packageName + ".SERVICE_SIGNAL").putExtra("START", false))
+                broadcastManager.sendBroadcast(Intent(baseContext.packageName + ".SERVICE_SIGNAL").putExtra("STOP", true))
             }
         }
         thread(true) {
@@ -80,6 +80,12 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                 unbindService(this)
             }
         }, Context.BIND_AUTO_CREATE)
+        broadcastManager.registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                stopService(service)
+                startService(service)
+            }
+        }, IntentFilter(baseContext.packageName + ".PEND_SERVICE_RESTART"))
     }
 
     fun initClass(): JsonObject {

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">LessonCountdown</string>
+    <string name="app_name" translatable="false">LessonCountdown</string>
     <string name="dev"><a href="https://vk.com/dibrin">Developer page in VK</a></string>
     <string name="appVk"><a href="https://vk.com/brin_apps">LessonCountdown group in VK</a></string>
     <string name="help">Help</string>

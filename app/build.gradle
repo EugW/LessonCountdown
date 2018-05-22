@@ -9,8 +9,8 @@ android {
         applicationId "pro.eugw.lessoncountdown"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 54
-        versionName "1.9.8"
+        versionCode 55
+        versionName "2.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }

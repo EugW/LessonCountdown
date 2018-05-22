@@ -34,7 +34,6 @@ import java.io.PrintWriter
 import java.net.HttpURLConnection
 import java.net.URL
 
-@Suppress("DEPRECATION")
 class SettingsFragment : Fragment() {
 
     private lateinit var host: String
@@ -177,10 +176,14 @@ class SettingsFragment : Fragment() {
         switchNotificationColor.isChecked = mActivity.prefs.getBoolean("CustomColor", false)
         customColors.visibility = if (mActivity.prefs.getBoolean("CustomColor", false)) View.VISIBLE else View.GONE
         switchNotificationColor.setOnCheckedChangeListener { _, state ->
-            if (state)
+            if (state) {
                 customColors.visibility = View.VISIBLE
-            else
+                sender.sendBroadcast(localIntent.putExtra("cVal", true))
+            }
+            else {
                 customColors.visibility = View.GONE
+                sender.sendBroadcast(localIntent.putExtra("cVal", false))
+            }
             mActivity.prefs.edit().putBoolean("CustomColor", state).apply()
         }
         val title = buttonChooseDialogTitle

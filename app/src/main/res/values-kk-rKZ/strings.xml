@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">LessonCountdown</string>
-    <string name="dev"><a href="https://vk.com/dibrin">Бағдарламашы парақшам VK</a></string>
-    <string name="appVk"><a href="https://vk.com/brin_apps">LessonCountdown бірлестік VK</a></string>
+    <string name="dev"><a href="https://vk.com/dibrin">Бағдарламашы парақшасы VK-дағы</a></string>
+    <string name="appVk"><a href="https://vk.com/brin_apps">LessonCountdown тобы VK-дағы</a></string>
     <string name="help">Жәрдем</string>
     <string name="networkErr">Желіге қол жеткізу мүмкін емес</string>
-    <string name="configErr">Конфигдағы қате</string>
+    <string name="configErr">Конфигдегі қате</string>
     <string name="timeErr">xxx уақыт енгізу өрісі келесідей болуы керек: Сағат:Минут-Сағат:Минут</string>
     <string name="lessonErr">xxx сабақ енгізу өрісі бос</string>
     <string name="indexErr">Тым көп сандарды енгіздіңіз</string>
-    <string name="notNumErr">Сіз нөмірді енгізген жоқсыз</string>
+    <string name="notNumErr">Сіз санды енгізген жоқсыз</string>
     <string name="editMode">Өңдеу режимі</string>
     <string name="lesson">Сабақ</string>
-    <string name="time">Уақытта</string>
+    <string name="time">Уақыт</string>
     <string name="add">Қосу</string>
-    <string name="addIndex">Кейін қосыңыз:</string>
+    <string name="addIndex">Кейін қосу:</string>
     <string name="remove">Жою</string>
     <string name="removeIndex">Жою:</string>
     <string name="curr">Ағымдағы</string>
@@ -33,30 +32,30 @@
     <string name="thursday">Бейсенбі</string>
     <string name="friday">Жұма</string>
     <string name="saturday">Сенбі</string>
-    <string name="settings">Параметрлер</string>
-    <string name="customCfg">Таңдамалы теңшелім (Автоматты жүктеуді өшіреді)</string>
-    <string name="chooseClass">Сыныпты таңдаңыз</string>
-    <string name="searchClass">Іздеу сыныпты</string>
-    <string name="ownServer">Жеке сервер мекенжайын орнатыңыз</string>
+    <string name="settings">Баптаулар</string>
+    <string name="customCfg">Өз конфигым (Автоматты жүктеуді өшіреді)</string>
+    <string name="chooseClass">Сыныпты таңдау</string>
+    <string name="searchClass">Сыныпты іздеу</string>
+    <string name="ownServer">Жеке сервер мекенжайын орнату</string>
     <string name="address">Мекенжай</string>
     <string name="navigation_drawer_open">Шарлау тартпасын ашу</string>
-    <string name="navigation_drawer_close">Шарлау тартпасын жабыңыз</string>
+    <string name="navigation_drawer_close">Шарлау тартпасын жабу</string>
     <string name="dowTitle">Апта күндері</string>
     <string name="darkTheme">Қараңғы тақырып</string>
     <string name="lessonsRemaining">Қалған сабақтар</string>
-    <string name="notificationColor">Өзгертпелі хабарландыру түстері</string>
-    <string name="titleColor">Сабақтың түсі</string>
+    <string name="notificationColor">Хабарландырудың өзгертпелі түстері</string>
+    <string name="titleColor">Сабақ түсі</string>
     <string name="timeColor">Уақыт түсі</string>
-    <string name="lessonsColor">Қарсы түсті</string>
-    <string name="backgroundColor">Фондық түс</string>
-    <string name="copyTo">Алмасу буферге көшіріңіз</string>
-    <string name="pasteFrom">Алмасу буферінен салыңыз</string>
-    <string name="pasteErr">Аралық сақтағыштан конфигурациялау мүмкін емес</string>
-    <string name="dozeWhitelist">Қолданбаны Doze ерекше жағдайлары үшін қосыңыз</string>
+    <string name="lessonsColor">Еспетегіш түсі</string>
+    <string name="backgroundColor">Фонның түсі</string>
+    <string name="copyTo">Айырбас буфергіне көшіру</string>
+    <string name="pasteFrom">Айырбас буферінен салу</string>
+    <string name="pasteErr">Айырбас буферінен конфиг мүмкін емес</string>
+    <string name="dozeWhitelist">Қолданбаны Doze ерекше жағдайларына қосыңыз</string>
     <string name="suWarn">Назар аударыңыз</string>
     <string name="suWarnDozeAdd">Енді бағдарлама Doze ерекшеліктер тізіміне қосылады. Сәтті орнатудан кейін құрылғы қайта жүктеледі</string>
     <string name="rootMode">Root режимі</string>
-    <string name="enableRoot">Root режимін қосыңыз</string>
-    <string name="dozeRemoveWhitelist">Қолданбаны Doze ерекшеліктерінен алып тастаңыз</string>
+    <string name="enableRoot">Root режимін қосу</string>
+    <string name="dozeRemoveWhitelist">Қолданбаны Doze ерекшеліктерінен алып тастау</string>
     <string name="suWarnDozeRemove">Қолданба енді Doze ерекшеліктерінен жойылады. Сәтті орнатудан кейін құрылғы қайта жүктеледі</string>
 </resources>
