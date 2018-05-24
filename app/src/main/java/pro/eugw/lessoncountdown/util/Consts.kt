@@ -44,11 +44,8 @@ const val SCHOOL_NAME = "school_name"
 
 const val SEARCH_REQUEST_CODE = 90
 
-// ---SKU---
-
-const val OWN_SERVER_SKU = "use_own_server"
-
 // ---Other---
 
 const val CHANNEL_ID = "LessonChannel"
 const val COLOR_PICKER_DIALOG = "color-picker-dialog"
+const val HTTP_TIMEOUT = 1000

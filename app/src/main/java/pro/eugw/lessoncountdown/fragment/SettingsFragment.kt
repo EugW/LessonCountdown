@@ -15,9 +15,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
-import com.android.billingclient.api.BillingClient
-import com.android.billingclient.api.BillingClientStateListener
-import com.android.billingclient.api.BillingFlowParams
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.jaredrummler.android.colorpicker.ColorPickerDialog
@@ -62,54 +59,6 @@ class SettingsFragment : Fragment() {
         initTheme()
         initCustomColors()
         initBigNotification()
-        val client = BillingClient.newBuilder(mActivity).setListener { responseCode, purchases ->
-            if (responseCode == BillingClient.BillingResponse.OK && purchases?.any { it.sku == OWN_SERVER_SKU } == true) {
-                ownServer.setOnClickListener {
-                    showDialogAddress()
-                }
-            }
-        }.build()
-        client.startConnection(object : BillingClientStateListener {
-            override fun onBillingSetupFinished(responseCode: Int) {
-                if (responseCode == BillingClient.BillingResponse.OK) {
-                    if (client.queryPurchases(BillingClient.SkuType.INAPP).purchasesList.any { it.sku == OWN_SERVER_SKU }) {
-                        ownServer.setOnClickListener {
-                            showDialogAddress()
-                        }
-                    } else {
-                        ownServer.setOnClickListener {
-                            val flowParams = BillingFlowParams.newBuilder().setSku(OWN_SERVER_SKU).setType(BillingClient.SkuType.INAPP).build()
-                            client.launchBillingFlow(mActivity, flowParams)
-                        }
-                    }
-                } else {
-                    Toast.makeText(mActivity, "Google Play Error $responseCode", Toast.LENGTH_LONG).show()
-                }
-            }
-
-            override fun onBillingServiceDisconnected() {
-                Toast.makeText(mActivity, "Google Play Disconnected", Toast.LENGTH_LONG).show()
-            }
-
-        })
-        /*devButton.setOnClickListener {
-            client.startConnection(object : BillingClientStateListener {
-                override fun onBillingSetupFinished(responseCode: Int) {
-                    if (responseCode == BillingClient.BillingResponse.OK) {
-                        client.queryPurchases(BillingClient.SkuType.INAPP).purchasesList.forEach {
-                            client.consumeAsync(it.purchaseToken, { _, _ -> })
-                        }
-                    } else {
-                        Toast.makeText(mActivity, "Google Play Error $responseCode", Toast.LENGTH_LONG).show()
-                    }
-                }
-
-                override fun onBillingServiceDisconnected() {
-                    Toast.makeText(mActivity, "Google Play Disconnected", Toast.LENGTH_LONG).show()
-                }
-
-            })
-        }*/
     }
 
     private fun initClass() {
@@ -167,6 +116,29 @@ class SettingsFragment : Fragment() {
         if (mActivity.prefs.getString(CUSTOM_ADDRESS, getString(R.string.host)) != getString(R.string.host)) {
             ownServerAddress.visibility = View.VISIBLE
             ownServerAddress.text = host
+        }
+        ownServer.setOnClickListener {
+            val ab = AlertDialog.Builder(mActivity)
+            ab.setTitle(R.string.address)
+            val input = EditText(mActivity)
+            input.setText(host)
+            ab.setView(input)
+            ab.setPositiveButton(getString(android.R.string.ok), { _, _ ->
+                host = try {
+                    val url = URL(input.text.toString())
+                    val conn = url.openConnection() as HttpURLConnection
+                    conn.connectTimeout = HTTP_TIMEOUT
+                    conn.readTimeout = HTTP_TIMEOUT
+                    conn.connect()
+                    ownServerAddress.visibility = View.VISIBLE
+                    ownServerAddress.text = input.text
+                    input.text.toString()
+                } catch (e: Exception) {
+                    getString(R.string.host)
+                }
+                mActivity.prefs.edit().putString(CUSTOM_ADDRESS, host).apply()
+            })
+            ab.show()
         }
     }
 
@@ -261,30 +233,6 @@ class SettingsFragment : Fragment() {
             mActivity.prefs.edit().putBoolean(BIG_NOTIFICATION, isChecked).apply()
             broadcastManager.sendBroadcast(Intent(mActivity.packageName + NOTIFICATION_STYLE_UPDATE))
         }
-    }
-
-    private fun showDialogAddress() {
-        val ab = AlertDialog.Builder(mActivity)
-        ab.setTitle(R.string.address)
-        val input = EditText(mActivity)
-        input.setText(host)
-        ab.setView(input)
-        ab.setPositiveButton(getString(android.R.string.ok), { _, _ ->
-            host = try {
-                val url = URL(input.text.toString())
-                val conn = url.openConnection() as HttpURLConnection
-                conn.connectTimeout = resources.getInteger(R.integer.timeout)
-                conn.readTimeout = resources.getInteger(R.integer.timeout)
-                conn.connect()
-                ownServerAddress.visibility = View.VISIBLE
-                ownServerAddress.text = input.text
-                input.text.toString()
-            } catch (e: Exception) {
-                getString(R.string.host)
-            }
-            mActivity.prefs.edit().putString(CUSTOM_ADDRESS, host).apply()
-        })
-        ab.show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

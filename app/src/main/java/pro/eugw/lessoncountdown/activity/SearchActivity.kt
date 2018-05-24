@@ -40,10 +40,10 @@ class SearchActivity : Activity() {
         recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.context, LinearLayoutManager(this).orientation))
         thread(true) {
             try {
-                val url = URL("http://" + host + "/classes?lang=${Locale.getDefault().language}")
+                val url = URL(host + "/classes?lang=${Locale.getDefault().language}")
                 val conn = url.openConnection() as HttpURLConnection
-                conn.connectTimeout = resources.getInteger(R.integer.timeout)
-                conn.readTimeout = resources.getInteger(R.integer.timeout)
+                conn.connectTimeout = HTTP_TIMEOUT
+                conn.readTimeout = HTTP_TIMEOUT
                 conn.connect()
                 arrayList = ArrayList()
                 JsonParser().parse(conn.inputStream.reader()).asJsonObject[CLASSES].asJsonArray.forEach {

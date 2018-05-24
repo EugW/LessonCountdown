@@ -392,6 +392,13 @@
 
         </android.support.constraint.ConstraintLayout>
 
+        <View
+            android:id="@+id/divider8"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:background="?android:attr/listDivider" />
+
         <Switch
             android:id="@+id/switchBigNotification"
             android:layout_width="match_parent"

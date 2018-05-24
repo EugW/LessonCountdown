@@ -94,10 +94,10 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         val bells = File(filesDir, BELLS_FILE)
         try {
             if (!prefs.getBoolean(CUSTOM_CONFIG, false)) {
-                val url = URL("http://" + prefs.getString(CUSTOM_ADDRESS, getString(R.string.host)) + "/class?school_id=" + prefs.getString(SCHOOL_ID, "") + "&clazz=" + URLEncoder.encode(prefs.getString(CLASS, ""), "UTF-8"))
+                val url = URL(prefs.getString(CUSTOM_ADDRESS, getString(R.string.host)) + "/class?school_id=" + prefs.getString(SCHOOL_ID, "") + "&clazz=" + URLEncoder.encode(prefs.getString(CLASS, ""), "UTF-8"))
                 val conn = url.openConnection() as HttpURLConnection
-                conn.connectTimeout = resources.getInteger(R.integer.timeout)
-                conn.readTimeout = resources.getInteger(R.integer.timeout)
+                conn.connectTimeout = HTTP_TIMEOUT
+                conn.readTimeout = HTTP_TIMEOUT
                 conn.connect()
                 val reader = JsonParser().parse(conn.inputStream.reader())
                 PrintWriter(FileWriter(schedule), true).println(try {
