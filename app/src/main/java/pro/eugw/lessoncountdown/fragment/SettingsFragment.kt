@@ -27,6 +27,7 @@ import kotlinx.android.synthetic.main.fragment_settings.*
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.activity.SearchActivity
+import pro.eugw.lessoncountdown.util.*
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
@@ -54,14 +55,15 @@ class SettingsFragment : Fragment() {
         mActivity.main_toolbar.title = getString(R.string.settings)
         mActivity.main_toolbar.menu.clear()
         broadcastManager = mActivity.broadcastManager
-        host = mActivity.prefs.getString("cAddress", getString(R.string.host))
+        host = mActivity.prefs.getString(CUSTOM_ADDRESS, getString(R.string.host))
         initClass()
         initCustomCfg()
         initOwnServer()
         initTheme()
         initCustomColors()
+        initBigNotification()
         val client = BillingClient.newBuilder(mActivity).setListener { responseCode, purchases ->
-            if (responseCode == BillingClient.BillingResponse.OK && purchases?.any { it.sku == "use_own_server" } == true) {
+            if (responseCode == BillingClient.BillingResponse.OK && purchases?.any { it.sku == OWN_SERVER_SKU } == true) {
                 ownServer.setOnClickListener {
                     showDialogAddress()
                 }
@@ -70,13 +72,13 @@ class SettingsFragment : Fragment() {
         client.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(responseCode: Int) {
                 if (responseCode == BillingClient.BillingResponse.OK) {
-                    if (client.queryPurchases(BillingClient.SkuType.INAPP).purchasesList.any { it.sku == "use_own_server" }) {
+                    if (client.queryPurchases(BillingClient.SkuType.INAPP).purchasesList.any { it.sku == OWN_SERVER_SKU }) {
                         ownServer.setOnClickListener {
                             showDialogAddress()
                         }
                     } else {
                         ownServer.setOnClickListener {
-                            val flowParams = BillingFlowParams.newBuilder().setSku("use_own_server").setType(BillingClient.SkuType.INAPP).build()
+                            val flowParams = BillingFlowParams.newBuilder().setSku(OWN_SERVER_SKU).setType(BillingClient.SkuType.INAPP).build()
                             client.launchBillingFlow(mActivity, flowParams)
                         }
                     }
@@ -111,7 +113,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun initClass() {
-        val string = mActivity.prefs.getString("class", "")
+        val string = mActivity.prefs.getString(CLASS, "")
         if (string.isNotEmpty()) {
             val text = selectedClass
             text.visibility = View.VISIBLE
@@ -119,24 +121,24 @@ class SettingsFragment : Fragment() {
         }
         selClassLayout.setOnClickListener {
             val intent = Intent(mActivity, SearchActivity::class.java)
-            startActivityForResult(intent, 1)
+            startActivityForResult(intent, SEARCH_REQUEST_CODE)
         }
     }
 
     private fun initCustomCfg() {
-        switchCustomCfg.isChecked = mActivity.prefs.getBoolean("CustomCfg", false)
-        customLayout.visibility = if (mActivity.prefs.getBoolean("CustomCfg", false)) View.VISIBLE else View.GONE
+        switchCustomCfg.isChecked = mActivity.prefs.getBoolean(CUSTOM_CONFIG, false)
+        customLayout.visibility = if (mActivity.prefs.getBoolean(CUSTOM_CONFIG, false)) View.VISIBLE else View.GONE
         switchCustomCfg.setOnCheckedChangeListener { _, state ->
             if (state)
                 customLayout.visibility = View.VISIBLE
             else
                 customLayout.visibility = View.GONE
-            mActivity.prefs.edit().putBoolean("CustomCfg", state).apply()
+            mActivity.prefs.edit().putBoolean(CUSTOM_CONFIG, state).apply()
         }
         buttonCopy.setOnClickListener {
             val jObject = JsonObject()
-            jObject.add("schedule", JsonParser().parse(FileReader(File(mActivity.filesDir, "schedule.json"))))
-            jObject.add("bells", JsonParser().parse(FileReader(File(mActivity.filesDir, "bells.json"))))
+            jObject.add(SCHEDULE, JsonParser().parse(FileReader(File(mActivity.filesDir, SCHEDULE_FILE))))
+            jObject.add(BELLS, JsonParser().parse(FileReader(File(mActivity.filesDir, BELLS_FILE))))
             val clip = mActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             clip.primaryClip = ClipData.newPlainText("lcConfig", jObject.toString())
         }
@@ -144,8 +146,8 @@ class SettingsFragment : Fragment() {
             val clip = mActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             try {
                 val jObject = JsonParser().parse(clip.primaryClip.getItemAt(0).text.toString()).asJsonObject
-                PrintWriter(FileWriter(File(mActivity.filesDir, "schedule.json")), true).println(jObject["schedule"])
-                PrintWriter(FileWriter(File(mActivity.filesDir, "bells.json")), true).println(jObject["bells"])
+                PrintWriter(FileWriter(File(mActivity.filesDir, SCHEDULE_FILE)), true).println(jObject[SCHEDULE])
+                PrintWriter(FileWriter(File(mActivity.filesDir, BELLS_FILE)), true).println(jObject[BELLS])
             } catch (e: Exception) {
                 Toast.makeText(mActivity, R.string.pasteErr, Toast.LENGTH_LONG).show()
                 e.printStackTrace()
@@ -154,40 +156,37 @@ class SettingsFragment : Fragment() {
     }
 
     private fun initTheme() {
-        val themeSwitch = switchDarkTheme
-        themeSwitch.isChecked = mActivity.prefs.getBoolean("darkTheme", false)
-        themeSwitch.setOnCheckedChangeListener { _, state ->
-            mActivity.prefs.edit().putBoolean("darkTheme", state).apply()
+        switchDarkTheme.isChecked = mActivity.prefs.getBoolean(DARK_THEME, false)
+        switchDarkTheme.setOnCheckedChangeListener { _, state ->
+            mActivity.prefs.edit().putBoolean(DARK_THEME, state).apply()
             mActivity.recreate()
         }
     }
 
     private fun initOwnServer() {
-        val ownServerAddress = ownServerAddress
-        if (mActivity.prefs.getString("cAddress", getString(R.string.host)) != getString(R.string.host)) {
+        if (mActivity.prefs.getString(CUSTOM_ADDRESS, getString(R.string.host)) != getString(R.string.host)) {
             ownServerAddress.visibility = View.VISIBLE
             ownServerAddress.text = host
         }
     }
 
     private fun initCustomColors() {
-        val localIntent = Intent(mActivity.packageName + ".NOTIFICATION_COLOR_UPDATE")
-        val sender = broadcastManager
-        switchNotificationColor.isChecked = mActivity.prefs.getBoolean("CustomColor", false)
-        customColors.visibility = if (mActivity.prefs.getBoolean("CustomColor", false)) View.VISIBLE else View.GONE
+        val localIntent = Intent(mActivity.packageName + NOTIFICATION_COLOR_UPDATE)
+        switchNotificationColor.isChecked = mActivity.prefs.getBoolean(CUSTOM_COLOR, false)
+        customColors.visibility = if (mActivity.prefs.getBoolean(CUSTOM_COLOR, false)) View.VISIBLE else View.GONE
         switchNotificationColor.setOnCheckedChangeListener { _, state ->
             if (state) {
                 customColors.visibility = View.VISIBLE
-                sender.sendBroadcast(localIntent.putExtra("cVal", true))
+                broadcastManager.sendBroadcast(localIntent.putExtra("cVal", true))
             }
             else {
                 customColors.visibility = View.GONE
-                sender.sendBroadcast(localIntent.putExtra("cVal", false))
+                broadcastManager.sendBroadcast(localIntent.putExtra("cVal", false))
             }
-            mActivity.prefs.edit().putBoolean("CustomColor", state).apply()
+            mActivity.prefs.edit().putBoolean(CUSTOM_COLOR, state).apply()
         }
         val title = buttonChooseDialogTitle
-        colorTitle = mActivity.prefs.getInt("titleColor", Color.parseColor("#000000"))
+        colorTitle = mActivity.prefs.getInt(TITLE_COLOR, Color.parseColor("#000000"))
         title.setBackgroundColor(colorTitle)
         title.setOnClickListener {
             val builder = ColorPickerDialog.newBuilder().setAllowPresets(false).setDialogType(0).setColor(colorTitle).create()
@@ -197,14 +196,14 @@ class SettingsFragment : Fragment() {
                 override fun onColorSelected(dialogId: Int, color: Int) {
                     colorTitle = color
                     title.setBackgroundColor(color)
-                    mActivity.prefs.edit().putInt("titleColor", colorTitle).apply()
-                    sender.sendBroadcast(localIntent)
+                    mActivity.prefs.edit().putInt(TITLE_COLOR, colorTitle).apply()
+                    broadcastManager.sendBroadcast(localIntent)
                 }
             })
-            builder.show(mActivity.fragmentManager, "color-picker-dialog")
+            builder.show(mActivity.fragmentManager, COLOR_PICKER_DIALOG)
         }
         val textTime = buttonChooseDialogTime
-        colorTime = mActivity.prefs.getInt("timeColor", Color.parseColor("#999999"))
+        colorTime = mActivity.prefs.getInt(TIME_COLOR, Color.parseColor("#999999"))
         textTime.setBackgroundColor(colorTime)
         textTime.setOnClickListener {
             val builder = ColorPickerDialog.newBuilder().setAllowPresets(false).setDialogType(0).setColor(colorTime).create()
@@ -214,14 +213,14 @@ class SettingsFragment : Fragment() {
                 override fun onColorSelected(dialogId: Int, color: Int) {
                     colorTime = color
                     textTime.setBackgroundColor(color)
-                    mActivity.prefs.edit().putInt("timeColor", colorTime).apply()
-                    sender.sendBroadcast(localIntent)
+                    mActivity.prefs.edit().putInt(TIME_COLOR, colorTime).apply()
+                    broadcastManager.sendBroadcast(localIntent)
                 }
             })
-            builder.show(mActivity.fragmentManager, "color-picker-dialog")
+            builder.show(mActivity.fragmentManager, COLOR_PICKER_DIALOG)
         }
         val textLessons = buttonChooseDialogLessons
-        colorLessons = mActivity.prefs.getInt("lessonsColor", Color.parseColor("#999999"))
+        colorLessons = mActivity.prefs.getInt(LESSONS_COLOR, Color.parseColor("#999999"))
         textLessons.setBackgroundColor(colorLessons)
         textLessons.setOnClickListener {
             val builder = ColorPickerDialog.newBuilder().setAllowPresets(false).setDialogType(0).setColor(colorLessons).create()
@@ -231,14 +230,14 @@ class SettingsFragment : Fragment() {
                 override fun onColorSelected(dialogId: Int, color: Int) {
                     colorLessons = color
                     textLessons.setBackgroundColor(color)
-                    mActivity.prefs.edit().putInt("lessonsColor", colorLessons).apply()
-                    sender.sendBroadcast(localIntent)
+                    mActivity.prefs.edit().putInt(LESSONS_COLOR, colorLessons).apply()
+                    broadcastManager.sendBroadcast(localIntent)
                 }
             })
-            builder.show(mActivity.fragmentManager, "color-picker-dialog")
+            builder.show(mActivity.fragmentManager, COLOR_PICKER_DIALOG)
         }
         val background = buttonChooseDialogBackground
-        colorBackground = mActivity.prefs.getInt("backgroundColor", Color.parseColor("#ffffff"))
+        colorBackground = mActivity.prefs.getInt(BACKGROUND_COLOR, Color.parseColor("#ffffff"))
         background.setBackgroundColor(colorBackground)
         background.setOnClickListener {
             val builder = ColorPickerDialog.newBuilder().setAllowPresets(false).setDialogType(0).setColor(colorBackground).create()
@@ -248,11 +247,19 @@ class SettingsFragment : Fragment() {
                 override fun onColorSelected(dialogId: Int, color: Int) {
                     colorBackground = color
                     background.setBackgroundColor(color)
-                    mActivity.prefs.edit().putInt("backgroundColor", colorBackground).apply()
-                    sender.sendBroadcast(localIntent)
+                    mActivity.prefs.edit().putInt(BACKGROUND_COLOR, colorBackground).apply()
+                    broadcastManager.sendBroadcast(localIntent)
                 }
             })
-            builder.show(mActivity.fragmentManager, "color-picker-dialog")
+            builder.show(mActivity.fragmentManager, COLOR_PICKER_DIALOG)
+        }
+    }
+    
+    private fun initBigNotification() {
+        switchBigNotification.isChecked = mActivity.prefs.getBoolean(BIG_NOTIFICATION, false)
+        switchBigNotification.setOnCheckedChangeListener { _, isChecked -> 
+            mActivity.prefs.edit().putBoolean(BIG_NOTIFICATION, isChecked).apply()
+            broadcastManager.sendBroadcast(Intent(mActivity.packageName + NOTIFICATION_STYLE_UPDATE))
         }
     }
 
@@ -262,35 +269,33 @@ class SettingsFragment : Fragment() {
         val input = EditText(mActivity)
         input.setText(host)
         ab.setView(input)
-        ab.setPositiveButton("ok", { _, _ ->
+        ab.setPositiveButton(getString(android.R.string.ok), { _, _ ->
             host = try {
-                val url = URL("http://${input.text}")
+                val url = URL(input.text.toString())
                 val conn = url.openConnection() as HttpURLConnection
                 conn.connectTimeout = resources.getInteger(R.integer.timeout)
                 conn.readTimeout = resources.getInteger(R.integer.timeout)
                 conn.connect()
-                val ownText2 = ownServerAddress
-                ownText2.visibility = View.VISIBLE
-                ownText2.text = input.text
+                ownServerAddress.visibility = View.VISIBLE
+                ownServerAddress.text = input.text
                 input.text.toString()
             } catch (e: Exception) {
                 getString(R.string.host)
             }
-            mActivity.prefs.edit().putString("cAddress", host).apply()
+            mActivity.prefs.edit().putString(CUSTOM_ADDRESS, host).apply()
         })
         ab.show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == 1 && resultCode == Activity.RESULT_OK && data != null) {
+        if (requestCode == SEARCH_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             val extras = data.extras
-            mActivity.prefs.edit().putString("class", extras["class"] as String).putString("school_id", extras["school_id"] as String).apply()
+            mActivity.prefs.edit().putString(CLASS, extras[CLASS] as String).putString(SCHOOL_ID, extras[SCHOOL_ID] as String).apply()
             val text = selectedClass
             text.visibility = View.VISIBLE
-            text.text = (extras["class"] as String).replace(".", "")
+            text.text = (extras[CLASS] as String).replace(".", "")
             mActivity.clazz = mActivity.initClass()
             mActivity.homework = mActivity.initHomework()
-            println("RES")
         }
     }
     

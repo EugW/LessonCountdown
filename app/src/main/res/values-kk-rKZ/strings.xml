@@ -58,4 +58,5 @@
     <string name="enableRoot">Root режимін қосу</string>
     <string name="dozeRemoveWhitelist">Қолданбаны Doze ерекшеліктерінен алып тастау</string>
     <string name="suWarnDozeRemove">Қолданба енді Doze ерекшеліктерінен жойылады. Сәтті орнатудан кейін құрылғы қайта жүктеледі</string>
+    <string name="bigNotification">Большое уведомление</string>
 </resources>

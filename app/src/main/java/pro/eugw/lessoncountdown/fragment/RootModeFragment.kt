@@ -11,6 +11,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_root_mode.*
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
+import pro.eugw.lessoncountdown.util.SU
 import java.io.File
 import java.io.FileOutputStream
 
@@ -33,7 +34,7 @@ class RootModeFragment : Fragment() {
     }
 
     private fun initRootMode() {
-        switchRootMode.isChecked = (activity as MainActivity).prefs.getBoolean("su", false)
+        switchRootMode.isChecked = (activity as MainActivity).prefs.getBoolean(SU, false)
         switchRootMode.setOnCheckedChangeListener { _, _ ->
             val su = Shell.SU.available()
             switchRootMode.isChecked = su
@@ -41,7 +42,7 @@ class RootModeFragment : Fragment() {
                 rootModeLayout.visibility = View.VISIBLE
             else
                 rootModeLayout.visibility = View.GONE
-            mActivity.prefs.edit().putBoolean("su", su).apply()
+            mActivity.prefs.edit().putBoolean(SU, su).apply()
         }
         if (switchRootMode.isChecked)
             rootModeLayout.visibility = View.VISIBLE
@@ -65,7 +66,7 @@ class RootModeFragment : Fragment() {
         val b = AlertDialog.Builder(mActivity)
         b.setTitle(R.string.suWarn)
         b.setMessage(R.string.suWarnDozeAdd)
-        b.setPositiveButton("OK") { _, _ ->
+        b.setPositiveButton(android.R.string.ok) { _, _ ->
             val tmp = File(mActivity.filesDir, "srv.xml.tmp")
             resources.openRawResource(R.raw.service).copyTo(FileOutputStream(tmp))
             val str = "mount -o rw,remount /system\n" +
@@ -81,7 +82,7 @@ class RootModeFragment : Fragment() {
         val b = AlertDialog.Builder(mActivity)
         b.setTitle(R.string.suWarn)
         b.setMessage(R.string.suWarnDozeRemove)
-        b.setPositiveButton("OK") { _, _ ->
+        b.setPositiveButton(android.R.string.ok) { _, _ ->
             val str = "mount -o rw,remount /system\n" +
                     "rm -rf /system/etc/sysconfig/service_lessoncountdown.xml\n" +
                     "reboot\n"

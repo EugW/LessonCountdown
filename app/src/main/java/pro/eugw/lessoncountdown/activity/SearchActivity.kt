@@ -15,6 +15,7 @@ import kotlinx.android.synthetic.main.activity_search.*
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.list.search.SearchAdapter
 import pro.eugw.lessoncountdown.list.search.SearchItem
+import pro.eugw.lessoncountdown.util.*
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
@@ -29,9 +30,9 @@ class SearchActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setTheme(if (getSharedPreferences("newPrefs", Context.MODE_PRIVATE).getBoolean("darkTheme", false)) R.style.AppTheme_Dark else R.style.AppTheme)
+        setTheme(if (getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE).getBoolean(DARK_THEME, false)) R.style.AppTheme_Dark else R.style.AppTheme)
         setContentView(R.layout.activity_search)
-        host = getSharedPreferences("newPrefs", Context.MODE_PRIVATE).getString("cAddress", getString(R.string.host))
+        host = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE).getString(CUSTOM_ADDRESS, getString(R.string.host))
         if (host.isBlank())
             host = getString(R.string.host)
         recyclerView = searchRecycler
@@ -45,8 +46,8 @@ class SearchActivity : Activity() {
                 conn.readTimeout = resources.getInteger(R.integer.timeout)
                 conn.connect()
                 arrayList = ArrayList()
-                JsonParser().parse(conn.inputStream.reader()).asJsonObject["classes"].asJsonArray.forEach {
-                    arrayList.add(SearchItem(it.asJsonObject["number"].asString, it.asJsonObject["letter"].asString, it.asJsonObject["subgroup"].asString, it.asJsonObject["school_id"].asString, it.asJsonObject["school_name"].asString))
+                JsonParser().parse(conn.inputStream.reader()).asJsonObject[CLASSES].asJsonArray.forEach {
+                    arrayList.add(SearchItem(it.asJsonObject[NUMBER].asString, it.asJsonObject[LETTER].asString, it.asJsonObject[SUBGROUP].asString, it.asJsonObject[SCHOOL_ID].asString, it.asJsonObject[SCHOOL_NAME].asString))
                 }
                 runOnUiThread {
                     updateAdapter(arrayList)
@@ -79,7 +80,7 @@ class SearchActivity : Activity() {
 
 
     fun choose(id: String, number: String, letter: String, subgroup: String) {
-        setResult(Activity.RESULT_OK, Intent().putExtra("class", "$number.$letter.$subgroup").putExtra("school_id", id))
+        setResult(Activity.RESULT_OK, Intent().putExtra(CLASS, "$number.$letter.$subgroup").putExtra(SCHOOL_ID, id))
         finish()
     }
 

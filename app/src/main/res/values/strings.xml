@@ -68,4 +68,5 @@
     <string name="dozeRemoveWhitelist">Remove app from Doze ignore list</string>
     <string name="suWarnDozeRemove">Now the application will be removed from Doze ignore list. After successful installation, the device will be rebooted</string>
     <string name="lessonsRemaining">Lessons remaining</string>
+    <string name="bigNotification">Big notification</string>
 </resources>

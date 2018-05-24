@@ -20,6 +20,7 @@ import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.fragment.DayOfWeekFragment
 import pro.eugw.lessoncountdown.fragment.RootModeFragment
 import pro.eugw.lessoncountdown.fragment.SettingsFragment
+import pro.eugw.lessoncountdown.util.*
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
@@ -40,28 +41,28 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setTheme(if (getSharedPreferences("newPrefs", Context.MODE_PRIVATE).getBoolean("darkTheme", false)) R.style.AppTheme_Dark else R.style.AppTheme)
+        setTheme(if (getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE).getBoolean(DARK_THEME, false)) R.style.AppTheme_Dark else R.style.AppTheme)
         setContentView(R.layout.activity_main)
         val toggle = ActionBarDrawerToggle(this, drawer_layout, main_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
         nav_view.setNavigationItemSelectedListener(this)
         broadcastManager = LocalBroadcastManager.getInstance(this)
-        prefs = getSharedPreferences("newPrefs", Context.MODE_PRIVATE)
+        prefs = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
         val toggleButton = nav_view.getHeaderView(0).findViewById<ToggleButton>(R.id.toggleButton)
         broadcastManager.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent?) {
                 toggleButton.isChecked = p1!!.getBooleanExtra("isRun", false)
             }
-        }, IntentFilter(baseContext.packageName + ".SERVICE_STATE"))
+        }, IntentFilter(baseContext.packageName + SERVICE_STATE))
         toggleButton.setOnClickListener {
             if (toggleButton.isChecked) {
-                File(filesDir, "service.pid").createNewFile()
-                broadcastManager.sendBroadcast(Intent(baseContext.packageName + ".SERVICE_SIGNAL").putExtra("START", true))
+                File(filesDir, SERVICE_PID).createNewFile()
+                broadcastManager.sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("START", true))
             }
             else {
-                File(filesDir, "service.pid").delete()
-                broadcastManager.sendBroadcast(Intent(baseContext.packageName + ".SERVICE_SIGNAL").putExtra("STOP", true))
+                File(filesDir, SERVICE_PID).delete()
+                broadcastManager.sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("STOP", true))
             }
         }
         thread(true) {
@@ -69,7 +70,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             homework = initHomework()
             inflateFragment()
         }
-        File(filesDir, "service.pid").createNewFile()
+        File(filesDir, SERVICE_PID).createNewFile()
         val service = Intent(this, MService::class.java)
         startService(service)
         bindService(service, object : ServiceConnection {
@@ -85,27 +86,27 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                 stopService(service)
                 startService(service)
             }
-        }, IntentFilter(baseContext.packageName + ".PEND_SERVICE_RESTART"))
+        }, IntentFilter(baseContext.packageName + PEND_SERVICE_RESTART))
     }
 
     fun initClass(): JsonObject {
-        val schedule = File(filesDir, "schedule.json")
-        val bells = File(filesDir, "bells.json")
+        val schedule = File(filesDir, SCHEDULE_FILE)
+        val bells = File(filesDir, BELLS_FILE)
         try {
-            if (!prefs.getBoolean("CustomCfg", false)) {
-                val url = URL("http://" + prefs.getString("cAddress", getString(R.string.host)) + "/class?school_id=" + prefs.getString("school_id", "") + "&clazz=" + URLEncoder.encode(prefs.getString("class", ""), "UTF-8"))
+            if (!prefs.getBoolean(CUSTOM_CONFIG, false)) {
+                val url = URL("http://" + prefs.getString(CUSTOM_ADDRESS, getString(R.string.host)) + "/class?school_id=" + prefs.getString(SCHOOL_ID, "") + "&clazz=" + URLEncoder.encode(prefs.getString(CLASS, ""), "UTF-8"))
                 val conn = url.openConnection() as HttpURLConnection
                 conn.connectTimeout = resources.getInteger(R.integer.timeout)
                 conn.readTimeout = resources.getInteger(R.integer.timeout)
                 conn.connect()
                 val reader = JsonParser().parse(conn.inputStream.reader())
                 PrintWriter(FileWriter(schedule), true).println(try {
-                    reader.asJsonObject["schedule"]
+                    reader.asJsonObject[SCHEDULE]
                 } catch (e: Exception) {
                     JsonObject()
                 })
                 PrintWriter(FileWriter(bells), true).println(try {
-                    reader.asJsonObject["bells"]
+                    reader.asJsonObject[BELLS]
                 } catch (e: Exception) {
                     JsonObject()
                 })
@@ -117,8 +118,8 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             val jsonObject = JsonObject()
             val scheduleJ = JsonParser().parse(FileReader(schedule)).asJsonObject
             val bellsJ = JsonParser().parse(FileReader(bells)).asJsonObject
-            jsonObject.add("schedule", scheduleJ)
-            jsonObject.add("bells", bellsJ)
+            jsonObject.add(SCHEDULE, scheduleJ)
+            jsonObject.add(BELLS, bellsJ)
             jsonObject
         } catch (e: Exception) {
             runOnUiThread { Toast.makeText(this, R.string.configErr, Toast.LENGTH_LONG).show() }

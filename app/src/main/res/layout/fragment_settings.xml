@@ -392,6 +392,17 @@
 
         </android.support.constraint.ConstraintLayout>
 
+        <Switch
+            android:id="@+id/switchBigNotification"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault"
+            android:textSize="18sp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/bigNotification" />
+
     </LinearLayout>
 
 </ScrollView>

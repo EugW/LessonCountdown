@@ -58,4 +58,5 @@
     <string name="suWarnDozeRemove">Cейчас приложение будет убрано из исключений Doze. После успешной установки девайс будет перезагружен</string>
     <string name="appVk"><a href="https://vk.com/brin_apps">Группа LessonCountdown в ВК </a></string>
     <string name="help">Помощь</string>
+    <string name="bigNotification">Большое уведомление</string>
 </resources>

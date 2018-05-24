@@ -53,7 +53,7 @@ internal class MAdapter(private var list: List<MLesson>, private var fragment: D
                 if (!homework.isEmpty())
                     input.setText(homework)
                 builder.setView(input)
-                builder.setPositiveButton("OK") { _, _ -> setList(name, input.text.toString(), position) }
+                builder.setPositiveButton(android.R.string.ok) { _, _ -> setList(name, input.text.toString(), position) }
                 builder.setNegativeButton(fragment.getString(R.string.cancel)) { dialogInterface, _ -> dialogInterface.cancel() }
                 builder.setNeutralButton(fragment.getString(R.string.clear)) { _, _ -> setList(name, "", position) }
                 builder.show()

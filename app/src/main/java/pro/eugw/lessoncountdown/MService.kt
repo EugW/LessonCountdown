@@ -16,7 +16,7 @@ import android.widget.RemoteViews
 import com.google.gson.JsonArray
 import com.google.gson.JsonParser
 import pro.eugw.lessoncountdown.activity.MainActivity
-import pro.eugw.lessoncountdown.util.LessonTime
+import pro.eugw.lessoncountdown.util.*
 import java.io.File
 import java.io.FileReader
 import java.text.SimpleDateFormat
@@ -45,54 +45,63 @@ class MService : Service() {
         super.onCreate()
         instance = LocalBroadcastManager.getInstance(this)
         val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val channelId = "LessonChannel"
         val notificationLayout = RemoteViews(packageName, R.layout.notification_small)
-        val prefs = getSharedPreferences("newPrefs", Context.MODE_PRIVATE)
-        if (prefs.getBoolean("CustomColor", false)) {
-            notificationLayout.setTextColor(R.id.textViewTitle, prefs.getInt("titleColor", Color.parseColor("#000000")))
-            notificationLayout.setTextColor(R.id.textViewText, prefs.getInt("timeColor", Color.parseColor("#999999")))
-            notificationLayout.setTextColor(R.id.textViewLessons, prefs.getInt("lessonsColor", Color.parseColor("#999999")))
-            notificationLayout.setInt(R.id.layoutNotification, "setBackgroundColor", prefs.getInt("backgroundColor", Color.parseColor("#ffffff")))
+        val prefs = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
+        if (prefs.getBoolean(CUSTOM_COLOR, false)) {
+            notificationLayout.setTextColor(R.id.textViewTitle, prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
+            notificationLayout.setTextColor(R.id.textViewText, prefs.getInt(TIME_COLOR, Color.parseColor("#999999")))
+            notificationLayout.setTextColor(R.id.textViewLessons, prefs.getInt(LESSONS_COLOR, Color.parseColor("#999999")))
+            notificationLayout.setInt(R.id.layoutNotification, "setBackgroundColor", prefs.getInt(BACKGROUND_COLOR, Color.parseColor("#ffffff")))
         }
-        val mBuilder = NotificationCompat.Builder(this, channelId)
-                .setContentTitle("LessonCountdown")
-                .setContentText("LessonCountdown")
+        val mBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle(CHANNEL_ID)
+                .setContentText(CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_oti)
                 .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_oti))
-                .setCustomContentView(notificationLayout)
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setShowWhen(false)
+        if (prefs.getBoolean(BIG_NOTIFICATION, false)) {
+            mBuilder.setCustomBigContentView(notificationLayout)
+        } else {
+            mBuilder.setCustomContentView(notificationLayout)
+        }
         val stackBuilder = TaskStackBuilder.create(this)
         stackBuilder.addParentStack(MainActivity::class.java)
         stackBuilder.addNextIntent(Intent(this, MainActivity::class.java))
         val resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
         mBuilder.setContentIntent(resultPendingIntent)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            mNotificationManager.createNotificationChannel(NotificationChannel(channelId, "LessonChannel", NotificationManager.IMPORTANCE_LOW))
+            mNotificationManager.createNotificationChannel(NotificationChannel(CHANNEL_ID, CHANNEL_ID, NotificationManager.IMPORTANCE_LOW))
         instance.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent) {
                 if (p1.getBooleanExtra("cVal", false)) {
-                    notificationLayout.setTextColor(R.id.textViewTitle, prefs.getInt("titleColor", Color.parseColor("#000000")))
-                    notificationLayout.setTextColor(R.id.textViewText, prefs.getInt("timeColor", Color.parseColor("#999999")))
-                    notificationLayout.setTextColor(R.id.textViewLessons, prefs.getInt("lessonsColor", Color.parseColor("#999999")))
-                    notificationLayout.setInt(R.id.layoutNotification, "setBackgroundColor", prefs.getInt("backgroundColor", Color.parseColor("#ffffff")))
+                    notificationLayout.setTextColor(R.id.textViewTitle, prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
+                    notificationLayout.setTextColor(R.id.textViewText, prefs.getInt(TIME_COLOR, Color.parseColor("#999999")))
+                    notificationLayout.setTextColor(R.id.textViewLessons, prefs.getInt(LESSONS_COLOR, Color.parseColor("#999999")))
+                    notificationLayout.setInt(R.id.layoutNotification, "setBackgroundColor", prefs.getInt(BACKGROUND_COLOR, Color.parseColor("#ffffff")))
                 } else {
-                    instance.sendBroadcast(Intent(baseContext.packageName + ".PEND_SERVICE_RESTART"))
+                    instance.sendBroadcast(Intent(baseContext.packageName + PEND_SERVICE_RESTART))
                     running = false
                 }
             }
-        }, IntentFilter(baseContext.packageName + ".NOTIFICATION_COLOR_UPDATE"))
+        }, IntentFilter(baseContext.packageName + NOTIFICATION_COLOR_UPDATE))
+        instance.registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                instance.sendBroadcast(Intent(baseContext.packageName + PEND_SERVICE_RESTART))
+                running = false
+            }
+        }, IntentFilter(baseContext.packageName + NOTIFICATION_STYLE_UPDATE))
         runnable = {
             val dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK).toString()
             val schedule = try {
-                JsonParser().parse(FileReader(File(filesDir, "schedule.json"))).asJsonObject[dayOfWeek].asJsonArray
+                JsonParser().parse(FileReader(File(filesDir, SCHEDULE_FILE))).asJsonObject[dayOfWeek].asJsonArray
             } catch (e: Exception) {
                 JsonArray()
             }
             val bells = try {
-                JsonParser().parse(FileReader(File(filesDir, "bells.json"))).asJsonObject[dayOfWeek].asJsonArray
+                JsonParser().parse(FileReader(File(filesDir, BELLS_FILE))).asJsonObject[dayOfWeek].asJsonArray
             } catch (e: Exception) {
                 JsonArray()
             }
@@ -109,8 +118,8 @@ class MService : Service() {
                 lessonArray.clear()
             }
             running = true
-            instance.sendBroadcast(Intent(baseContext.packageName + ".SERVICE_STATE").putExtra("isRun", running))
-            if (lessonArray.isNotEmpty() && File(filesDir, "service.pid").exists())
+            instance.sendBroadcast(Intent(baseContext.packageName + SERVICE_STATE).putExtra("isRun", running))
+            if (lessonArray.isNotEmpty() && File(filesDir, SERVICE_PID).exists())
                 while (running && System.currentTimeMillis() <= lessonArray.last().end) {
                     val title = StringBuilder()
                     val text = StringBuilder()
@@ -147,7 +156,7 @@ class MService : Service() {
                     Thread.sleep(1000)
                 }
             running = false
-            instance.sendBroadcast(Intent(baseContext.packageName + ".SERVICE_STATE").putExtra("isRun", running))
+            instance.sendBroadcast(Intent(baseContext.packageName + SERVICE_STATE).putExtra("isRun", running))
             mNotificationManager.cancel(0)
         }
         thread(true, block = runnable)
@@ -160,7 +169,7 @@ class MService : Service() {
                     running = false
                 }
             }
-        }, IntentFilter(baseContext.packageName + ".SERVICE_SIGNAL"))
+        }, IntentFilter(baseContext.packageName + SERVICE_SIGNAL))
     }
 
     private fun appendable(vararg arg: Long): String = "${(arg[0] - arg[1]) / 60000} ${getString(R.string.min)} ${(arg[0] - arg[1]) / 1000 % 60} ${getString(R.string.sec)}"

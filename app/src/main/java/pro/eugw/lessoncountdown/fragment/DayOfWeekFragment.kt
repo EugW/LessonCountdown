@@ -19,6 +19,10 @@ import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.list.schedule.MAdapter
 import pro.eugw.lessoncountdown.list.schedule.MLesson
+import pro.eugw.lessoncountdown.util.BELLS
+import pro.eugw.lessoncountdown.util.CUSTOM_CONFIG
+import pro.eugw.lessoncountdown.util.SCHEDULE
+import pro.eugw.lessoncountdown.util.SCHEDULE_FILE
 import java.io.File
 import java.io.FileWriter
 import java.io.PrintWriter
@@ -48,7 +52,7 @@ class DayOfWeekFragment : Fragment() {
         val bundle = arguments
         val toolbar = activity!!.main_toolbar
         toolbar.title = bundle!!.getString("dayName")
-        if (mActivity.prefs.getBoolean("CustomCfg", false))
+        if (mActivity.prefs.getBoolean(CUSTOM_CONFIG, false))
             if (toolbar.menu.size() <= 0)
                 toolbar.inflateMenu(R.menu.dayofweek_menu)
         adapter = MAdapter(list, this, false)
@@ -57,11 +61,11 @@ class DayOfWeekFragment : Fragment() {
         dialogView.layoutManager = LinearLayoutManager(activity)
         dialogView.addItemDecoration(DividerItemDecoration(dialogView.context, LinearLayoutManager(activity).orientation))
         val job = mActivity.clazz
-        if (!job.has("schedule") || !job.has("bells")) {
+        if (!job.has(SCHEDULE) || !job.has(BELLS)) {
             return
         }
-        schedule = job["schedule"].asJsonObject
-        bells = job["bells"].asJsonObject
+        schedule = job[SCHEDULE].asJsonObject
+        bells = job[BELLS].asJsonObject
         day = bundle.getString("day")
         val homework = JsonParser().parse(bundle.getString("homework", JsonObject().toString())).asJsonObject
         if (!schedule.has(day) || !bells.has(day))
@@ -93,8 +97,8 @@ class DayOfWeekFragment : Fragment() {
                             schedule[day].asJsonArray.add(it.lesson)
                             bells[day].asJsonArray.add(it.time)
                         }
-                        PrintWriter(FileWriter(File(mActivity.filesDir, "schedule.json")), true).println(schedule)
-                        PrintWriter(FileWriter(File(mActivity.filesDir, "bells.json")), true).println(bells)
+                        PrintWriter(FileWriter(File(mActivity.filesDir, SCHEDULE_FILE)), true).println(schedule)
+                        PrintWriter(FileWriter(File(mActivity.filesDir, SCHEDULE_FILE)), true).println(bells)
                     }
                     edit = !edit
                     dialogView.adapter = if (edit) adapterEdit else adapter
@@ -105,7 +109,7 @@ class DayOfWeekFragment : Fragment() {
                     ab.setTitle(R.string.addIndex)
                     val input = EditText(activity)
                     ab.setView(input)
-                    ab.setPositiveButton("ok", { _, _ ->
+                    ab.setPositiveButton(getString(android.R.string.ok), { _, _ ->
                         val int = try {
                             input.text.toString().toInt()
                         } catch (e: Exception) {
@@ -126,7 +130,7 @@ class DayOfWeekFragment : Fragment() {
                     ab.setTitle(R.string.removeIndex)
                     val input = EditText(activity)
                     ab.setView(input)
-                    ab.setPositiveButton("ok", { _, _ ->
+                    ab.setPositiveButton(getString(android.R.string.ok), { _, _ ->
                         val int = try {
                             input.text.toString().toInt()
                         } catch (e: Exception) {
