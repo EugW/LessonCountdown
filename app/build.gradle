@@ -9,8 +9,8 @@ android {
         applicationId "pro.eugw.lessoncountdown"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 57
-        versionName "2.1.01"
+        versionCode 59
+        versionName "2.1.03"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -34,6 +34,5 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.jaredrummler:colorpicker:1.0.2'
-    implementation 'com.android.billingclient:billing:1.1'
     implementation 'eu.chainfire:libsuperuser:1.0.0.201704021214'
 }

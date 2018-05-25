@@ -99,7 +99,6 @@ class SettingsFragment : Fragment() {
                 PrintWriter(FileWriter(File(mActivity.filesDir, BELLS_FILE)), true).println(jObject[BELLS])
             } catch (e: Exception) {
                 Toast.makeText(mActivity, R.string.pasteErr, Toast.LENGTH_LONG).show()
-                e.printStackTrace()
             }
         }
     }
@@ -125,7 +124,7 @@ class SettingsFragment : Fragment() {
             ab.setView(input)
             ab.setPositiveButton(getString(android.R.string.ok), { _, _ ->
                 host = try {
-                    val url = URL(input.text.toString())
+                    val url = URL("http://" + input.text)
                     val conn = url.openConnection() as HttpURLConnection
                     conn.connectTimeout = HTTP_TIMEOUT
                     conn.readTimeout = HTTP_TIMEOUT

@@ -40,7 +40,7 @@ class SearchActivity : Activity() {
         recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.context, LinearLayoutManager(this).orientation))
         thread(true) {
             try {
-                val url = URL(host + "/classes?lang=${Locale.getDefault().language}")
+                val url = URL("http://$host/classes?lang=${Locale.getDefault().language}")
                 val conn = url.openConnection() as HttpURLConnection
                 conn.connectTimeout = HTTP_TIMEOUT
                 conn.readTimeout = HTTP_TIMEOUT

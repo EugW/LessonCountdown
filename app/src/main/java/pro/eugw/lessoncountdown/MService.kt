@@ -114,7 +114,6 @@ class MService : Service() {
                     lessonArray.add(LessonTime(sdf.parse(yrr.format(Date()) + " " + s[0]).time, sdf.parse(yrr.format(Date()) + " " + s[1]).time, jsonElement.asString))
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
                 lessonArray.clear()
             }
             running = true
