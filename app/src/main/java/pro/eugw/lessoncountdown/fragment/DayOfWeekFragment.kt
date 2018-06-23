@@ -2,15 +2,12 @@ package pro.eugw.lessoncountdown.fragment
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlinx.android.synthetic.main.activity_main.*
@@ -19,10 +16,7 @@ import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.list.schedule.MAdapter
 import pro.eugw.lessoncountdown.list.schedule.MLesson
-import pro.eugw.lessoncountdown.util.BELLS
-import pro.eugw.lessoncountdown.util.CUSTOM_CONFIG
-import pro.eugw.lessoncountdown.util.SCHEDULE
-import pro.eugw.lessoncountdown.util.SCHEDULE_FILE
+import pro.eugw.lessoncountdown.util.*
 import java.io.File
 import java.io.FileWriter
 import java.io.PrintWriter
@@ -37,7 +31,7 @@ class DayOfWeekFragment : Fragment() {
     private var schedule = JsonObject()
     private var bells = JsonObject()
     private var day = "0"
-    private lateinit var dialogView: RecyclerView
+    private lateinit var dialogView: androidx.recyclerview.widget.RecyclerView
     private lateinit var mActivity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -53,13 +47,14 @@ class DayOfWeekFragment : Fragment() {
         val toolbar = activity!!.main_toolbar
         toolbar.title = bundle!!.getString("dayName")
         if (mActivity.prefs.getBoolean(CUSTOM_CONFIG, false))
-            if (toolbar.menu.size() <= 0)
-                toolbar.inflateMenu(R.menu.dayofweek_menu)
+            if (!mActivity.prefs.getBoolean(HIDE_CONTROLS, false))
+                if (toolbar.menu.size() <= 0)
+                    toolbar.inflateMenu(R.menu.dayofweek_menu)
         adapter = MAdapter(list, this, false)
         adapterEdit = MAdapter(list, this, true)
         dialogView.adapter = adapter
-        dialogView.layoutManager = LinearLayoutManager(activity)
-        dialogView.addItemDecoration(DividerItemDecoration(dialogView.context, LinearLayoutManager(activity).orientation))
+        dialogView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(activity)
+        dialogView.addItemDecoration(androidx.recyclerview.widget.DividerItemDecoration(dialogView.context, androidx.recyclerview.widget.LinearLayoutManager(activity).orientation))
         val job = mActivity.clazz
         if (!job.has(SCHEDULE) || !job.has(BELLS)) {
             return
@@ -109,7 +104,7 @@ class DayOfWeekFragment : Fragment() {
                     ab.setTitle(R.string.addIndex)
                     val input = EditText(activity)
                     ab.setView(input)
-                    ab.setPositiveButton(getString(android.R.string.ok), { _, _ ->
+                    ab.setPositiveButton(getString(android.R.string.ok)) { _, _ ->
                         val int = try {
                             input.text.toString().toInt()
                         } catch (e: Exception) {
@@ -122,7 +117,7 @@ class DayOfWeekFragment : Fragment() {
                         }
                         list.add(int, MLesson("", "", ""))
                         if (edit) adapterEdit.notifyDataSetChanged() else adapter.notifyDataSetChanged()
-                    })
+                    }
                     ab.show()
                 }
                 R.id.menuRemove -> {
@@ -130,7 +125,7 @@ class DayOfWeekFragment : Fragment() {
                     ab.setTitle(R.string.removeIndex)
                     val input = EditText(activity)
                     ab.setView(input)
-                    ab.setPositiveButton(getString(android.R.string.ok), { _, _ ->
+                    ab.setPositiveButton(getString(android.R.string.ok)) { _, _ ->
                         val int = try {
                             input.text.toString().toInt()
                         } catch (e: Exception) {
@@ -143,7 +138,7 @@ class DayOfWeekFragment : Fragment() {
                         }
                         list.removeAt(int - 1)
                         if (edit) adapterEdit.notifyDataSetChanged() else adapter.notifyDataSetChanged()
-                    })
+                    }
                     ab.show()
                 }
             }

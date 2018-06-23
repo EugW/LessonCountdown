@@ -60,13 +60,8 @@
     <string name="copyTo">Copy config to clipboard</string>
     <string name="pasteFrom">Paste config from clipboard</string>
     <string name="pasteErr">Could not parse config from clipboard</string>
-    <string name="dozeWhitelist">Add app to Doze ignore list</string>
-    <string name="suWarn">Warning</string>
-    <string name="suWarnDozeAdd">Now the application will be added in Doze ignore list. After successful installation, the device will be rebooted</string>
-    <string name="rootMode">Root mode</string>
-    <string name="enableRoot">Enable root mode</string>
-    <string name="dozeRemoveWhitelist">Remove app from Doze ignore list</string>
-    <string name="suWarnDozeRemove">Now the application will be removed from Doze ignore list. After successful installation, the device will be rebooted</string>
     <string name="lessonsRemaining">Lessons remaining</string>
     <string name="bigNotification">Big notification</string>
+    <string name="cpv_select">Select</string>
+    <string name="hideEditionControls">Hide edition mode controls</string>
 </resources>

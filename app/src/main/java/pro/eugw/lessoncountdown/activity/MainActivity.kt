@@ -4,21 +4,20 @@ import android.content.*
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
-import android.support.design.widget.NavigationView
-import android.support.v4.app.FragmentActivity
-import android.support.v4.content.LocalBroadcastManager
-import android.support.v4.view.GravityCompat
-import android.support.v7.app.ActionBarDrawerToggle
 import android.view.MenuItem
 import android.widget.Toast
 import android.widget.ToggleButton
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.view.GravityCompat
+import androidx.fragment.app.FragmentActivity
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.google.android.material.navigation.NavigationView
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlinx.android.synthetic.main.activity_main.*
 import pro.eugw.lessoncountdown.MService
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.fragment.DayOfWeekFragment
-import pro.eugw.lessoncountdown.fragment.RootModeFragment
 import pro.eugw.lessoncountdown.fragment.SettingsFragment
 import pro.eugw.lessoncountdown.util.*
 import java.io.File
@@ -41,14 +40,14 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setTheme(if (getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE).getBoolean(DARK_THEME, false)) R.style.AppTheme_Dark else R.style.AppTheme)
+        prefs = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
+        setTheme(if (prefs.getBoolean(DARK_THEME, false)) R.style.AppTheme_Dark else R.style.AppTheme)
         setContentView(R.layout.activity_main)
         val toggle = ActionBarDrawerToggle(this, drawer_layout, main_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
         nav_view.setNavigationItemSelectedListener(this)
         broadcastManager = LocalBroadcastManager.getInstance(this)
-        prefs = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
         val toggleButton = nav_view.getHeaderView(0).findViewById<ToggleButton>(R.id.toggleButton)
         broadcastManager.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent?) {
@@ -112,6 +111,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                 })
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             runOnUiThread { Toast.makeText(this, R.string.networkErr, Toast.LENGTH_LONG).show() }
         }
         return try {
@@ -170,8 +170,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             R.id.menuSaturday -> inflateFragment(7, item.title.toString())
             R.id.menuSunday -> inflateFragment(1, item.title.toString())
             R.id.menuSettings -> Handler(mainLooper).postDelayed({ supportFragmentManager.beginTransaction().replace(R.id.content_frame, SettingsFragment()).commit() }, 500)
-            R.id.menuRoot -> Handler(mainLooper).postDelayed({ supportFragmentManager.beginTransaction().replace(R.id.content_frame, RootModeFragment()).commit() }, 500)
-            R.id.menuAbout -> startActivity(Intent(this, HelpActivity::class.java))
+            R.id.menuHelp -> startActivity(Intent(this, HelpActivity::class.java))
         }
         return true
     }

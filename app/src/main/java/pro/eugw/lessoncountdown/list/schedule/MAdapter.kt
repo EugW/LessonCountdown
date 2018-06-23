@@ -1,7 +1,6 @@
 package pro.eugw.lessoncountdown.list.schedule
 
 import android.app.AlertDialog
-import android.support.v7.widget.RecyclerView
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -17,7 +16,7 @@ import java.io.FileWriter
 import java.io.PrintWriter
 
 
-internal class MAdapter(private var list: List<MLesson>, private var fragment: DayOfWeekFragment, private val edit: Boolean) : RecyclerView.Adapter<MHolder>() {
+internal class MAdapter(private var list: List<MLesson>, private var fragment: DayOfWeekFragment, private val edit: Boolean) : androidx.recyclerview.widget.RecyclerView.Adapter<MHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MHolder {
         val view = if (edit) LayoutInflater.from(parent.context).inflate(R.layout.lesson_view_edit, parent, false) else LayoutInflater.from(parent.context).inflate(R.layout.lesson_view, parent, false)

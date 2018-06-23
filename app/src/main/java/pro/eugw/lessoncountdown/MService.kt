@@ -10,9 +10,8 @@ import android.graphics.Color
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
-import android.support.v4.app.NotificationCompat
-import android.support.v4.content.LocalBroadcastManager
 import android.widget.RemoteViews
+import androidx.core.app.NotificationCompat
 import com.google.gson.JsonArray
 import com.google.gson.JsonParser
 import pro.eugw.lessoncountdown.activity.MainActivity
@@ -29,7 +28,7 @@ class MService : Service() {
 
     var running: Boolean = true
     private lateinit var runnable: () -> Unit
-    private lateinit var instance: LocalBroadcastManager
+    private lateinit var instance: androidx.localbroadcastmanager.content.LocalBroadcastManager
     private var mBinder = MBinder()
 
     inner class MBinder : Binder() {
@@ -43,7 +42,7 @@ class MService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        instance = LocalBroadcastManager.getInstance(this)
+        instance = androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
         val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val notificationLayout = RemoteViews(packageName, R.layout.notification_small)
         val prefs = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)

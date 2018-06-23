@@ -33,11 +33,7 @@
         android:title="@string/settings" />
 
     <item
-        android:id="@+id/menuRoot"
-        android:title="@string/rootMode" />
-
-    <item
-        android:id="@+id/menuAbout"
+        android:id="@+id/menuHelp"
         android:title="@string/help" />
 
 </menu>

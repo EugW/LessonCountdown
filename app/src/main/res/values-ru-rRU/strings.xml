@@ -49,14 +49,9 @@
     <string name="sunday">Воскресенье</string>
     <string name="navigation_drawer_open">Открыть меню</string>
     <string name="navigation_drawer_close">Закрыть меню</string>
-    <string name="suWarn">Внимание</string>
-    <string name="suWarnDozeAdd">Cейчас приложение будет добавлено в список исключений Doze. После успешной установки девайс будет перезагружен</string>
-    <string name="rootMode">Root режим</string>
-    <string name="enableRoot">Включить root режим</string>
-    <string name="dozeWhitelist">Добавить приложение в исключения Doze</string>
-    <string name="dozeRemoveWhitelist">Убрать приложение из исключений Doze</string>
-    <string name="suWarnDozeRemove">Cейчас приложение будет убрано из исключений Doze. После успешной установки девайс будет перезагружен</string>
     <string name="appVk"><a href="https://vk.com/brin_apps">Группа LessonCountdown в ВК </a></string>
     <string name="help">Помощь</string>
     <string name="bigNotification">Большое уведомление</string>
+    <string name="cpv_select">Выбрать</string>
+    <string name="hideEditionControls">Скрыть элементы управления режима редактирования</string>
 </resources>

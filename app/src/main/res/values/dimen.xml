@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <dimen name="cpv_required_padding">6dp</dimen>
+  <dimen name="cpv_dialog_preview_width">66dp</dimen>
+  <dimen name="cpv_dialog_preview_height">34dp</dimen>
+</resources>

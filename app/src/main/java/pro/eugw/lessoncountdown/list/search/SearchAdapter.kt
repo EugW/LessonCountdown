@@ -1,12 +1,11 @@
 package pro.eugw.lessoncountdown.list.search
 
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import pro.eugw.lessoncountdown.R
-import pro.eugw.lessoncountdown.activity.SearchActivity
+import pro.eugw.lessoncountdown.fragment.SearchDialog
 
-internal class SearchAdapter(private var arrayList: ArrayList<SearchItem>, private val context: SearchActivity): RecyclerView.Adapter<SearchHolder>() {
+internal class SearchAdapter(private var arrayList: ArrayList<SearchItem>, private val context: SearchDialog): androidx.recyclerview.widget.RecyclerView.Adapter<SearchHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchHolder {
         return SearchHolder(LayoutInflater.from(parent.context).inflate(R.layout.search_view, parent, false))

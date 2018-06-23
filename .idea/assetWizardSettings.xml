@@ -151,7 +151,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/action/ic_feedback_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/navigation/ic_arrow_forward_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -161,7 +161,7 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="ic_feedback_black" />
+                            <entry key="outputName" value="color_picker_arrow_forward" />
                             <entry key="sourceFile" value="D:\wg\Documents\sp.psd" />
                           </map>
                         </option>

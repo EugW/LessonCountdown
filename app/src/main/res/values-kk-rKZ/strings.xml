@@ -51,12 +51,7 @@
     <string name="copyTo">Айырбас буфергіне көшіру</string>
     <string name="pasteFrom">Айырбас буферінен салу</string>
     <string name="pasteErr">Айырбас буферінен конфиг мүмкін емес</string>
-    <string name="dozeWhitelist">Қолданбаны Doze ерекше жағдайларына қосыңыз</string>
-    <string name="suWarn">Назар аударыңыз</string>
-    <string name="suWarnDozeAdd">Енді бағдарлама Doze ерекшеліктер тізіміне қосылады. Сәтті орнатудан кейін құрылғы қайта жүктеледі</string>
-    <string name="rootMode">Root режимі</string>
-    <string name="enableRoot">Root режимін қосу</string>
-    <string name="dozeRemoveWhitelist">Қолданбаны Doze ерекшеліктерінен алып тастау</string>
-    <string name="suWarnDozeRemove">Қолданба енді Doze ерекшеліктерінен жойылады. Сәтті орнатудан кейін құрылғы қайта жүктеледі</string>
     <string name="bigNotification">Большое уведомление</string>
+    <string name="cpv_select">Выбрать</string>
+    <string name="hideEditionControls">Скрыть элементы управления режима редактирования</string>
 </resources>

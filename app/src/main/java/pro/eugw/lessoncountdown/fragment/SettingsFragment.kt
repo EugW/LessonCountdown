@@ -8,29 +8,32 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.content.LocalBroadcastManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.content.edit
+import androidx.fragment.app.Fragment
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import com.jaredrummler.android.colorpicker.ColorPickerDialog
-import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.custom_colors_layout.*
+import kotlinx.android.synthetic.main.custom_config_layout.*
 import kotlinx.android.synthetic.main.fragment_settings.*
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
-import pro.eugw.lessoncountdown.activity.SearchActivity
 import pro.eugw.lessoncountdown.util.*
+import pro.eugw.lessoncountdown.util.color.ColorPickerDialog
+import pro.eugw.lessoncountdown.util.color.ColorPickerDialogListener
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import java.io.PrintWriter
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlin.concurrent.thread
 
 class SettingsFragment : Fragment() {
 
@@ -69,20 +72,25 @@ class SettingsFragment : Fragment() {
             text.text = string.replace(".", "")
         }
         selClassLayout.setOnClickListener {
-            val intent = Intent(mActivity, SearchActivity::class.java)
-            startActivityForResult(intent, SEARCH_REQUEST_CODE)
+            val fragment = SearchDialog()
+            fragment.setTargetFragment(this, SEARCH_REQUEST_CODE)
+            fragmentManager!!.beginTransaction().add(fragment, "search-dialog").commit()
         }
     }
 
     private fun initCustomCfg() {
         switchCustomCfg.isChecked = mActivity.prefs.getBoolean(CUSTOM_CONFIG, false)
-        customLayout.visibility = if (mActivity.prefs.getBoolean(CUSTOM_CONFIG, false)) View.VISIBLE else View.GONE
+        includedConfig.visibility = if (mActivity.prefs.getBoolean(CUSTOM_CONFIG, false)) View.VISIBLE else View.GONE
         switchCustomCfg.setOnCheckedChangeListener { _, state ->
             if (state)
-                customLayout.visibility = View.VISIBLE
+                includedConfig.visibility = View.VISIBLE
             else
-                customLayout.visibility = View.GONE
-            mActivity.prefs.edit().putBoolean(CUSTOM_CONFIG, state).apply()
+                includedConfig.visibility = View.GONE
+            mActivity.prefs.edit{ putBoolean(CUSTOM_CONFIG, state) }
+        }
+        switchVisibleEditing.isChecked = mActivity.prefs.getBoolean(HIDE_CONTROLS, false)
+        switchVisibleEditing.setOnCheckedChangeListener { _, state ->
+            mActivity.prefs.edit{ putBoolean(HIDE_CONTROLS, state) }
         }
         buttonCopy.setOnClickListener {
             val jObject = JsonObject()
@@ -122,7 +130,7 @@ class SettingsFragment : Fragment() {
             val input = EditText(mActivity)
             input.setText(host)
             ab.setView(input)
-            ab.setPositiveButton(getString(android.R.string.ok), { _, _ ->
+            ab.setPositiveButton(getString(android.R.string.ok)) { _, _ ->
                 host = try {
                     val url = URL("http://" + input.text)
                     val conn = url.openConnection() as HttpURLConnection
@@ -136,7 +144,7 @@ class SettingsFragment : Fragment() {
                     getString(R.string.host)
                 }
                 mActivity.prefs.edit().putString(CUSTOM_ADDRESS, host).apply()
-            })
+            }
             ab.show()
         }
     }
@@ -144,14 +152,14 @@ class SettingsFragment : Fragment() {
     private fun initCustomColors() {
         val localIntent = Intent(mActivity.packageName + NOTIFICATION_COLOR_UPDATE)
         switchNotificationColor.isChecked = mActivity.prefs.getBoolean(CUSTOM_COLOR, false)
-        customColors.visibility = if (mActivity.prefs.getBoolean(CUSTOM_COLOR, false)) View.VISIBLE else View.GONE
+        includedColors.visibility = if (mActivity.prefs.getBoolean(CUSTOM_COLOR, false)) View.VISIBLE else View.GONE
         switchNotificationColor.setOnCheckedChangeListener { _, state ->
             if (state) {
-                customColors.visibility = View.VISIBLE
+                includedColors.visibility = View.VISIBLE
                 broadcastManager.sendBroadcast(localIntent.putExtra("cVal", true))
             }
             else {
-                customColors.visibility = View.GONE
+                includedColors.visibility = View.GONE
                 broadcastManager.sendBroadcast(localIntent.putExtra("cVal", false))
             }
             mActivity.prefs.edit().putBoolean(CUSTOM_COLOR, state).apply()
@@ -160,7 +168,7 @@ class SettingsFragment : Fragment() {
         colorTitle = mActivity.prefs.getInt(TITLE_COLOR, Color.parseColor("#000000"))
         title.setBackgroundColor(colorTitle)
         title.setOnClickListener {
-            val builder = ColorPickerDialog.newBuilder().setAllowPresets(false).setDialogType(0).setColor(colorTitle).create()
+            val builder = ColorPickerDialog.newBuilder().setColor(colorTitle).create()
             builder.setColorPickerDialogListener(object : ColorPickerDialogListener {
                 override fun onDialogDismissed(dialogId: Int) {}
 
@@ -171,13 +179,13 @@ class SettingsFragment : Fragment() {
                     broadcastManager.sendBroadcast(localIntent)
                 }
             })
-            builder.show(mActivity.fragmentManager, COLOR_PICKER_DIALOG)
+            builder.show(mActivity.supportFragmentManager, COLOR_PICKER_DIALOG)
         }
         val textTime = buttonChooseDialogTime
         colorTime = mActivity.prefs.getInt(TIME_COLOR, Color.parseColor("#999999"))
         textTime.setBackgroundColor(colorTime)
         textTime.setOnClickListener {
-            val builder = ColorPickerDialog.newBuilder().setAllowPresets(false).setDialogType(0).setColor(colorTime).create()
+            val builder = ColorPickerDialog.newBuilder().setColor(colorTime).create()
             builder.setColorPickerDialogListener(object : ColorPickerDialogListener {
                 override fun onDialogDismissed(dialogId: Int) {}
 
@@ -188,13 +196,13 @@ class SettingsFragment : Fragment() {
                     broadcastManager.sendBroadcast(localIntent)
                 }
             })
-            builder.show(mActivity.fragmentManager, COLOR_PICKER_DIALOG)
+            builder.show(mActivity.supportFragmentManager, COLOR_PICKER_DIALOG)
         }
         val textLessons = buttonChooseDialogLessons
         colorLessons = mActivity.prefs.getInt(LESSONS_COLOR, Color.parseColor("#999999"))
         textLessons.setBackgroundColor(colorLessons)
         textLessons.setOnClickListener {
-            val builder = ColorPickerDialog.newBuilder().setAllowPresets(false).setDialogType(0).setColor(colorLessons).create()
+            val builder = ColorPickerDialog.newBuilder().setColor(colorLessons).create()
             builder.setColorPickerDialogListener(object : ColorPickerDialogListener {
                 override fun onDialogDismissed(dialogId: Int) {}
 
@@ -205,13 +213,13 @@ class SettingsFragment : Fragment() {
                     broadcastManager.sendBroadcast(localIntent)
                 }
             })
-            builder.show(mActivity.fragmentManager, COLOR_PICKER_DIALOG)
+            builder.show(mActivity.supportFragmentManager, COLOR_PICKER_DIALOG)
         }
         val background = buttonChooseDialogBackground
         colorBackground = mActivity.prefs.getInt(BACKGROUND_COLOR, Color.parseColor("#ffffff"))
         background.setBackgroundColor(colorBackground)
         background.setOnClickListener {
-            val builder = ColorPickerDialog.newBuilder().setAllowPresets(false).setDialogType(0).setColor(colorBackground).create()
+            val builder = ColorPickerDialog.newBuilder().setColor(colorBackground).create()
             builder.setColorPickerDialogListener(object : ColorPickerDialogListener {
                 override fun onDialogDismissed(dialogId: Int) {}
 
@@ -222,7 +230,7 @@ class SettingsFragment : Fragment() {
                     broadcastManager.sendBroadcast(localIntent)
                 }
             })
-            builder.show(mActivity.fragmentManager, COLOR_PICKER_DIALOG)
+            builder.show(mActivity.supportFragmentManager, COLOR_PICKER_DIALOG)
         }
     }
     
@@ -237,13 +245,18 @@ class SettingsFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == SEARCH_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             val extras = data.extras
-            mActivity.prefs.edit().putString(CLASS, extras[CLASS] as String).putString(SCHOOL_ID, extras[SCHOOL_ID] as String).apply()
+            mActivity.prefs.edit {
+                putString(CLASS, extras[CLASS] as String)
+                putString(SCHOOL_ID, extras[SCHOOL_ID] as String)
+            }
             val text = selectedClass
             text.visibility = View.VISIBLE
             text.text = (extras[CLASS] as String).replace(".", "")
-            mActivity.clazz = mActivity.initClass()
-            mActivity.homework = mActivity.initHomework()
+            thread(true) {
+                mActivity.clazz = mActivity.initClass()
+                mActivity.homework = mActivity.initHomework()
+            }
         }
     }
-    
+
 }
