@@ -7,12 +7,11 @@ android {
     buildToolsVersion '28.0.0-rc2'
     defaultConfig {
         applicationId "pro.eugw.lessoncountdown"
-        minSdkVersion 21
+        minSdkVersion 14
         targetSdkVersion 27
         versionCode 60
         versionName "2.1.04"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables.useSupportLibrary = true
     }
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_8
@@ -25,7 +24,6 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0-alpha3'
     implementation 'androidx.appcompat:appcompat:1.0.0-alpha3'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.2'
-    implementation 'androidx.vectordrawable:vectordrawable:1.0.0-alpha3'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.0-alpha3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha3'

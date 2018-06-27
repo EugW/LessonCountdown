@@ -61,7 +61,6 @@ class SettingsFragment : Fragment() {
         initOwnServer()
         initTheme()
         initCustomColors()
-        initBigNotification()
     }
 
     private fun initClass() {
@@ -231,14 +230,6 @@ class SettingsFragment : Fragment() {
                 }
             })
             builder.show(mActivity.supportFragmentManager, COLOR_PICKER_DIALOG)
-        }
-    }
-    
-    private fun initBigNotification() {
-        switchBigNotification.isChecked = mActivity.prefs.getBoolean(BIG_NOTIFICATION, false)
-        switchBigNotification.setOnCheckedChangeListener { _, isChecked -> 
-            mActivity.prefs.edit().putBoolean(BIG_NOTIFICATION, isChecked).apply()
-            broadcastManager.sendBroadcast(Intent(mActivity.packageName + NOTIFICATION_STYLE_UPDATE))
         }
     }
 

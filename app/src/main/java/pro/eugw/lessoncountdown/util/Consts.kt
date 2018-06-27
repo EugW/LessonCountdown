@@ -48,4 +48,4 @@ const val SEARCH_REQUEST_CODE = 90
 
 const val CHANNEL_ID = "LessonChannel"
 const val COLOR_PICKER_DIALOG = "color-picker-dialog"
-const val HTTP_TIMEOUT = 1000
+const val HTTP_TIMEOUT = 3000

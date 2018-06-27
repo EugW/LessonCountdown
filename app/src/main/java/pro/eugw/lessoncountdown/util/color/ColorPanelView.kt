@@ -9,6 +9,7 @@ import android.os.Parcelable
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
+import androidx.core.content.res.ResourcesCompat
 import pro.eugw.lessoncountdown.R
 
 /**
@@ -81,7 +82,8 @@ class ColorPanelView @JvmOverloads constructor(context: Context, attrs: Attribut
             originalPaint = Paint()
         }
         if (shape == ColorShape.CIRCLE) {
-            val bitmap = ((resources.getDrawable(R.drawable.cpv_alpha, resources.newTheme())) as BitmapDrawable).bitmap
+
+            val bitmap = ((ResourcesCompat.getDrawable(resources, R.drawable.cpv_alpha, null)) as BitmapDrawable).bitmap
             alphaPaint = Paint()
             alphaPaint!!.isAntiAlias = true
             val shader = BitmapShader(bitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)

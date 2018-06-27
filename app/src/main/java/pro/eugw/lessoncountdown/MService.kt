@@ -1,6 +1,9 @@
 package pro.eugw.lessoncountdown
 
-import android.app.*
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -22,7 +25,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
-
 
 class MService : Service() {
 
@@ -47,7 +49,9 @@ class MService : Service() {
         val notificationLayout = RemoteViews(packageName, R.layout.notification_small)
         val prefs = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
         if (prefs.getBoolean(CUSTOM_COLOR, false)) {
-            notificationLayout.setTextColor(R.id.textViewTitle, prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
+            notificationLayout.setInt(R.id.imageView, "setColorFilter", prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
+            notificationLayout.setTextColor(R.id.textViewCurrent, prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
+            notificationLayout.setTextColor(R.id.textViewNext, prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
             notificationLayout.setTextColor(R.id.textViewText, prefs.getInt(TIME_COLOR, Color.parseColor("#999999")))
             notificationLayout.setTextColor(R.id.textViewLessons, prefs.getInt(LESSONS_COLOR, Color.parseColor("#999999")))
             notificationLayout.setInt(R.id.layoutNotification, "setBackgroundColor", prefs.getInt(BACKGROUND_COLOR, Color.parseColor("#ffffff")))
@@ -61,22 +65,16 @@ class MService : Service() {
                 .setOngoing(true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setShowWhen(false)
-        if (prefs.getBoolean(BIG_NOTIFICATION, false)) {
-            mBuilder.setCustomBigContentView(notificationLayout)
-        } else {
-            mBuilder.setCustomContentView(notificationLayout)
-        }
-        val stackBuilder = TaskStackBuilder.create(this)
-        stackBuilder.addParentStack(MainActivity::class.java)
-        stackBuilder.addNextIntent(Intent(this, MainActivity::class.java))
-        val resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
-        mBuilder.setContentIntent(resultPendingIntent)
+                .setContentIntent(PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
+                .setCustomContentView(notificationLayout)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             mNotificationManager.createNotificationChannel(NotificationChannel(CHANNEL_ID, CHANNEL_ID, NotificationManager.IMPORTANCE_LOW))
         instance.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent) {
                 if (p1.getBooleanExtra("cVal", false)) {
-                    notificationLayout.setTextColor(R.id.textViewTitle, prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
+                    notificationLayout.setInt(R.id.imageView, "setColorFilter", prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
+                    notificationLayout.setTextColor(R.id.textViewCurrent, prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
+                    notificationLayout.setTextColor(R.id.textViewNext, prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
                     notificationLayout.setTextColor(R.id.textViewText, prefs.getInt(TIME_COLOR, Color.parseColor("#999999")))
                     notificationLayout.setTextColor(R.id.textViewLessons, prefs.getInt(LESSONS_COLOR, Color.parseColor("#999999")))
                     notificationLayout.setInt(R.id.layoutNotification, "setBackgroundColor", prefs.getInt(BACKGROUND_COLOR, Color.parseColor("#ffffff")))
@@ -120,6 +118,8 @@ class MService : Service() {
             if (lessonArray.isNotEmpty() && File(filesDir, SERVICE_PID).exists())
                 while (running && System.currentTimeMillis() <= lessonArray.last().end) {
                     val title = StringBuilder()
+                    var l1 = ""
+                    var l2 = ""
                     val text = StringBuilder()
                     val lessons = StringBuilder()
                     lessonArray.forEachIndexed { index, lessonTime ->
@@ -128,8 +128,11 @@ class MService : Service() {
                         val current = System.currentTimeMillis()
                         if (current in start..end) {
                             title.append(getString(R.string.curr) + ": ").append(lessonTime.lesson)
-                            if (index < lessonArray.size - 1)
+                            l1 = lessonTime.lesson
+                            if (index < lessonArray.size - 1) {
                                 title.append(" - " + getString(R.string.next) + ": ").append(lessonArray[index + 1].lesson)
+                                l2 = lessonArray[index + 1].lesson
+                            }
                             text.append(appendable(end, current))
                             lessons.append("${getString(R.string.lessonsRemaining)}: ${lessonArray.lastIndex - index}")
                         } else if (index < lessonArray.lastIndex) {
@@ -137,17 +140,20 @@ class MService : Service() {
                             if (current in (end + 1)..(nexS - 1)) {
                                 text.append(appendable(nexS, current))
                                 title.append(getString(R.string.next) + ": ").append(lessonArray[index + 1].lesson)
+                                l2 = lessonArray[index + 1].lesson
                                 lessons.append("${getString(R.string.lessonsRemaining)}: ${lessonArray.lastIndex - index}")
                             }
                             if (current < lessonArray.first().start && index == 0) {
                                 val nolS = lessonArray.first().start
                                 text.append(appendable(nolS, current))
                                 title.append(getString(R.string.next) + ": ").append(lessonArray.first().lesson)
+                                l2 = lessonArray.first().lesson
                                 lessons.append("${getString(R.string.lessonsRemaining)}: ${lessonArray.size - index}")
                             }
                         }
                     }
-                    notificationLayout.setTextViewText(R.id.textViewTitle, title)
+                    notificationLayout.setTextViewText(R.id.textViewCurrent, l1)
+                    notificationLayout.setTextViewText(R.id.textViewNext, l2)
                     notificationLayout.setTextViewText(R.id.textViewText, text)
                     notificationLayout.setTextViewText(R.id.textViewLessons, lessons)
                     mNotificationManager.notify(0, mBuilder.build())

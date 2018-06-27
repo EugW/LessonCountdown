@@ -52,7 +52,8 @@ class SearchDialog : DialogFragment() {
                 }
                 arrayList.clear()
                 arrayList.addAll(tamar)
-                activity!!.runOnUiThread { adapter.notifyDataSetChanged() }
+                if (isVisible)
+                    activity!!.runOnUiThread { adapter.notifyDataSetChanged() }
             }
         })
         recyclerView = v.findViewById(R.id.searchRecycler)
@@ -81,11 +82,13 @@ class SearchDialog : DialogFragment() {
                 }
                 arrayList.clear()
                 arrayList.addAll(baseArray)
-                activity!!.runOnUiThread { adapter.notifyDataSetChanged() }
+                if (isVisible)
+                    activity!!.runOnUiThread { adapter.notifyDataSetChanged() }
             } catch (e: Exception) {
                 e.printStackTrace()
-                activity!!.runOnUiThread { Toast.makeText(context, R.string.networkErr, Toast.LENGTH_LONG).show() }
-                dismiss()
+                if (isVisible)
+                    activity!!.runOnUiThread { Toast.makeText(context, R.string.networkErr, Toast.LENGTH_LONG).show() }
+                dismissAllowingStateLoss()
             }
         }
 
@@ -93,7 +96,7 @@ class SearchDialog : DialogFragment() {
 
     fun choose(id: String, number: String, letter: String, subgroup: String) {
         targetFragment!!.onActivityResult(SEARCH_REQUEST_CODE, Activity.RESULT_OK, Intent().putExtra(CLASS, "$number.$letter.$subgroup").putExtra(SCHOOL_ID, id))
-        dialog.dismiss()
+        dismissAllowingStateLoss()
     }
 
 }
