@@ -10,7 +10,7 @@
     <string name="thursday">Четверг</string>
     <string name="friday">Пятница</string>
     <string name="dev"><a href="https://vk.com/dibrin">Страница разработчика в ВК</a></string>
-    <string name="networkErr">Сеть недоступна</string>
+    <string name="networkErr">Сервер недоступен</string>
     <string name="configErr">Ошибка в конфиге</string>
     <string name="cancel">Отмена</string>
     <string name="clear">Стереть</string>
@@ -36,7 +36,6 @@
     <string name="ownServer">Установить собственный адрес сервера</string>
     <string name="address">Адрес</string>
     <string name="dowTitle">Дни недели</string>
-    <string name="darkTheme">Темная тема</string>
     <string name="lessonsRemaining">Уроков осталось</string>
     <string name="titleColor">Цвет урока</string>
     <string name="timeColor">Цвет времени</string>
@@ -51,7 +50,8 @@
     <string name="navigation_drawer_close">Закрыть меню</string>
     <string name="appVk"><a href="https://vk.com/brin_apps">Группа LessonCountdown в ВК </a></string>
     <string name="help">Помощь</string>
-    <string name="bigNotification">Большое уведомление</string>
     <string name="cpv_select">Выбрать</string>
     <string name="hideEditionControls">Скрыть элементы управления режима редактирования</string>
+    <string name="enableEvenOddWeeks">Включить четные/нечетные недели</string>
+    <string name="inverseEvenOddWeeks">Инвертировать четность недель</string>
 </resources>

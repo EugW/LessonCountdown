@@ -18,6 +18,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import pro.eugw.lessoncountdown.MService
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.fragment.DayOfWeekFragment
+import pro.eugw.lessoncountdown.fragment.KundelikFragment
 import pro.eugw.lessoncountdown.fragment.SettingsFragment
 import pro.eugw.lessoncountdown.util.*
 import java.io.File
@@ -27,7 +28,6 @@ import java.io.PrintWriter
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
-import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.concurrent.thread
 
@@ -38,16 +38,17 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
     lateinit var broadcastManager: LocalBroadcastManager
     var clazz = JsonObject()
     var homework = JsonObject()
+    var kundelikMenu: MenuItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prefs = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
-        setTheme(if (prefs.getBoolean(DARK_THEME, false)) R.style.AppTheme_Dark else R.style.AppTheme)
         setContentView(R.layout.activity_main)
         val toggle = ActionBarDrawerToggle(this, drawer_layout, main_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
         nav_view.setNavigationItemSelectedListener(this)
+        kundelikMenu = nav_view.menu.add("Kundelik")
         broadcastManager = LocalBroadcastManager.getInstance(this)
         val toggleButton = nav_view.getHeaderView(0).findViewById<ToggleButton>(R.id.toggleButton)
         broadcastManager.registerReceiver(object : BroadcastReceiver() {
@@ -100,19 +101,16 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                 conn.readTimeout = HTTP_TIMEOUT
                 conn.connect()
                 val reader = JsonParser().parse(conn.inputStream.reader())
-                PrintWriter(FileWriter(schedule), true).println(try {
-                    reader.asJsonObject[SCHEDULE]
-                } catch (e: Exception) {
-                    JsonObject()
-                })
-                PrintWriter(FileWriter(bells), true).println(try {
-                    reader.asJsonObject[BELLS]
-                } catch (e: Exception) {
-                    JsonObject()
-                })
+                PrintWriter(FileWriter(schedule), true).println(reader.asJsonObject[SCHEDULE])
+                PrintWriter(FileWriter(bells), true).println(reader.asJsonObject[BELLS])
+            } else if (!schedule.exists() || !bells.exists()) {
+                PrintWriter(FileWriter(schedule), true).println(JsonObject())
+                PrintWriter(FileWriter(bells), true).println(JsonObject())
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            PrintWriter(FileWriter(schedule), true).println(JsonObject())
+            PrintWriter(FileWriter(bells), true).println(JsonObject())
             runOnUiThread { Toast.makeText(this, R.string.networkErr, Toast.LENGTH_LONG).show() }
         }
         return try {
@@ -152,6 +150,16 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         }, 500)
     }
 
+    private fun inflateKundelikFragment() {
+        Handler(mainLooper).postDelayed({
+            try {
+                val fragment = KundelikFragment()
+                supportFragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit()
+            } catch (e: Exception) { }
+        }, 500)
+    }
+
+
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
@@ -172,6 +180,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             R.id.menuSunday -> inflateFragment(1, item.title.toString())
             R.id.menuSettings -> Handler(mainLooper).postDelayed({ supportFragmentManager.beginTransaction().replace(R.id.content_frame, SettingsFragment()).commit() }, 500)
             R.id.menuHelp -> startActivity(Intent(this, HelpActivity::class.java))
+            kundelikMenu?.itemId -> inflateKundelikFragment()
         }
         return true
     }

@@ -15,6 +15,7 @@ import android.os.Build
 import android.os.IBinder
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.gson.JsonArray
 import com.google.gson.JsonParser
 import pro.eugw.lessoncountdown.activity.MainActivity
@@ -30,7 +31,7 @@ class MService : Service() {
 
     var running: Boolean = true
     private lateinit var runnable: () -> Unit
-    private lateinit var instance: androidx.localbroadcastmanager.content.LocalBroadcastManager
+    private lateinit var instance: LocalBroadcastManager
     private var mBinder = MBinder()
 
     inner class MBinder : Binder() {
@@ -44,13 +45,13 @@ class MService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        instance = androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
+        instance = LocalBroadcastManager.getInstance(this)
         val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val notificationLayout = RemoteViews(packageName, R.layout.notification_small)
         val prefs = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
         if (prefs.getBoolean(CUSTOM_COLOR, false)) {
-            notificationLayout.setInt(R.id.imageView, "setColorFilter", prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
             notificationLayout.setTextColor(R.id.textViewCurrent, prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
+            notificationLayout.setInt(R.id.imageViewNextArrow, "setColorFilter", prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
             notificationLayout.setTextColor(R.id.textViewNext, prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
             notificationLayout.setTextColor(R.id.textViewText, prefs.getInt(TIME_COLOR, Color.parseColor("#999999")))
             notificationLayout.setTextColor(R.id.textViewLessons, prefs.getInt(LESSONS_COLOR, Color.parseColor("#999999")))
@@ -72,8 +73,8 @@ class MService : Service() {
         instance.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent) {
                 if (p1.getBooleanExtra("cVal", false)) {
-                    notificationLayout.setInt(R.id.imageView, "setColorFilter", prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
                     notificationLayout.setTextColor(R.id.textViewCurrent, prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
+                    notificationLayout.setInt(R.id.imageViewNextArrow, "setColorFilter", prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
                     notificationLayout.setTextColor(R.id.textViewNext, prefs.getInt(TITLE_COLOR, Color.parseColor("#000000")))
                     notificationLayout.setTextColor(R.id.textViewText, prefs.getInt(TIME_COLOR, Color.parseColor("#999999")))
                     notificationLayout.setTextColor(R.id.textViewLessons, prefs.getInt(LESSONS_COLOR, Color.parseColor("#999999")))
@@ -91,21 +92,26 @@ class MService : Service() {
             }
         }, IntentFilter(baseContext.packageName + NOTIFICATION_STYLE_UPDATE))
         runnable = {
-            val dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK).toString()
-            val schedule = try {
-                JsonParser().parse(FileReader(File(filesDir, SCHEDULE_FILE))).asJsonObject[dayOfWeek].asJsonArray
-            } catch (e: Exception) {
-                JsonArray()
-            }
-            val bells = try {
-                JsonParser().parse(FileReader(File(filesDir, BELLS_FILE))).asJsonObject[dayOfWeek].asJsonArray
-            } catch (e: Exception) {
-                JsonArray()
+            val schedule = JsonParser().parse(FileReader(File(filesDir, SCHEDULE_FILE))).asJsonObject
+            var dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK).toString()
+            if (prefs.getBoolean(EVEN_ODD_WEEKS, false) || schedule.has("${dayOfWeek}e")) {
+                val preEven = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) % 2 == 0
+                val even = if (!prefs.getBoolean(INVERSE_EVEN_ODD_WEEKS, false)) preEven else !preEven
+                if (even)
+                    dayOfWeek += "e"
             }
             val lessonArray = ArrayList<LessonTime>()
             try {
-                schedule.forEachIndexed { index, jsonElement ->
-                    val s = bells[index].asString.split("-")
+                try {
+                    schedule[dayOfWeek].asJsonArray
+                } catch (e: Exception) {
+                    JsonArray()
+                }.forEachIndexed { index, jsonElement ->
+                    val s = try {
+                        JsonParser().parse(FileReader(File(filesDir, BELLS_FILE))).asJsonObject[dayOfWeek].asJsonArray
+                    } catch (e: Exception) {
+                        JsonArray()
+                    }[index].asString.split("-")
                     val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US)
                     val yrr = SimpleDateFormat("yyyy-MM-dd", Locale.US)
                     lessonArray.add(LessonTime(sdf.parse(yrr.format(Date()) + " " + s[0]).time, sdf.parse(yrr.format(Date()) + " " + s[1]).time, jsonElement.asString))

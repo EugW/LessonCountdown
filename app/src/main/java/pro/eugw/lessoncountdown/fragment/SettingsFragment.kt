@@ -55,16 +55,15 @@ class SettingsFragment : Fragment() {
         mActivity.main_toolbar.title = getString(R.string.settings)
         mActivity.main_toolbar.menu.clear()
         broadcastManager = mActivity.broadcastManager
-        host = mActivity.prefs.getString(CUSTOM_ADDRESS, getString(R.string.host))
+        host = mActivity.prefs.getString(CUSTOM_ADDRESS, getString(R.string.host)) as String
         initClass()
         initCustomCfg()
         initOwnServer()
-        initTheme()
         initCustomColors()
     }
 
     private fun initClass() {
-        val string = mActivity.prefs.getString(CLASS, "")
+        val string = mActivity.prefs.getString(CLASS, "") as String
         if (string.isNotEmpty()) {
             val text = selectedClass
             text.visibility = View.VISIBLE
@@ -85,12 +84,14 @@ class SettingsFragment : Fragment() {
                 includedConfig.visibility = View.VISIBLE
             else
                 includedConfig.visibility = View.GONE
-            mActivity.prefs.edit{ putBoolean(CUSTOM_CONFIG, state) }
+            mActivity.prefs.edit { putBoolean(CUSTOM_CONFIG, state) }
         }
         switchVisibleEditing.isChecked = mActivity.prefs.getBoolean(HIDE_CONTROLS, false)
-        switchVisibleEditing.setOnCheckedChangeListener { _, state ->
-            mActivity.prefs.edit{ putBoolean(HIDE_CONTROLS, state) }
-        }
+        switchVisibleEditing.setOnCheckedChangeListener { _, state -> mActivity.prefs.edit { putBoolean(HIDE_CONTROLS, state) } }
+        switchEvenOddWeeks.isChecked = mActivity.prefs.getBoolean(EVEN_ODD_WEEKS, false)
+        switchEvenOddWeeks.setOnCheckedChangeListener { _, state -> mActivity.prefs.edit { putBoolean(EVEN_ODD_WEEKS, state) } }
+        switchInverseEvenOddWeeks.isChecked = mActivity.prefs.getBoolean(INVERSE_EVEN_ODD_WEEKS, false)
+        switchInverseEvenOddWeeks.setOnCheckedChangeListener { _, state -> mActivity.prefs.edit { putBoolean(INVERSE_EVEN_ODD_WEEKS, state) } }
         buttonCopy.setOnClickListener {
             val jObject = JsonObject()
             jObject.add(SCHEDULE, JsonParser().parse(FileReader(File(mActivity.filesDir, SCHEDULE_FILE))))
@@ -101,20 +102,22 @@ class SettingsFragment : Fragment() {
         buttonPaste.setOnClickListener {
             val clip = mActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             try {
-                val jObject = JsonParser().parse(clip.primaryClip.getItemAt(0).text.toString()).asJsonObject
+                val jObject = JsonParser().parse(clip.primaryClip?.getItemAt(0)?.text.toString()).asJsonObject
+                if (jObject.has("1e")
+                        || jObject.has("2e")
+                        || jObject.has("3e")
+                        || jObject.has("4e")
+                        || jObject.has("5e")
+                        || jObject.has("6e")
+                        || jObject.has("7e")) {
+                    switchEvenOddWeeks.isChecked = true
+                    mActivity.prefs.edit { putBoolean(EVEN_ODD_WEEKS, true) }
+                }
                 PrintWriter(FileWriter(File(mActivity.filesDir, SCHEDULE_FILE)), true).println(jObject[SCHEDULE])
                 PrintWriter(FileWriter(File(mActivity.filesDir, BELLS_FILE)), true).println(jObject[BELLS])
             } catch (e: Exception) {
                 Toast.makeText(mActivity, R.string.pasteErr, Toast.LENGTH_LONG).show()
             }
-        }
-    }
-
-    private fun initTheme() {
-        switchDarkTheme.isChecked = mActivity.prefs.getBoolean(DARK_THEME, false)
-        switchDarkTheme.setOnCheckedChangeListener { _, state ->
-            mActivity.prefs.edit().putBoolean(DARK_THEME, state).apply()
-            mActivity.recreate()
         }
     }
 
@@ -235,7 +238,7 @@ class SettingsFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == SEARCH_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
-            val extras = data.extras
+            val extras = data.extras!!
             mActivity.prefs.edit {
                 putString(CLASS, extras[CLASS] as String)
                 putString(SCHOOL_ID, extras[SCHOOL_ID] as String)

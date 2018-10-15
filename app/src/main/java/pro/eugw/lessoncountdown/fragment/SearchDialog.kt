@@ -42,8 +42,8 @@ class SearchDialog : DialogFragment() {
                 baseArray.forEach {
                     val mmm = it
                     var match = true
-                    s.toString().toUpperCase().split(" ").forEach {
-                        if (!(mmm.number + mmm.letter + mmm.subgroup + mmm.school_name).replace(" ", "").toUpperCase().contains(it)) {
+                    s.toString().toUpperCase().split(" ").forEach { string ->
+                        if (!(mmm.number + mmm.letter + mmm.subgroup + mmm.school_name).replace(" ", "").toUpperCase().contains(string)) {
                             match = false
                         }
                     }
@@ -62,8 +62,8 @@ class SearchDialog : DialogFragment() {
 
     override fun onStart() {
         super.onStart()
-        dialog.window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        host = (activity as MainActivity).prefs.getString(CUSTOM_ADDRESS, getString(R.string.host))
+        dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        host = (activity as MainActivity).prefs.getString(CUSTOM_ADDRESS, getString(R.string.host)) as String
         if (host.isBlank())
             host = getString(R.string.host)
         adapter = SearchAdapter(arrayList, this)

@@ -3,7 +3,7 @@
     <string name="dev"><a href="https://vk.com/dibrin">Бағдарламашы парақшасы VK-дағы</a></string>
     <string name="appVk"><a href="https://vk.com/brin_apps">LessonCountdown тобы VK-дағы</a></string>
     <string name="help">Жәрдем</string>
-    <string name="networkErr">Желіге қол жеткізу мүмкін емес</string>
+    <string name="networkErr">Сервер қол жеткізу мүмкін емес</string>
     <string name="configErr">Конфигдегі қате</string>
     <string name="timeErr">xxx уақыт енгізу өрісі келесідей болуы керек: Сағат:Минут-Сағат:Минут</string>
     <string name="lessonErr">xxx сабақ енгізу өрісі бос</string>
@@ -41,7 +41,6 @@
     <string name="navigation_drawer_open">Шарлау тартпасын ашу</string>
     <string name="navigation_drawer_close">Шарлау тартпасын жабу</string>
     <string name="dowTitle">Апта күндері</string>
-    <string name="darkTheme">Қараңғы тақырып</string>
     <string name="lessonsRemaining">Қалған сабақтар</string>
     <string name="notificationColor">Хабарландырудың өзгертпелі түстері</string>
     <string name="titleColor">Сабақ түсі</string>
@@ -51,7 +50,8 @@
     <string name="copyTo">Айырбас буфергіне көшіру</string>
     <string name="pasteFrom">Айырбас буферінен салу</string>
     <string name="pasteErr">Айырбас буферінен конфиг мүмкін емес</string>
-    <string name="bigNotification">Большое уведомление</string>
     <string name="cpv_select">Выбрать</string>
     <string name="hideEditionControls">Скрыть элементы управления режима редактирования</string>
+    <string name="enableEvenOddWeeks">Включить четные/нечетные недели</string>
+    <string name="inverseEvenOddWeeks">Инвертировать четность недель</string>
 </resources>

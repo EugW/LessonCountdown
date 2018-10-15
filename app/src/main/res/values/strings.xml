@@ -2,8 +2,9 @@
     <string name="app_name" translatable="false">LessonCountdown</string>
     <string name="dev"><a href="https://vk.com/dibrin">Developer page in VK</a></string>
     <string name="appVk"><a href="https://vk.com/brin_apps">LessonCountdown group in VK</a></string>
+    <string name="whitespace" translatable="false"> </string>
     <string name="help">Help</string>
-    <string name="networkErr">Network is unreachable</string>
+    <string name="networkErr">Server is unreachable</string>
     <string name="configErr">Wrong config</string>
     <string name="timeErr">The xxx time entry field should look like: Hours:Minutes-Hours:Minutes</string>
     <string name="lessonErr">The xxx lesson entry field is blank</string>
@@ -50,7 +51,6 @@
         <item>@string/friday</item>
         <item>@string/saturday</item>
     </string-array>
-    <string name="darkTheme">Dark theme</string>
     <string name="notificationColor">Custom notification colors</string>
     <string name="titleColor">Color of the lesson</string>
     <string name="timeColor">Time color</string>
@@ -61,7 +61,10 @@
     <string name="pasteFrom">Paste config from clipboard</string>
     <string name="pasteErr">Could not parse config from clipboard</string>
     <string name="lessonsRemaining">Lessons remaining</string>
-    <string name="bigNotification">Big notification</string>
     <string name="cpv_select">Select</string>
     <string name="hideEditionControls">Hide edition mode controls</string>
+    <string name="enableEvenOddWeeks">Enable even/odd weeks</string>
+    <string name="inverseEvenOddWeeks">Inverse even/odd weeks</string>
+    <string name="enableKundelik">Enable Kundelik.kz</string>
+    <string name="kundelik">Kundelik</string>
 </resources>

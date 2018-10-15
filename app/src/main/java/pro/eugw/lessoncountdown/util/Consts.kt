@@ -6,13 +6,13 @@ const val APP_PREFERENCES = "newPrefs"
 const val CUSTOM_COLOR = "CustomColor"
 const val CUSTOM_CONFIG = "CustomCfg"
 const val HIDE_CONTROLS = "hideControls"
+const val EVEN_ODD_WEEKS = "evenOddWeeks"
+const val INVERSE_EVEN_ODD_WEEKS = "inverseEvenOddWeeks"
 const val TITLE_COLOR = "titleColor"
 const val TIME_COLOR = "timeColor"
 const val LESSONS_COLOR = "lessonsColor"
 const val BACKGROUND_COLOR = "backgroundColor"
-const val DARK_THEME = "darkTheme"
 const val CUSTOM_ADDRESS = "cAddress"
-const val BIG_NOTIFICATION = "bigNotification"
 
 // ---broadcasts---
 
