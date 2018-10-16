@@ -5,10 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.android.volley.toolbox.Volley
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonObjectRequest
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.fragment_kundelik_panel.*
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
+import pro.eugw.lessoncountdown.fragment.lil.KundelikLoginFragment
 
 class KundelikFragment : Fragment() {
 
@@ -16,7 +20,7 @@ class KundelikFragment : Fragment() {
     private lateinit var token: String
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_kundelik_loading, container, false)
+        return inflater.inflate(R.layout.fragment_kundelik_panel, container, false)
     }
 
     override fun onStart() {
@@ -26,12 +30,22 @@ class KundelikFragment : Fragment() {
         mActivity.main_toolbar.menu.clear()
         token = mActivity.prefs.getString("kundelikToken", "")!!
         if (token.length < 5) {
-            val queue = Volley.newRequestQueue(context)
-            
+            val fragment = KundelikLoginFragment()
+            fragment.show(mActivity.supportFragmentManager, "lol")
         } else {
-            if (view != null)
-                (view as ViewGroup).removeAllViews()
-            layoutInflater.inflate(R.layout.fragment_kundelik_login, view as ViewGroup)
         }
     }
+
+    fun profileRetrieveRequest(): JsonObjectRequest {
+        val url = "https://api.kundelik.kz/v1/users/me?access_token=$token"
+        return JsonObjectRequest(Request.Method.GET, url, null,
+                Response.Listener { response ->
+                    textViewKundelikName.text = response.getString("name")
+                },
+                Response.ErrorListener { error ->
+
+                }
+        )
+    }
+
 }

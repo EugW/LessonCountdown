@@ -11,6 +11,8 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.Volley
 import com.google.android.material.navigation.NavigationView
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -36,9 +38,10 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
 
     lateinit var prefs: SharedPreferences
     lateinit var broadcastManager: LocalBroadcastManager
+    lateinit var queue: RequestQueue
     var clazz = JsonObject()
     var homework = JsonObject()
-    var kundelikMenu: MenuItem? = null
+    private var kundelikMenu: MenuItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +51,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
         nav_view.setNavigationItemSelectedListener(this)
+        queue = Volley.newRequestQueue(this)
         kundelikMenu = nav_view.menu.add("Kundelik")
         broadcastManager = LocalBroadcastManager.getInstance(this)
         val toggleButton = nav_view.getHeaderView(0).findViewById<ToggleButton>(R.id.toggleButton)
