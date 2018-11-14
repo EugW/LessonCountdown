@@ -16,11 +16,11 @@ import com.google.gson.JsonParser
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.list.search.SearchAdapter
-import pro.eugw.lessoncountdown.list.search.SearchItem
+import pro.eugw.lessoncountdown.list.search.SearchElement
 import pro.eugw.lessoncountdown.util.*
-import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
+import javax.net.ssl.HttpsURLConnection
 import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
 
@@ -28,8 +28,8 @@ class SearchDialog : DialogFragment() {
 
     private lateinit var recyclerView: androidx.recyclerview.widget.RecyclerView
     private lateinit var adapter: SearchAdapter
-    private var arrayList = ArrayList<SearchItem>()
-    private var baseArray = ArrayList<SearchItem>()
+    private var arrayList = ArrayList<SearchElement>()
+    private var baseArray = ArrayList<SearchElement>()
     private lateinit var host: String
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -38,7 +38,7 @@ class SearchDialog : DialogFragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                val tamar = ArrayList<SearchItem>()
+                val tamar = ArrayList<SearchElement>()
                 baseArray.forEach {
                     val mmm = it
                     var match = true
@@ -72,13 +72,13 @@ class SearchDialog : DialogFragment() {
         recyclerView.adapter = adapter
         thread(true) {
             try {
-                val url = URL("http://$host/classes?lang=${Locale.getDefault().language}")
-                val conn = url.openConnection() as HttpURLConnection
+                val url = URL("https://$host/classes?lang=${Locale.getDefault().language}")
+                val conn = url.openConnection() as HttpsURLConnection
                 conn.connectTimeout = HTTP_TIMEOUT
                 conn.readTimeout = HTTP_TIMEOUT
                 conn.connect()
                 JsonParser().parse(conn.inputStream.reader()).asJsonObject[CLASSES].asJsonArray.forEach {
-                    baseArray.add(SearchItem(it.asJsonObject[NUMBER].asString, it.asJsonObject[LETTER].asString, it.asJsonObject[SUBGROUP].asString, it.asJsonObject[SCHOOL_ID].asString, it.asJsonObject[SCHOOL_NAME].asString))
+                    baseArray.add(SearchElement(it.asJsonObject[NUMBER].asString, it.asJsonObject[LETTER].asString, it.asJsonObject[SUBGROUP].asString, it.asJsonObject[SCHOOL_ID].asString, it.asJsonObject[SCHOOL_NAME].asString))
                 }
                 arrayList.clear()
                 arrayList.addAll(baseArray)

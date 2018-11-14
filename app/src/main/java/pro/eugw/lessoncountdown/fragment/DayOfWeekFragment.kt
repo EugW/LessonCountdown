@@ -17,8 +17,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_day_of_week.view.*
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
-import pro.eugw.lessoncountdown.list.schedule.MAdapter
-import pro.eugw.lessoncountdown.list.schedule.MLesson
+import pro.eugw.lessoncountdown.list.schedule.ScheduleAdapter
+import pro.eugw.lessoncountdown.list.schedule.ScheduleElement
 import pro.eugw.lessoncountdown.util.*
 import java.io.File
 import java.io.FileWriter
@@ -27,9 +27,9 @@ import java.util.*
 
 class DayOfWeekFragment : Fragment() {
 
-    val list = ArrayList<MLesson>()
-    private lateinit var adapter: MAdapter
-    private lateinit var adapterEdit: MAdapter
+    val list = ArrayList<ScheduleElement>()
+    private lateinit var adapter: ScheduleAdapter
+    private lateinit var adapterEdit: ScheduleAdapter
     private var edit = false
     private var schedule = JsonObject()
     private var bells = JsonObject()
@@ -53,8 +53,8 @@ class DayOfWeekFragment : Fragment() {
             if (!mActivity.prefs.getBoolean(HIDE_CONTROLS, false))
                 if (toolbar.menu.size() <= 0)
                     toolbar.inflateMenu(R.menu.dayofweek_menu)
-        adapter = MAdapter(list, this, false)
-        adapterEdit = MAdapter(list, this, true)
+        adapter = ScheduleAdapter(list, this, false)
+        adapterEdit = ScheduleAdapter(list, this, true)
         dialogView.adapter = adapter
         dialogView.layoutManager = LinearLayoutManager(activity)
         dialogView.addItemDecoration(DividerItemDecoration(dialogView.context, LinearLayoutManager(activity).orientation))
@@ -82,7 +82,7 @@ class DayOfWeekFragment : Fragment() {
         if (!bells.has(day))
             bells.add(day, JsonArray())
         schedule.get(day).asJsonArray.forEachIndexed { index, jsonElement ->
-            list.add(MLesson(jsonElement.asString, bells.get(day).asJsonArray[index].asString, if (homework.has(jsonElement.asString)) homework.get(jsonElement.asString).asString else ""))
+            list.add(ScheduleElement(jsonElement.asString, bells.get(day).asJsonArray[index].asString, if (homework.has(jsonElement.asString)) homework.get(jsonElement.asString).asString else ""))
         }
         adapterEdit.notifyDataSetChanged()
         adapter.notifyDataSetChanged()
@@ -98,7 +98,7 @@ class DayOfWeekFragment : Fragment() {
                             if (!bells.has(day))
                                 bells.add(day, JsonArray())
                             schedule.get(day).asJsonArray.forEachIndexed { index, jsonElement ->
-                                list.add(MLesson(jsonElement.asString, bells.get(day).asJsonArray[index].asString, if (homework.has(jsonElement.asString)) homework.get(jsonElement.asString).asString else ""))
+                                list.add(ScheduleElement(jsonElement.asString, bells.get(day).asJsonArray[index].asString, if (homework.has(jsonElement.asString)) homework.get(jsonElement.asString).asString else ""))
                             }
                             toolbar.menu.findItem(R.id.menuEvenOdd).title = "O"
                         }
@@ -107,7 +107,7 @@ class DayOfWeekFragment : Fragment() {
                             list.clear()
                             println(day)
                             schedule.get(day).asJsonArray.forEachIndexed { index, jsonElement ->
-                                list.add(MLesson(jsonElement.asString, bells.get(day).asJsonArray[index].asString, if (homework.has(jsonElement.asString)) homework.get(jsonElement.asString).asString else ""))
+                                list.add(ScheduleElement(jsonElement.asString, bells.get(day).asJsonArray[index].asString, if (homework.has(jsonElement.asString)) homework.get(jsonElement.asString).asString else ""))
                             }
                             toolbar.menu.findItem(R.id.menuEvenOdd).title = "E"
                         }
@@ -155,7 +155,7 @@ class DayOfWeekFragment : Fragment() {
                             Toast.makeText(activity, R.string.indexErr, Toast.LENGTH_LONG).show()
                             return@setPositiveButton
                         }
-                        list.add(int, MLesson("", "", ""))
+                        list.add(int, ScheduleElement("", "", ""))
                         if (edit) adapterEdit.notifyDataSetChanged() else adapter.notifyDataSetChanged()
                     }
                     ab.show()

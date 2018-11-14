@@ -13,6 +13,8 @@ const val TIME_COLOR = "timeColor"
 const val LESSONS_COLOR = "lessonsColor"
 const val BACKGROUND_COLOR = "backgroundColor"
 const val CUSTOM_ADDRESS = "cAddress"
+const val KUNDELIK_TOKEN = "kundelikToken"
+const val SECKEY = "secKey"
 
 // ---broadcasts---
 

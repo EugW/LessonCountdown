@@ -27,10 +27,10 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import java.io.PrintWriter
-import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.util.*
+import javax.net.ssl.HttpsURLConnection
 import kotlin.concurrent.thread
 
 
@@ -41,7 +41,6 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
     lateinit var queue: RequestQueue
     var clazz = JsonObject()
     var homework = JsonObject()
-    private var kundelikMenu: MenuItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +51,6 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         toggle.syncState()
         nav_view.setNavigationItemSelectedListener(this)
         queue = Volley.newRequestQueue(this)
-        kundelikMenu = nav_view.menu.add("Kundelik")
         broadcastManager = LocalBroadcastManager.getInstance(this)
         val toggleButton = nav_view.getHeaderView(0).findViewById<ToggleButton>(R.id.toggleButton)
         broadcastManager.registerReceiver(object : BroadcastReceiver() {
@@ -99,8 +97,8 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         val bells = File(filesDir, BELLS_FILE)
         try {
             if (!prefs.getBoolean(CUSTOM_CONFIG, false)) {
-                val url = URL("http://" + prefs.getString(CUSTOM_ADDRESS, getString(R.string.host)) + "/class?school_id=" + prefs.getString(SCHOOL_ID, "") + "&clazz=" + URLEncoder.encode(prefs.getString(CLASS, ""), "UTF-8"))
-                val conn = url.openConnection() as HttpURLConnection
+                val url = URL("https://" + prefs.getString(CUSTOM_ADDRESS, getString(R.string.host)) + "/class?school_id=" + prefs.getString(SCHOOL_ID, "") + "&clazz=" + URLEncoder.encode(prefs.getString(CLASS, ""), "UTF-8"))
+                val conn = url.openConnection() as HttpsURLConnection
                 conn.connectTimeout = HTTP_TIMEOUT
                 conn.readTimeout = HTTP_TIMEOUT
                 conn.connect()
@@ -182,9 +180,9 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             R.id.menuFriday -> inflateFragment(6, item.title.toString())
             R.id.menuSaturday -> inflateFragment(7, item.title.toString())
             R.id.menuSunday -> inflateFragment(1, item.title.toString())
+            R.id.menuKundelik -> inflateKundelikFragment()
             R.id.menuSettings -> Handler(mainLooper).postDelayed({ supportFragmentManager.beginTransaction().replace(R.id.content_frame, SettingsFragment()).commit() }, 500)
             R.id.menuHelp -> startActivity(Intent(this, HelpActivity::class.java))
-            kundelikMenu?.itemId -> inflateKundelikFragment()
         }
         return true
     }

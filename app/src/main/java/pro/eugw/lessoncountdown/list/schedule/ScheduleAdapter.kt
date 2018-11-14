@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.JsonParser
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.fragment.DayOfWeekFragment
@@ -16,14 +17,14 @@ import java.io.FileWriter
 import java.io.PrintWriter
 
 
-internal class MAdapter(private var list: List<MLesson>, private var fragment: DayOfWeekFragment, private val edit: Boolean) : androidx.recyclerview.widget.RecyclerView.Adapter<MHolder>() {
+class ScheduleAdapter(private var list: List<ScheduleElement>, private var fragment: DayOfWeekFragment, private val edit: Boolean) : RecyclerView.Adapter<ScheduleHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MHolder {
-        val view = if (edit) LayoutInflater.from(parent.context).inflate(R.layout.lesson_view_edit, parent, false) else LayoutInflater.from(parent.context).inflate(R.layout.lesson_view, parent, false)
-        return MHolder(view)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScheduleHolder {
+        val view = if (edit) LayoutInflater.from(parent.context).inflate(R.layout.schedule_element_edit, parent, false) else LayoutInflater.from(parent.context).inflate(R.layout.schedule_element, parent, false)
+        return ScheduleHolder(view)
     }
 
-    override fun onBindViewHolder(holder: MHolder, position: Int) {
+    override fun onBindViewHolder(holder: ScheduleHolder, position: Int) {
         val name = list[position].lesson
         val homework = list[position].homework
         holder.imageHomework.visibility = if (!homework.isEmpty()) View.VISIBLE else View.GONE
@@ -34,14 +35,14 @@ internal class MAdapter(private var list: List<MLesson>, private var fragment: D
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: Editable?) {
-                    fragment.list[holder.adapterPosition] = MLesson(s.toString(), list[holder.adapterPosition].time, homework)
+                    fragment.list[holder.adapterPosition] = ScheduleElement(s.toString(), list[holder.adapterPosition].time, homework)
                 }
             })
             holder.time.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: Editable?) {
-                    fragment.list[holder.adapterPosition] = MLesson(list[holder.adapterPosition].lesson, s.toString(), homework)
+                    fragment.list[holder.adapterPosition] = ScheduleElement(list[holder.adapterPosition].lesson, s.toString(), homework)
                 }
             })
         } else

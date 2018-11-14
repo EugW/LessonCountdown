@@ -50,8 +50,11 @@
     <string name="copyTo">Айырбас буфергіне көшіру</string>
     <string name="pasteFrom">Айырбас буферінен салу</string>
     <string name="pasteErr">Айырбас буферінен конфиг мүмкін емес</string>
-    <string name="cpv_select">Выбрать</string>
+    <string name="cpv_select">Таңдаңыз</string>
     <string name="hideEditionControls">Скрыть элементы управления режима редактирования</string>
     <string name="enableEvenOddWeeks">Включить четные/нечетные недели</string>
     <string name="inverseEvenOddWeeks">Инвертировать четность недель</string>
+    <string name="kundelik">Күнделік</string>
+    <string name="patches">Патчлар</string>
+    <string name="utilities">Утилитдар</string>
 </resources>

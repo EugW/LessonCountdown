@@ -29,6 +29,18 @@
     </item>
 
     <item
+        android:title="@string/utilities">
+        <menu>
+            <item
+                android:id="@+id/menuKundelik"
+                android:title="@string/kundelik" />
+            <item
+                android:id="@+id/menuPatches"
+                android:title="@string/patches" />
+        </menu>
+    </item>
+
+    <item
         android:id="@+id/menuSettings"
         android:title="@string/settings" />
 

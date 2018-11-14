@@ -29,9 +29,9 @@ class KundelikFragment : Fragment() {
         mActivity.main_toolbar.title = getString(R.string.kundelik)
         mActivity.main_toolbar.menu.clear()
         token = mActivity.prefs.getString("kundelikToken", "")!!
+        KundelikLoginFragment().show(mActivity.supportFragmentManager, "lol")
         if (token.length < 5) {
-            val fragment = KundelikLoginFragment()
-            fragment.show(mActivity.supportFragmentManager, "lol")
+            KundelikLoginFragment().show(mActivity.supportFragmentManager, "lol")
         } else {
         }
     }

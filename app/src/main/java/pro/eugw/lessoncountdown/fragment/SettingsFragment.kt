@@ -31,8 +31,8 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import java.io.PrintWriter
-import java.net.HttpURLConnection
 import java.net.URL
+import javax.net.ssl.HttpsURLConnection
 import kotlin.concurrent.thread
 
 class SettingsFragment : Fragment() {
@@ -134,8 +134,8 @@ class SettingsFragment : Fragment() {
             ab.setView(input)
             ab.setPositiveButton(getString(android.R.string.ok)) { _, _ ->
                 host = try {
-                    val url = URL("http://" + input.text)
-                    val conn = url.openConnection() as HttpURLConnection
+                    val url = URL("https://" + input.text)
+                    val conn = url.openConnection() as HttpsURLConnection
                     conn.connectTimeout = HTTP_TIMEOUT
                     conn.readTimeout = HTTP_TIMEOUT
                     conn.connect()

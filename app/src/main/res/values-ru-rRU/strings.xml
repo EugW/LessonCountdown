@@ -54,4 +54,7 @@
     <string name="hideEditionControls">Скрыть элементы управления режима редактирования</string>
     <string name="enableEvenOddWeeks">Включить четные/нечетные недели</string>
     <string name="inverseEvenOddWeeks">Инвертировать четность недель</string>
+    <string name="utilities">Утилиты</string>
+    <string name="patches">Патчи</string>
+    <string name="kundelik">Кунделик</string>
 </resources>
