@@ -55,6 +55,6 @@
     <string name="enableEvenOddWeeks">Включить четные/нечетные недели</string>
     <string name="inverseEvenOddWeeks">Инвертировать четность недель</string>
     <string name="kundelik">Күнделік</string>
-    <string name="patches">Патчлар</string>
-    <string name="utilities">Утилитдар</string>
+    <string name="patches">Патчтар</string>
+    <string name="utilities">Утилттер</string>
 </resources>

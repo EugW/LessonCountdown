@@ -47,7 +47,7 @@ class KundelikLoginFragment : DialogFragment() {
         jsonDetails.put("client_secret", "8a7d709cfdbb4047b0ea8947afe89d67")
         jsonDetails.put("scope", "CommonInfo,ContactInfo,FriendsAndRelatives,EducationalInfo,SocialInfo,Files,Wall,Messages,Schools,Relatives,EduGroups,Lessons,Marks,EduWorks,Avatar")
         buttonKundelikLogin.setOnClickListener {
-            loglay.visibility = View.GONE
+            loginLayout.visibility = View.GONE
             progressBar.visibility = View.VISIBLE
             (activity as MainActivity).queue.add(JsonObjectRequest(Request.Method.POST, url, jsonDetails,
                     Response.Listener { response ->
@@ -67,7 +67,7 @@ class KundelikLoginFragment : DialogFragment() {
                                 secureRandom.nextBytes(key)
                             }
 
-                            mActivity.prefs.edit { putString(SECKEY, key.let { it.toList().toString().substring(1, it.toList().toString().lastIndex - 1) }) }
+                            mActivity.prefs.edit { putString(SECKEY, key.let { string -> string.toList().toString().substring(1, string.toList().toString().lastIndex - 1) }) }
                             val secretKey = SecretKeySpec(key, "AES")
                             cipher.init(Cipher.ENCRYPT_MODE, secretKey)
                             cred.writeText(cipher.doFinal("${editTextKundelikLogin.text}|${editTextKundelikPassword.text}".toByteArray()).toString())
