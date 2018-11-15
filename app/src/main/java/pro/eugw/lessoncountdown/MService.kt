@@ -17,6 +17,7 @@ import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.util.*
@@ -92,7 +93,11 @@ class MService : Service() {
             }
         }, IntentFilter(baseContext.packageName + NOTIFICATION_STYLE_UPDATE))
         runnable = {
-            val schedule = JsonParser().parse(FileReader(File(filesDir, SCHEDULE_FILE))).asJsonObject
+            val schedule = try {
+                JsonParser().parse(FileReader(File(filesDir, SCHEDULE_FILE))).asJsonObject
+            } catch (e: Exception) {
+                JsonObject()
+            }
             var dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK).toString()
             if (prefs.getBoolean(EVEN_ODD_WEEKS, false) || schedule.has("${dayOfWeek}e")) {
                 val preEven = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) % 2 == 0
