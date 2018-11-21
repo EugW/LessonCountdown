@@ -55,6 +55,10 @@
     <string name="enableEvenOddWeeks">Включить четные/нечетные недели</string>
     <string name="inverseEvenOddWeeks">Инвертировать четность недель</string>
     <string name="kundelik">Күнделік</string>
-    <string name="patches">Патчтар</string>
+    <string name="patches">Патчтар (Скоро)</string>
     <string name="utilities">Утилттер</string>
+    <string name="download">Скачать расписание</string>
+    <string name="svCred">Сохранить данные</string>
+    <string name="password">Пароль</string>
+    <string name="login">Логин</string>
 </resources>

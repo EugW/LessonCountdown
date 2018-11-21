@@ -66,7 +66,11 @@
     <string name="enableEvenOddWeeks">Enable even/odd weeks</string>
     <string name="inverseEvenOddWeeks">Inverse even/odd weeks</string>
     <string name="utilities">Utilities</string>
-    <string name="patches">Patches</string>
+    <string name="patches">Patches (Soon)</string>
     <string name="kundelik">Kundelik</string>
     <string name="patchHelp" translatable="false">All in secs\n*min for minute\nSupported maths: *, /, +, -\nLesson bias patch depends on lesson duration patch</string>
+    <string name="download">Download schedule</string>
+    <string name="login">Login</string>
+    <string name="password">Password</string>
+    <string name="svCred">Save credentials</string>
 </resources>

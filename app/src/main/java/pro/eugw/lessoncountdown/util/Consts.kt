@@ -14,7 +14,8 @@ const val LESSONS_COLOR = "lessonsColor"
 const val BACKGROUND_COLOR = "backgroundColor"
 const val CUSTOM_ADDRESS = "cAddress"
 const val KUNDELIK_TOKEN = "kundelikToken"
-const val SECKEY = "secKey"
+const val SECKEY1 = "secKey1"
+const val SECKEY2 = "secKey2"
 
 // ---broadcasts---
 
@@ -51,3 +52,6 @@ const val SEARCH_REQUEST_CODE = 90
 const val CHANNEL_ID = "LessonChannel"
 const val COLOR_PICKER_DIALOG = "color-picker-dialog"
 const val HTTP_TIMEOUT = 3000
+const val CLIENT_ID = "387d44e3e0c94265a9e4a4caaad5111c"
+const val CLIENT_SECRET = "8a7d709cfdbb4047b0ea8947afe89d67"
+const val KUNDELIK_SCOPE = "CommonInfo,ContactInfo,FriendsAndRelatives,EducationalInfo,SocialInfo,Files,Wall,Messages,Schools,Relatives,EduGroups,Lessons,Marks,EduWorks,Avatar"

@@ -8,15 +8,22 @@ import android.view.MenuItem
 import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.content.edit
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.android.volley.RequestQueue
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.navigation.NavigationView
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlinx.android.synthetic.main.activity_main.*
+import org.json.JSONArray
+import org.json.JSONObject
 import pro.eugw.lessoncountdown.MService
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.fragment.DayOfWeekFragment
@@ -29,6 +36,7 @@ import java.io.FileWriter
 import java.io.PrintWriter
 import java.net.URL
 import java.net.URLEncoder
+import java.text.SimpleDateFormat
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
 import kotlin.concurrent.thread
@@ -68,11 +76,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                 broadcastManager.sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("STOP", true))
             }
         }
-        thread(true) {
-            clazz = initClass()
-            homework = initHomework()
-            inflateFragment()
-        }
+        initBase()
         File(filesDir, SERVICE_PID).createNewFile()
         val service = Intent(this, MService::class.java)
         startService(service)
@@ -90,6 +94,14 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                 startService(service)
             }
         }, IntentFilter(baseContext.packageName + PEND_SERVICE_RESTART))
+    }
+
+    private fun initBase() {
+        thread(true) {
+            clazz = initClass()
+            homework = initHomework()
+            inflateDOWFragment()
+        }
     }
 
     fun initClass(): JsonObject {
@@ -128,6 +140,95 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         }
     }
 
+    fun initScheduleKundelik() {
+        val token = prefs.getString(KUNDELIK_TOKEN, "")!!
+        if (token.length < 5)
+            return
+        queue.add(JsonObjectRequest("https://api.kundelik.kz/v1/users/me?access_token=$token", null,
+                Response.Listener { responsePerson ->
+                    val personId = responsePerson.getLong("personId")
+                    Toast.makeText(this, "Person ID request succeed: $personId", Toast.LENGTH_LONG).show()
+                    queue.add(JsonArrayRequest("https://api.kundelik.kz/v1/users/me/schools?access_token=$token",
+                            Response.Listener { responseSchool ->
+                                val schoolId = responseSchool[0] as Long
+                                Toast.makeText(this, "School ID request succeed: $schoolId", Toast.LENGTH_LONG).show()
+                                queue.add(JsonArrayRequest("https://api.kundelik.kz/v1/persons/$personId/schools/$schoolId/edu-groups?access_token=$token",
+                                        Response.Listener { responseEduGroup ->
+                                            val eduGroupId = (responseEduGroup[0] as JSONObject).getLong("id")
+                                            Toast.makeText(this, "Edu Group ID request succeed: $eduGroupId", Toast.LENGTH_LONG).show()
+                                            val calendar = Calendar.getInstance()
+                                            calendar.set(Calendar.DAY_OF_WEEK, 2)
+                                            val firstDay = calendar.time
+                                            calendar.add(Calendar.WEEK_OF_YEAR, 1)
+                                            calendar.set(Calendar.DAY_OF_WEEK, 1)
+                                            val lastDay = calendar.time
+                                            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                                            queue.add(JsonObjectRequest("https://api.kundelik.kz/v1/persons/$personId/groups/$eduGroupId/schedules?startDate=${sdf.format(firstDay)}&endDate=${sdf.format(lastDay)}&access_token=$token", null,
+                                                    Response.Listener { responseSchedule ->
+                                                        val scheduleArray = responseSchedule.getJSONArray("days")
+                                                        Toast.makeText(this, "Schedule request succeed: $scheduleArray", Toast.LENGTH_LONG).show()
+                                                        convertKundelikToMSchedule(scheduleArray)
+                                                    },
+                                                    Response.ErrorListener { error ->
+                                                        Toast.makeText(this, "Schedule request failed: ${error.message}", Toast.LENGTH_LONG).show()
+                                                    }
+                                            ))
+                                        },
+                                        Response.ErrorListener { error ->
+                                            Toast.makeText(this, "Edu Group ID request failed: ${error.message}", Toast.LENGTH_LONG).show()
+                                        }
+                                ))
+                            },
+                            Response.ErrorListener { error ->
+                                Toast.makeText(this, "School ID request failed: ${error.message}", Toast.LENGTH_LONG).show()
+                            }
+                    ))
+                },
+                Response.ErrorListener { error ->
+                    Toast.makeText(this, "Person ID request failed: ${error.message}", Toast.LENGTH_LONG).show()
+                }
+        ))
+    }
+
+    private fun convertKundelikToMSchedule(origin: JSONArray) {
+        val schedule = File(filesDir, SCHEDULE_FILE)
+        val bells = File(filesDir, BELLS_FILE)
+        val array = JsonParser().parse(origin.toString()).asJsonArray
+        array.forEach {
+            val obj = it.asJsonObject
+            obj.remove("marks")
+            obj.remove("works")
+            obj.remove("homeworks")
+            obj.remove("workTypes")
+            obj.remove("lessonLogEntries")
+            obj.remove("teaches")
+            obj.remove("nextDate")
+        }
+        val scheduleObject = JsonObject()
+        val bellsObject = JsonObject()
+        array.forEach {
+            val lss = it.asJsonObject["lessons"].asJsonArray
+            val sub = it.asJsonObject["subjects"].asJsonArray
+            val sdlArr = JsonArray()
+            val bllArr = JsonArray()
+            lss.forEach { lesson ->
+                val subId = lesson.asJsonObject["subjectId"].asLong
+                val name = sub.find { prd -> prd.asJsonObject["id"].asLong == subId }!!.asJsonObject["name"].asString
+                sdlArr.add(name)
+                val hours = lesson.asJsonObject["hours"].asString.replace(" ", "")
+                bllArr.add(hours)
+            }
+            scheduleObject.add("${array.indexOf(it) + 1}", sdlArr)
+            bellsObject.add("${array.indexOf(it) + 1}", bllArr)
+        }
+        PrintWriter(FileWriter(schedule), true).println(scheduleObject)
+        PrintWriter(FileWriter(bells), true).println(bellsObject)
+        prefs.edit {
+            putBoolean(CUSTOM_CONFIG, true)
+        }
+        initBase()
+    }
+
     fun initHomework(): JsonObject {
         val file = File(filesDir, "homework.json")
         if (!file.exists())
@@ -135,11 +236,11 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         return JsonParser().parse(FileReader(file)).asJsonObject
     }
 
-    private fun inflateFragment() {
-        inflateFragment(Calendar.getInstance().get(Calendar.DAY_OF_WEEK), resources.getStringArray(R.array.days)[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1])
+    private fun inflateDOWFragment() {
+        inflateDOWFragment(Calendar.getInstance().get(Calendar.DAY_OF_WEEK), resources.getStringArray(R.array.days)[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1])
     }
 
-    private fun inflateFragment(day: Int, dayName: String) {
+    private fun inflateDOWFragment(day: Int, dayName: String) {
         val bundle = Bundle()
         bundle.putString("day", day.toString())
         bundle.putString("dayName", dayName)
@@ -152,13 +253,21 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         }, 500)
     }
 
-    private fun inflateKundelikFragment() {
+    fun inflateKundelikFragment() {
         Handler(mainLooper).postDelayed({
             try {
-                val fragment = KundelikFragment()
-                supportFragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit()
+                supportFragmentManager.beginTransaction().replace(R.id.content_frame, KundelikFragment()).commit()
             } catch (e: Exception) { }
         }, 500)
+    }
+
+    private fun inflatePatchesFragment() {
+        /*Handler(mainLooper).postDelayed({
+            try {
+                supportFragmentManager.beginTransaction().replace(R.id.content_frame, PatchesFragment()).commit()
+            } catch (e: Exception) { }
+        }, 500)*/
+        Toast.makeText(this, R.string.patches, Toast.LENGTH_LONG).show()
     }
 
 
@@ -173,14 +282,15 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         drawer_layout.closeDrawer(GravityCompat.START)
         when (item.itemId) {
-            R.id.menuMonday -> inflateFragment(2, item.title.toString())
-            R.id.menuTuesday -> inflateFragment(3, item.title.toString())
-            R.id.menuWednesday -> inflateFragment(4, item.title.toString())
-            R.id.menuThursday -> inflateFragment(5, item.title.toString())
-            R.id.menuFriday -> inflateFragment(6, item.title.toString())
-            R.id.menuSaturday -> inflateFragment(7, item.title.toString())
-            R.id.menuSunday -> inflateFragment(1, item.title.toString())
+            R.id.menuMonday -> inflateDOWFragment(2, item.title.toString())
+            R.id.menuTuesday -> inflateDOWFragment(3, item.title.toString())
+            R.id.menuWednesday -> inflateDOWFragment(4, item.title.toString())
+            R.id.menuThursday -> inflateDOWFragment(5, item.title.toString())
+            R.id.menuFriday -> inflateDOWFragment(6, item.title.toString())
+            R.id.menuSaturday -> inflateDOWFragment(7, item.title.toString())
+            R.id.menuSunday -> inflateDOWFragment(1, item.title.toString())
             R.id.menuKundelik -> inflateKundelikFragment()
+            R.id.menuPatches -> inflatePatchesFragment()
             R.id.menuSettings -> Handler(mainLooper).postDelayed({ supportFragmentManager.beginTransaction().replace(R.id.content_frame, SettingsFragment()).commit() }, 500)
             R.id.menuHelp -> startActivity(Intent(this, HelpActivity::class.java))
         }
