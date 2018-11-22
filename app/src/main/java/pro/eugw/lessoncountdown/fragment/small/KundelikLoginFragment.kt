@@ -1,4 +1,4 @@
-package pro.eugw.lessoncountdown.fragment.lil
+package pro.eugw.lessoncountdown.fragment.small
 
 import android.app.AlertDialog
 import android.content.ClipData
@@ -51,7 +51,7 @@ class KundelikLoginFragment : DialogFragment() {
             progressBar.visibility = View.VISIBLE
             (activity as MainActivity).queue.add(JsonObjectRequest(Request.Method.POST, url, jsonDetails,
                     Response.Listener { response ->
-                        Toast.makeText(context, "Success: $response", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, "Success: $response", Toast.LENGTH_SHORT).show()
                         showResultDialog("Success", response.toString())
                         mActivity.prefs.edit { putString(KUNDELIK_TOKEN, response.getString("accessToken")) }
                         if (checkBoxSavePassword.isChecked) {
@@ -78,7 +78,7 @@ class KundelikLoginFragment : DialogFragment() {
                         mActivity.inflateKundelikFragment()
                     },
                     Response.ErrorListener { error ->
-                        Toast.makeText(context, "ERROR get: ${error.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
                         showResultDialog("Error", error.message.toString())
                         dismiss()
                     }

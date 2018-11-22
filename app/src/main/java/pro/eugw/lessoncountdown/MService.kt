@@ -16,7 +16,6 @@ import android.os.IBinder
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import pro.eugw.lessoncountdown.activity.MainActivity
@@ -98,25 +97,17 @@ class MService : Service() {
             } catch (e: Exception) {
                 JsonObject()
             }
-            var dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK).toString()
-            if (prefs.getBoolean(EVEN_ODD_WEEKS, false) || schedule.has("${dayOfWeek}e")) {
+            var dow = Calendar.getInstance().get(Calendar.DAY_OF_WEEK).toString()
+            if (prefs.getBoolean(EVEN_ODD_WEEKS, false) || schedule.has("${dow}e")) {
                 val preEven = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) % 2 == 0
                 val even = if (!prefs.getBoolean(INVERSE_EVEN_ODD_WEEKS, false)) preEven else !preEven
                 if (even)
-                    dayOfWeek += "e"
+                    dow += "e"
             }
             val lessonArray = ArrayList<LessonTime>()
             try {
-                try {
-                    schedule[dayOfWeek].asJsonArray
-                } catch (e: Exception) {
-                    JsonArray()
-                }.forEachIndexed { index, jsonElement ->
-                    val s = try {
-                        JsonParser().parse(FileReader(File(filesDir, BELLS_FILE))).asJsonObject[dayOfWeek].asJsonArray
-                    } catch (e: Exception) {
-                        JsonArray()
-                    }[index].asString.split("-")
+                schedule[dow].asJsonArray.forEachIndexed { index, jsonElement ->
+                    val s = JsonParser().parse(FileReader(File(filesDir, BELLS_FILE))).asJsonObject[dow].asJsonArray[index].asString.split("-")
                     val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US)
                     val yrr = SimpleDateFormat("yyyy-MM-dd", Locale.US)
                     lessonArray.add(LessonTime(sdf.parse(yrr.format(Date()) + " " + s[0]).time, sdf.parse(yrr.format(Date()) + " " + s[1]).time, jsonElement.asString))

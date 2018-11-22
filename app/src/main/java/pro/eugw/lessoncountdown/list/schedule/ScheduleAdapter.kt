@@ -10,14 +10,14 @@ import android.widget.EditText
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.JsonParser
 import pro.eugw.lessoncountdown.R
-import pro.eugw.lessoncountdown.fragment.DayOfWeekFragment
+import pro.eugw.lessoncountdown.fragment.DOWFragment
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import java.io.PrintWriter
 
 
-class ScheduleAdapter(private var list: List<ScheduleElement>, private var fragment: DayOfWeekFragment, private val edit: Boolean) : RecyclerView.Adapter<ScheduleHolder>() {
+class ScheduleAdapter(private var list: List<ScheduleElement>, private var fragment: DOWFragment, private val edit: Boolean) : RecyclerView.Adapter<ScheduleHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScheduleHolder {
         val view = if (edit) LayoutInflater.from(parent.context).inflate(R.layout.schedule_element_edit, parent, false) else LayoutInflater.from(parent.context).inflate(R.layout.schedule_element, parent, false)

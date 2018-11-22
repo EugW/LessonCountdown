@@ -33,7 +33,6 @@ import java.io.FileWriter
 import java.io.PrintWriter
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
-import kotlin.concurrent.thread
 
 class SettingsFragment : Fragment() {
 
@@ -116,7 +115,7 @@ class SettingsFragment : Fragment() {
                 PrintWriter(FileWriter(File(mActivity.filesDir, SCHEDULE_FILE)), true).println(jObject[SCHEDULE])
                 PrintWriter(FileWriter(File(mActivity.filesDir, BELLS_FILE)), true).println(jObject[BELLS])
             } catch (e: Exception) {
-                Toast.makeText(mActivity, R.string.pasteErr, Toast.LENGTH_LONG).show()
+                Toast.makeText(mActivity, R.string.pasteErr, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -246,10 +245,7 @@ class SettingsFragment : Fragment() {
             val text = selectedClass
             text.visibility = View.VISIBLE
             text.text = (extras[CLASS] as String).replace(".", "")
-            thread(true) {
-                mActivity.clazz = mActivity.initClass()
-                mActivity.homework = mActivity.initHomework()
-            }
+            mActivity.initClass()
         }
     }
 

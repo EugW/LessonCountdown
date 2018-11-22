@@ -87,7 +87,7 @@ class SearchDialog : DialogFragment() {
             } catch (e: Exception) {
                 e.printStackTrace()
                 if (isVisible)
-                    activity!!.runOnUiThread { Toast.makeText(context, R.string.networkErr, Toast.LENGTH_LONG).show() }
+                    activity!!.runOnUiThread { Toast.makeText(context, R.string.networkErr, Toast.LENGTH_SHORT).show() }
                 dismissAllowingStateLoss()
             }
         }

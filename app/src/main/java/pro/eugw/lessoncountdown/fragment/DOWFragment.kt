@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_day_of_week.view.*
 import pro.eugw.lessoncountdown.R
@@ -25,7 +24,7 @@ import java.io.FileWriter
 import java.io.PrintWriter
 import java.util.*
 
-class DayOfWeekFragment : Fragment() {
+class DOWFragment : Fragment() {
 
     val list = ArrayList<ScheduleElement>()
     private lateinit var adapter: ScheduleAdapter
@@ -76,7 +75,7 @@ class DayOfWeekFragment : Fragment() {
             else
                 toolbar.menu.findItem(R.id.menuEvenOdd).title = "O"
         }
-        val homework = JsonParser().parse(bundle.getString("homework", JsonObject().toString())).asJsonObject
+        val homework = mActivity.homework
         if (!schedule.has(day))
             schedule.add(day, JsonArray())
         if (!bells.has(day))
@@ -122,11 +121,11 @@ class DayOfWeekFragment : Fragment() {
                             bells[day].asJsonArray.remove(0)
                         list.map {
                             if (it.lesson.isBlank()) {
-                                Toast.makeText(activity, getString(R.string.lessonErr).replace("xxx", (list.indexOf(it) + 1).toString()), Toast.LENGTH_LONG).show()
+                                Toast.makeText(activity, getString(R.string.lessonErr).replace("xxx", (list.indexOf(it) + 1).toString()), Toast.LENGTH_SHORT).show()
                                 return@setOnMenuItemClickListener true
                             }
                             if (!it.time.matches("[0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2}".toRegex())) {
-                                Toast.makeText(activity, getString(R.string.timeErr).replace("xxx", (list.indexOf(it) + 1).toString()), Toast.LENGTH_LONG).show()
+                                Toast.makeText(activity, getString(R.string.timeErr).replace("xxx", (list.indexOf(it) + 1).toString()), Toast.LENGTH_SHORT).show()
                                 return@setOnMenuItemClickListener true
                             }
                             schedule[day].asJsonArray.add(it.lesson)
@@ -148,11 +147,11 @@ class DayOfWeekFragment : Fragment() {
                         val int = try {
                             input.text.toString().toInt()
                         } catch (e: Exception) {
-                            Toast.makeText(activity, R.string.notNumErr, Toast.LENGTH_LONG).show()
+                            Toast.makeText(activity, R.string.notNumErr, Toast.LENGTH_SHORT).show()
                             return@setPositiveButton
                         }
                         if (int !in 0..list.size) {
-                            Toast.makeText(activity, R.string.indexErr, Toast.LENGTH_LONG).show()
+                            Toast.makeText(activity, R.string.indexErr, Toast.LENGTH_SHORT).show()
                             return@setPositiveButton
                         }
                         list.add(int, ScheduleElement("", "", ""))
@@ -169,11 +168,11 @@ class DayOfWeekFragment : Fragment() {
                         val int = try {
                             input.text.toString().toInt()
                         } catch (e: Exception) {
-                            Toast.makeText(activity, R.string.notNumErr, Toast.LENGTH_LONG).show()
+                            Toast.makeText(activity, R.string.notNumErr, Toast.LENGTH_SHORT).show()
                             return@setPositiveButton
                         }
                         if (int !in 1..list.size) {
-                            Toast.makeText(activity, R.string.indexErr, Toast.LENGTH_LONG).show()
+                            Toast.makeText(activity, R.string.indexErr, Toast.LENGTH_SHORT).show()
                             return@setPositiveButton
                         }
                         list.removeAt(int - 1)

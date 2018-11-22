@@ -20,7 +20,7 @@ import kotlinx.android.synthetic.main.fragment_kundelik_panel.*
 import org.json.JSONObject
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
-import pro.eugw.lessoncountdown.fragment.lil.KundelikLoginFragment
+import pro.eugw.lessoncountdown.fragment.small.KundelikLoginFragment
 import pro.eugw.lessoncountdown.util.*
 import java.io.File
 import java.io.PrintWriter
@@ -59,13 +59,13 @@ class KundelikFragment : Fragment() {
         return JsonObjectRequest(Request.Method.GET, url, null,
                 Response.Listener { response ->
                     textViewKundelikName.text = response.getString("name")
-                    Toast.makeText(mActivity, "Authentication succeed", Toast.LENGTH_LONG).show()
+                    Toast.makeText(mActivity, "Authentication succeed", Toast.LENGTH_SHORT).show()
                 },
                 Response.ErrorListener {
-                    Toast.makeText(mActivity, "Token is out of date. Updating...", Toast.LENGTH_LONG).show()
+                    Toast.makeText(mActivity, "Token is out of date. Updating...", Toast.LENGTH_SHORT).show()
                     val cred = File(mActivity.filesDir, "encLogDet")
                     if (!cred.exists()) {
-                        Toast.makeText(mActivity, "Authentication failed. Unable to found saved credentials. Re-login please", Toast.LENGTH_LONG).show()
+                        Toast.makeText(mActivity, "Authentication failed. Unable to found saved credentials. Re-login please", Toast.LENGTH_SHORT).show()
                         KundelikLoginFragment().show(mActivity.supportFragmentManager, "lol")
                     }
                     try {
@@ -84,12 +84,12 @@ class KundelikFragment : Fragment() {
                         jsonDetails.put("scope", KUNDELIK_SCOPE)
                         mActivity.queue.add(JsonObjectRequest(Request.Method.POST, "https://api.kundelik.kz/v1/authorizations/bycredentials", jsonDetails,
                                 Response.Listener { response ->
-                                    Toast.makeText(context, "Token update succeed: $response", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(context, "Token update succeed: $response", Toast.LENGTH_SHORT).show()
                                     mActivity.prefs.edit { putString(KUNDELIK_TOKEN, response.getString("accessToken")) }
                                     mActivity.inflateKundelikFragment()
                                 },
                                 Response.ErrorListener { error ->
-                                    Toast.makeText(context, "Token update failed: $error", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(context, "Token update failed: $error", Toast.LENGTH_SHORT).show()
                                 }
                         ))
                     } catch (e: Exception) {
