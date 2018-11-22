@@ -245,19 +245,15 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         bundle.putString("day", day.toString())
         bundle.putString("dayName", dayName)
         Handler(mainLooper).postDelayed({
-            try {
-                val fragment = DOWFragment()
-                fragment.arguments = bundle
-                supportFragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit()
-            } catch (e: Exception) { }
+            val fragment = DOWFragment()
+            fragment.arguments = bundle
+            supportFragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit()
         }, 500)
     }
 
     fun inflateKundelikFragment() {
         Handler(mainLooper).postDelayed({
-            try {
-                supportFragmentManager.beginTransaction().replace(R.id.content_frame, KundelikFragment()).commit()
-            } catch (e: Exception) { }
+            supportFragmentManager.beginTransaction().replace(R.id.content_frame, KundelikFragment()).commit()
         }, 500)
     }
 

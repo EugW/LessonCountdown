@@ -12,21 +12,21 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonObjectRequest
 import com.google.gson.JsonParser
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.list.search.SearchAdapter
 import pro.eugw.lessoncountdown.list.search.SearchElement
 import pro.eugw.lessoncountdown.util.*
-import java.net.URL
 import java.util.*
-import javax.net.ssl.HttpsURLConnection
 import kotlin.collections.ArrayList
-import kotlin.concurrent.thread
 
 class SearchDialog : DialogFragment() {
 
-    private lateinit var recyclerView: androidx.recyclerview.widget.RecyclerView
+    private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: SearchAdapter
     private var arrayList = ArrayList<SearchElement>()
     private var baseArray = ArrayList<SearchElement>()
@@ -53,7 +53,7 @@ class SearchDialog : DialogFragment() {
                 arrayList.clear()
                 arrayList.addAll(tamar)
                 if (isVisible)
-                    activity!!.runOnUiThread { adapter.notifyDataSetChanged() }
+                    adapter.notifyDataSetChanged()
             }
         })
         recyclerView = v.findViewById(R.id.searchRecycler)
@@ -63,35 +63,35 @@ class SearchDialog : DialogFragment() {
     override fun onStart() {
         super.onStart()
         dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        host = (activity as MainActivity).prefs.getString(CUSTOM_ADDRESS, getString(R.string.host)) as String
+        val mActivity = activity as MainActivity
+        host = mActivity.prefs.getString(CUSTOM_ADDRESS, getString(R.string.host)) as String
         if (host.isBlank())
             host = getString(R.string.host)
         adapter = SearchAdapter(arrayList, this)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.addItemDecoration(androidx.recyclerview.widget.DividerItemDecoration(recyclerView.context, LinearLayoutManager(context).orientation))
         recyclerView.adapter = adapter
-        thread(true) {
-            try {
-                val url = URL("https://$host/classes?lang=${Locale.getDefault().language}")
-                val conn = url.openConnection() as HttpsURLConnection
-                conn.connectTimeout = HTTP_TIMEOUT
-                conn.readTimeout = HTTP_TIMEOUT
-                conn.connect()
-                JsonParser().parse(conn.inputStream.reader()).asJsonObject[CLASSES].asJsonArray.forEach {
-                    baseArray.add(SearchElement(it.asJsonObject[NUMBER].asString, it.asJsonObject[LETTER].asString, it.asJsonObject[SUBGROUP].asString, it.asJsonObject[SCHOOL_ID].asString, it.asJsonObject[SCHOOL_NAME].asString))
-                }
-                arrayList.clear()
-                arrayList.addAll(baseArray)
-                if (isVisible)
-                    activity!!.runOnUiThread { adapter.notifyDataSetChanged() }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                if (isVisible)
-                    activity!!.runOnUiThread { Toast.makeText(context, R.string.networkErr, Toast.LENGTH_SHORT).show() }
-                dismissAllowingStateLoss()
-            }
-        }
+        mActivity.queue.add(JsonObjectRequest("https://$host/classes?lang=${Locale.getDefault().language}", null,
+                Response.Listener {
+                    try {
+                        JsonParser().parse(it.toString()).asJsonObject[CLASSES].asJsonArray.forEach {jE ->
+                            baseArray.add(SearchElement(jE.asJsonObject[NUMBER].asString, jE.asJsonObject[LETTER].asString, jE.asJsonObject[SUBGROUP].asString, jE.asJsonObject[SCHOOL_ID].asString, jE.asJsonObject[SCHOOL_NAME].asString))
+                        }
+                        arrayList.clear()
+                        arrayList.addAll(baseArray)
+                        if (isVisible)
+                            adapter.notifyDataSetChanged()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        if (isVisible)
+                            Toast.makeText(context, R.string.networkErr, Toast.LENGTH_SHORT).show()
+                        dismissAllowingStateLoss()
+                    }
+                },
+                Response.ErrorListener {
 
+                }
+        ))
     }
 
     fun choose(id: String, number: String, letter: String, subgroup: String) {

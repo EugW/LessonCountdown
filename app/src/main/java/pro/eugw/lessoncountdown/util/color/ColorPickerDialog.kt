@@ -44,7 +44,7 @@ class ColorPickerDialog : DialogFragment(), OnTouchListener, ColorPickerView.OnC
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         color = savedInstanceState?.getInt(ARG_COLOR) ?: arguments!!.getInt(ARG_COLOR)
 
-        val rootView = FrameLayout(context)
+        val rootView = FrameLayout(context!!)
         rootView.addView(createPickerView())
 
         val selectedButtonStringRes = getString(R.string.cpv_select)
