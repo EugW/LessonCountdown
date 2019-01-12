@@ -114,6 +114,7 @@ class SettingsFragment : Fragment() {
                 }
                 PrintWriter(FileWriter(File(mActivity.filesDir, SCHEDULE_FILE)), true).println(jObject[SCHEDULE])
                 PrintWriter(FileWriter(File(mActivity.filesDir, BELLS_FILE)), true).println(jObject[BELLS])
+                mActivity.initClass()
             } catch (e: Exception) {
                 Toast.makeText(mActivity, R.string.pasteErr, Toast.LENGTH_SHORT).show()
             }

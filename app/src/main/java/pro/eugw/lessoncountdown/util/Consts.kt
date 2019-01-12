@@ -16,6 +16,7 @@ const val CUSTOM_ADDRESS = "cAddress"
 const val KUNDELIK_TOKEN = "kundelikToken"
 const val SECKEY1 = "secKey1"
 const val SECKEY2 = "secKey2"
+const val LCAPI_TOKEN = "LCAPIToken"
 
 // ---broadcasts---
 
@@ -49,7 +50,10 @@ const val SEARCH_REQUEST_CODE = 90
 
 // ---Other---
 
+const val FCM_CHANNEL_ID = "FCM-LC"
 const val CHANNEL_ID = "LessonChannel"
+const val MARKS_GROUP = "MarksGroup"
+const val TIME_GROUP = "TimeGroup"
 const val COLOR_PICKER_DIALOG = "color-picker-dialog"
 const val HTTP_TIMEOUT = 3000
 const val CLIENT_ID = "387d44e3e0c94265a9e4a4caaad5111c"

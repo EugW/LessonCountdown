@@ -16,8 +16,6 @@
     <string name="addIndex">Кейін қосу:</string>
     <string name="remove">Жою</string>
     <string name="removeIndex">Жою:</string>
-    <string name="curr">Ағымдағы</string>
-    <string name="next">Келесі</string>
     <string name="sec">сек</string>
     <string name="min">мин</string>
     <string name="cancel">Болдырмау</string>
@@ -61,4 +59,11 @@
     <string name="svCred">Сохранить данные</string>
     <string name="password">Пароль</string>
     <string name="login">Логин</string>
+    <string name="resetLogin">Сбросить вход</string>
+    <string name="forSubject">по предмету</string>
+    <string name="newMark">Новая оценка</string>
+    <string name="regNoti">Зарегистрироваться для получения уведомлений о новых овенцках</string>
+    <string name="unregNoti">Отменить регистрацию для получения уведомлений о новых овенцках</string>
+    <string name="regLogin">Зарегистрироваться/Войти</string>
+    <string name="onMarkDate">за</string>
 </resources>

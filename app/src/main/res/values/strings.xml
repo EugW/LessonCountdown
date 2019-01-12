@@ -17,8 +17,6 @@
     <string name="addIndex">Add after:</string>
     <string name="remove">Remove</string>
     <string name="removeIndex">Remove:</string>
-    <string name="curr">Current</string>
-    <string name="next">Next</string>
     <string name="sec">sec</string>
     <string name="min">min</string>
     <string name="cancel">Cancel</string>
@@ -73,4 +71,11 @@
     <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="svCred">Save credentials</string>
+    <string name="resetLogin">Reset login</string>
+    <string name="newMark">New mark</string>
+    <string name="forSubject">on the subject of</string>
+    <string name="regNoti">Register for receiving new marks notification</string>
+    <string name="unregNoti">Unregister for receiving new marks notification</string>
+    <string name="regLogin">Register/Login</string>
+    <string name="onMarkDate">on</string>
 </resources>

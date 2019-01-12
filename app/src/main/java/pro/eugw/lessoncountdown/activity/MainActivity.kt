@@ -46,6 +46,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
     lateinit var queue: RequestQueue
     var clazz = JsonObject()
     var homework = JsonObject()
+    private var saved = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -241,29 +242,49 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
     }
 
     private fun inflateDOWFragment(day: Int, dayName: String) {
-        val bundle = Bundle()
-        bundle.putString("day", day.toString())
-        bundle.putString("dayName", dayName)
-        Handler(mainLooper).postDelayed({
-            val fragment = DOWFragment()
-            fragment.arguments = bundle
-            supportFragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit()
-        }, 500)
+        try {
+            val bundle = Bundle()
+            bundle.putString("day", day.toString())
+            bundle.putString("dayName", dayName)
+            Handler(mainLooper).postDelayed({
+                val fragment = DOWFragment()
+                fragment.arguments = bundle
+                supportFragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit()
+            }, 500)
+        } catch (e: Exception) {
+
+        }
     }
 
     fun inflateKundelikFragment() {
-        Handler(mainLooper).postDelayed({
-            supportFragmentManager.beginTransaction().replace(R.id.content_frame, KundelikFragment()).commit()
-        }, 500)
+        try {
+            Handler(mainLooper).postDelayed({
+                supportFragmentManager.beginTransaction().replace(R.id.content_frame, KundelikFragment()).commit()
+            }, 500)
+        } catch (e: Exception) {
+
+        }
     }
 
     private fun inflatePatchesFragment() {
-        /*Handler(mainLooper).postDelayed({
+        /*if (saved)
+            return
+        Handler(mainLooper).postDelayed({
             try {
                 supportFragmentManager.beginTransaction().replace(R.id.content_frame, PatchesFragment()).commit()
             } catch (e: Exception) { }
         }, 500)*/
         Toast.makeText(this, R.string.patches, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun inflateSettingsFragment() {
+        try {
+            Handler(mainLooper).postDelayed({
+                supportFragmentManager.beginTransaction().replace(R.id.content_frame, SettingsFragment()).commit()
+             }, 500)
+        } catch (e: Exception) {
+
+        }
     }
 
 
@@ -287,10 +308,21 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             R.id.menuSunday -> inflateDOWFragment(1, item.title.toString())
             R.id.menuKundelik -> inflateKundelikFragment()
             R.id.menuPatches -> inflatePatchesFragment()
-            R.id.menuSettings -> Handler(mainLooper).postDelayed({ supportFragmentManager.beginTransaction().replace(R.id.content_frame, SettingsFragment()).commit() }, 500)
+            R.id.menuSettings -> inflateSettingsFragment()
             R.id.menuHelp -> startActivity(Intent(this, HelpActivity::class.java))
         }
         return true
+    }
+
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        saved = true
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
+        saved = false
     }
 
 }

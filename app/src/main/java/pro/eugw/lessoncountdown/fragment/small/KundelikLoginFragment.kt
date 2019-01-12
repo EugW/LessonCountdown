@@ -39,7 +39,6 @@ class KundelikLoginFragment : DialogFragment() {
         super.onStart()
         mActivity = activity as MainActivity
         val url = "https://api.kundelik.kz/v1/authorizations/bycredentials"
-
         val jsonDetails = JSONObject()
         jsonDetails.put("username", editTextKundelikLogin.text)
         jsonDetails.put("password", editTextKundelikPassword.text)

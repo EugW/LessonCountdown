@@ -15,8 +15,6 @@
     <string name="cancel">Отмена</string>
     <string name="clear">Стереть</string>
     <string name="homework">Домашнее задание</string>
-    <string name="curr">Сейчас</string>
-    <string name="next">Затем</string>
     <string name="sec">сек</string>
     <string name="min">мин</string>
     <string name="lesson">Урок</string>
@@ -61,4 +59,11 @@
     <string name="svCred">Сохранить данные</string>
     <string name="password">Пароль</string>
     <string name="login">Логин</string>
+    <string name="resetLogin">Сбросить вход</string>
+    <string name="forSubject">по предмету</string>
+    <string name="newMark">Новая оценка</string>
+    <string name="regNoti">Зарегистрироваться для получения уведомлений о новых овенцках</string>
+    <string name="unregNoti">Отменить регистрацию для получения уведомлений о новых овенцках</string>
+    <string name="regLogin">Зарегистрироваться/Войти</string>
+    <string name="onMarkDate">за</string>
 </resources>
