@@ -122,18 +122,17 @@ class MService : Service() {
                             }
                             text.append(appendable(end, current))
                             lessons.append("${getString(R.string.lessonsRemaining)}: ${lessonArray.lastIndex - index}")
+                        } else if (current < lessonArray.first().start && index == 0) {
+                            val nolS = lessonArray.first().start
+                            text.append(appendable(nolS, current))
+                            l2 = lessonArray.first().lesson
+                            lessons.append("${getString(R.string.lessonsRemaining)}: ${lessonArray.size - index}")
                         } else if (index < lessonArray.lastIndex) {
                             val nexS = lessonArray[index + 1].start
                             if (current in (end + 1)..(nexS - 1)) {
                                 text.append(appendable(nexS, current))
                                 l2 = lessonArray[index + 1].lesson
                                 lessons.append("${getString(R.string.lessonsRemaining)}: ${lessonArray.lastIndex - index}")
-                            }
-                            if (current < lessonArray.first().start && index == 0) {
-                                val nolS = lessonArray.first().start
-                                text.append(appendable(nolS, current))
-                                l2 = lessonArray.first().lesson
-                                lessons.append("${getString(R.string.lessonsRemaining)}: ${lessonArray.size - index}")
                             }
                         }
                     }
