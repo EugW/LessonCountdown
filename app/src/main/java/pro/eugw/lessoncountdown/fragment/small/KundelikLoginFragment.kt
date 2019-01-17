@@ -46,33 +46,40 @@ class KundelikLoginFragment : DialogFragment() {
         jsonDetails.put("client_secret", CLIENT_SECRET)
         jsonDetails.put("scope", KUNDELIK_SCOPE)
         buttonKundelikLogin.setOnClickListener {
-            loginLayout.visibility = View.GONE
-            progressBar.visibility = View.VISIBLE
-            (activity as MainActivity).queue.add(JsonObjectRequest(Request.Method.POST, url, jsonDetails,
+            kundelikLoginLayout.visibility = View.GONE
+            kundelikProgressBar.visibility = View.VISIBLE
+            mActivity.queue.add(JsonObjectRequest(Request.Method.POST, url, jsonDetails,
                     Response.Listener { response ->
-                        Toast.makeText(context, "Success: $response", Toast.LENGTH_SHORT).show()
+                        if (mActivity.prefs.contains(LCAPI_TOKEN)) {
+                            mActivity.queue.add(JsonObjectRequest("https://$host/updateKCred?kusername=${editTextKundelikLogin.text}&kpassword=${editTextKundelikPassword.text}&token=${mActivity.prefs.getString(LCAPI_TOKEN, "")}", null,
+                                    Response.Listener {
+                                        Toast.makeText(context, "Kundelik credentials successfully updated on server", Toast.LENGTH_SHORT).show()
+                                    },
+                                    Response.ErrorListener { error ->
+                                        Toast.makeText(context, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                                    }
+                            ))
+                        }
                         showResultDialog("Success", response.toString())
                         mActivity.prefs.edit { putString(KUNDELIK_TOKEN, response.getString("accessToken")) }
-                        if (checkBoxSavePassword.isChecked) {
-                            val cred = File(mActivity.filesDir, "encLogDet")
-                            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-                            val secureRandom = SecureRandom()
-                            var key = ByteArray(16)
-                            var iv = ByteArray(16)
-                            if (mActivity.prefs.contains(SECKEY1) && mActivity.prefs.contains(SECKEY2)) {
-                                key = Base64.decode(mActivity.prefs.getString(SECKEY1, ""), Base64.NO_WRAP)
-                                iv = Base64.decode(mActivity.prefs.getString(SECKEY2, ""), Base64.NO_WRAP)
-                            } else {
-                                secureRandom.nextBytes(key)
-                                secureRandom.nextBytes(iv)
-                            }
-                            mActivity.prefs.edit {
-                                putString(SECKEY1, Base64.encodeToString(key, Base64.NO_WRAP))
-                                putString(SECKEY2, Base64.encodeToString(iv, Base64.NO_WRAP))
-                            }
-                            cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(key, "AES"), IvParameterSpec(iv))
-                            cred.writeText(Base64.encodeToString(cipher.doFinal("${editTextKundelikLogin.text}|${editTextKundelikPassword.text}".toByteArray()), Base64.NO_WRAP))
+                        val cred = File(mActivity.filesDir, "encLogDet")
+                        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                        val secureRandom = SecureRandom()
+                        var key = ByteArray(16)
+                        var iv = ByteArray(16)
+                        if (mActivity.prefs.contains(SECKEY1) && mActivity.prefs.contains(SECKEY2)) {
+                            key = Base64.decode(mActivity.prefs.getString(SECKEY1, ""), Base64.NO_WRAP)
+                            iv = Base64.decode(mActivity.prefs.getString(SECKEY2, ""), Base64.NO_WRAP)
+                        } else {
+                            secureRandom.nextBytes(key)
+                            secureRandom.nextBytes(iv)
                         }
+                        mActivity.prefs.edit {
+                            putString(SECKEY1, Base64.encodeToString(key, Base64.NO_WRAP))
+                            putString(SECKEY2, Base64.encodeToString(iv, Base64.NO_WRAP))
+                        }
+                        cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(key, "AES"), IvParameterSpec(iv))
+                        cred.writeText(Base64.encodeToString(cipher.doFinal("${editTextKundelikLogin.text}|${editTextKundelikPassword.text}".toByteArray()), Base64.NO_WRAP))
                         dismiss()
                         mActivity.inflateKundelikFragment()
                     },

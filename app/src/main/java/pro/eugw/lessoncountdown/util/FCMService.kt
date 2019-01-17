@@ -34,12 +34,11 @@ class FCMService : FirebaseMessagingService() {
 
     override fun onNewToken(p0: String) {
         super.onNewToken(p0)
-        println("UPDATED TOKEN:$p0")
         val host = prefs.getString(CUSTOM_ADDRESS, getString(R.string.host))
         queue.add(JsonObjectRequest("https://$host/updateFCMToken?token=${prefs.getString(LCAPI_TOKEN, "")}&fcmtoken=$p0", null,
                 Response.Listener {},
-                Response.ErrorListener {
-        }))
+                Response.ErrorListener {}
+        ))
 
     }
 
@@ -52,7 +51,7 @@ class FCMService : FirebaseMessagingService() {
         val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(parsed["date"].asString)
         val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val mBuilder = NotificationCompat.Builder(this, FCM_CHANNEL_ID)
-                .setContentTitle(getString(R.string.newMark) + " " + getString(R.string.forSubject) + " " + parsed["subject"].asString)
+                .setContentTitle(getString(R.string.newMark) + ": " + parsed["subject"].asString)
                 .setContentText(parsed["mark"].asString + " " + getString(R.string.onMarkDate) + " "  + SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(date))
                 .setSmallIcon(R.drawable.ic_oti)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)

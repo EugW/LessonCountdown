@@ -52,7 +52,6 @@ const val SEARCH_REQUEST_CODE = 90
 
 const val FCM_CHANNEL_ID = "FCM-LC"
 const val CHANNEL_ID = "LessonChannel"
-const val MARKS_GROUP = "MarksGroup"
 const val TIME_GROUP = "TimeGroup"
 const val COLOR_PICKER_DIALOG = "color-picker-dialog"
 const val HTTP_TIMEOUT = 3000

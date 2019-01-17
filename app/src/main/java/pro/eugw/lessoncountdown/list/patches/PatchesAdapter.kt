@@ -16,7 +16,7 @@ class PatchesAdapter(var patchesArrayList: ArrayList<PatchesElement>, var fragme
     override fun onBindViewHolder(holder: PatchesHolder, position: Int) {
         holder.name.text = patchesArrayList[position].name
         holder.id.text = patchesArrayList[position].id.toString()
-        holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
+        holder.checkBox.setOnCheckedChangeListener { _, _ ->
             //add to active patches list
         }
         holder.element.setOnClickListener {

@@ -49,9 +49,10 @@ class DOWFragment : Fragment() {
         val toolbar = activity!!.main_toolbar
         toolbar.title = bundle!!.getString("dayName")
         if (mActivity.prefs.getBoolean(CUSTOM_CONFIG, false))
-            if (!mActivity.prefs.getBoolean(HIDE_CONTROLS, false))
-                if (toolbar.menu.size() <= 0)
-                    toolbar.inflateMenu(R.menu.dayofweek_menu)
+            if (!mActivity.prefs.getBoolean(HIDE_CONTROLS, false)) {
+                toolbar.menu.clear()
+                toolbar.inflateMenu(R.menu.dayofweek_menu)
+            }
         adapter = ScheduleAdapter(list, this, false)
         adapterEdit = ScheduleAdapter(list, this, true)
         dialogView.adapter = adapter

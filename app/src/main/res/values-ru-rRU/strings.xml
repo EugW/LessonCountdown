@@ -60,10 +60,9 @@
     <string name="password">Пароль</string>
     <string name="login">Логин</string>
     <string name="resetLogin">Сбросить вход</string>
-    <string name="forSubject">по предмету</string>
     <string name="newMark">Новая оценка</string>
     <string name="regNoti">Зарегистрироваться для получения уведомлений о новых овенцках</string>
     <string name="unregNoti">Отменить регистрацию для получения уведомлений о новых овенцках</string>
-    <string name="regLogin">Зарегистрироваться/Войти</string>
     <string name="onMarkDate">за</string>
+    <string name="marksLog">Лог оценок</string>
 </resources>

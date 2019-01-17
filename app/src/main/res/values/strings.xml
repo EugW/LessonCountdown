@@ -66,16 +66,14 @@
     <string name="utilities">Utilities</string>
     <string name="patches">Patches (Soon)</string>
     <string name="kundelik">Kundelik</string>
-    <string name="patchHelp" translatable="false">All in secs\n*min for minute\nSupported maths: *, /, +, -\nLesson bias patch depends on lesson duration patch</string>
     <string name="download">Download schedule</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="svCred">Save credentials</string>
     <string name="resetLogin">Reset login</string>
     <string name="newMark">New mark</string>
-    <string name="forSubject">on the subject of</string>
     <string name="regNoti">Register for receiving new marks notification</string>
     <string name="unregNoti">Unregister for receiving new marks notification</string>
-    <string name="regLogin">Register/Login</string>
     <string name="onMarkDate">on</string>
+    <string name="marksLog">Marks log</string>
 </resources>

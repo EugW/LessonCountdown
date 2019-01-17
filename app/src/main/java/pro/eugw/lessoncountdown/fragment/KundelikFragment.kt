@@ -16,13 +16,13 @@ import androidx.fragment.app.Fragment
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_kundelik_panel.*
 import org.json.JSONObject
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.fragment.small.KundelikLoginFragment
 import pro.eugw.lessoncountdown.fragment.small.LCAPILoginFragment
+import pro.eugw.lessoncountdown.fragment.small.LCAPIMarksLogFragment
 import pro.eugw.lessoncountdown.util.*
 import java.io.File
 import java.io.PrintWriter
@@ -44,10 +44,8 @@ class KundelikFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         mActivity = activity as MainActivity
-        mActivity.main_toolbar.title = getString(R.string.kundelik)
-        mActivity.main_toolbar.menu.clear()
         prefs = mActivity.prefs
-        token = prefs.getString("kundelikToken", "")!!
+        token = prefs.getString(KUNDELIK_TOKEN, "")!!
         if (token.length < 5) {
             KundelikLoginFragment().show(mActivity.supportFragmentManager, "lol")
         } else {
@@ -65,33 +63,38 @@ class KundelikFragment : Fragment() {
             File(mActivity.filesDir, "encLogDet").delete()
         }
         val host = prefs.getString(CUSTOM_ADDRESS, getString(R.string.host))
+        when (prefs.contains(LCAPI_TOKEN)) {
+            true -> {
+                buttonRegisterNotification.visibility = View.GONE
+            }
+            false -> {
+                buttonUnregisterNotification.visibility = View.GONE
+            }
+        }
         buttonRegisterNotification.setOnClickListener {
             LCAPILoginFragment().show(mActivity.supportFragmentManager, "lol")
         }
         buttonUnregisterNotification.setOnClickListener {
             val url = "https://$host/unregister?token=${prefs.getString(LCAPI_TOKEN, "")}"
             mActivity.queue.add(JsonObjectRequest(url, null,
-                    Response.Listener { response ->
+                    Response.Listener {
                         Toast.makeText(mActivity, "Success", Toast.LENGTH_SHORT).show()
                         prefs.edit {
                             remove(LCAPI_TOKEN)
                         }
+                        buttonUnregisterNotification.visibility = View.GONE
+                        buttonRegisterNotification.visibility = View.VISIBLE
                     },
                     Response.ErrorListener { error ->
                         Toast.makeText(mActivity, error.message, Toast.LENGTH_SHORT).show()
-                    }))
+                    }
+            ))
         }
-    }
-
-    private fun updateKToken(token: String) {
-        val url = "https://$host/updateKToken?token=${prefs.getString(LCAPI_TOKEN, "")}&ktoken=$token"
-        mActivity.queue.add(JsonObjectRequest(url, null,
-                Response.Listener { response ->
-                    Toast.makeText(mActivity, "Success", Toast.LENGTH_SHORT).show()
-                },
-                Response.ErrorListener { error ->
-                    Toast.makeText(mActivity, error.message, Toast.LENGTH_SHORT).show()
-                }))
+        buttonMarksLog.setOnClickListener {
+            val fragment = LCAPIMarksLogFragment()
+            fragment.setTargetFragment(this, SEARCH_REQUEST_CODE)
+            fragmentManager!!.beginTransaction().add(fragment, "search-dialog").commit()
+        }
     }
 
     private fun tokenTestRequest(): JsonObjectRequest {
@@ -126,7 +129,6 @@ class KundelikFragment : Fragment() {
                                 Response.Listener { response ->
                                     Toast.makeText(context, "Token update succeed: $response", Toast.LENGTH_SHORT).show()
                                     mActivity.prefs.edit { putString(KUNDELIK_TOKEN, response.getString("accessToken")) }
-                                    updateKToken(response.getString("accessToken"))
                                     mActivity.inflateKundelikFragment()
                                 },
                                 Response.ErrorListener { error ->
