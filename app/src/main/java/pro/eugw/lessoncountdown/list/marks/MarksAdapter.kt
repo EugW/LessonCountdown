@@ -15,7 +15,8 @@ class MarksAdapter(private var arrayList: ArrayList<MarksElement>): RecyclerView
 
     override fun onBindViewHolder(holder: MarksHolder, position: Int) {
         holder.mark.text = arrayList[position].mark
-        holder.date.text = arrayList[position].mark
+        holder.date.text = arrayList[position].date.split("T")[0]
+        holder.time.text = arrayList[position].date.split("T")[1].subSequence(0, 5)
         holder.subject.text = arrayList[position].subject
     }
 

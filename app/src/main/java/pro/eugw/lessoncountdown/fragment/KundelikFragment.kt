@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_kundelik_panel.*
 import org.json.JSONObject
 import pro.eugw.lessoncountdown.R
@@ -44,6 +45,8 @@ class KundelikFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         mActivity = activity as MainActivity
+        mActivity.main_toolbar.title = getString(R.string.kundelik)
+        mActivity.main_toolbar.menu.clear()
         prefs = mActivity.prefs
         token = prefs.getString(KUNDELIK_TOKEN, "")!!
         if (token.length < 5) {

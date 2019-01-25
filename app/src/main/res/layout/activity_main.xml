@@ -22,6 +22,12 @@
 
         </androidx.appcompat.widget.Toolbar>
 
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider" />
+
         <FrameLayout
             android:id="@+id/content_frame"
             android:layout_width="match_parent"

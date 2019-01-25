@@ -24,19 +24,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <service android:name=".MService" />
-
-        <service android:name=".util.FCMService"
+        <service
+            android:name=".util.FCMService"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
-        <activity
-            android:name=".activity.HelpActivity"
-            android:label="@string/help" />
     </application>
 
 </manifest>

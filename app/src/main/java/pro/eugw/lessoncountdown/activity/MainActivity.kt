@@ -27,6 +27,7 @@ import org.json.JSONObject
 import pro.eugw.lessoncountdown.MService
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.fragment.DOWFragment
+import pro.eugw.lessoncountdown.fragment.HelpFragment
 import pro.eugw.lessoncountdown.fragment.KundelikFragment
 import pro.eugw.lessoncountdown.fragment.SettingsFragment
 import pro.eugw.lessoncountdown.util.*
@@ -287,6 +288,16 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         }
     }
 
+    private fun inflateHelpFragment() {
+        try {
+            Handler(mainLooper).postDelayed({
+                supportFragmentManager.beginTransaction().replace(R.id.content_frame, HelpFragment()).commit()
+            }, 500)
+        } catch (e: Exception) {
+
+        }
+    }
+
 
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
@@ -309,7 +320,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             R.id.menuKundelik -> inflateKundelikFragment()
             R.id.menuPatches -> inflatePatchesFragment()
             R.id.menuSettings -> inflateSettingsFragment()
-            R.id.menuHelp -> startActivity(Intent(this, HelpActivity::class.java))
+            R.id.menuHelp -> inflateHelpFragment()
         }
         return true
     }

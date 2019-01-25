@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_day_of_week.view.*
+import kotlinx.android.synthetic.main.fragment_day_of_week.*
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.list.schedule.ScheduleAdapter
@@ -33,20 +33,16 @@ class DOWFragment : Fragment() {
     private var schedule = JsonObject()
     private var bells = JsonObject()
     private var day = "0"
-    private lateinit var dialogView: androidx.recyclerview.widget.RecyclerView
-    private lateinit var mActivity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val v = inflater.inflate(R.layout.fragment_day_of_week, container, false)
-        dialogView = v.dialogRecycler
-        return v
+        return inflater.inflate(R.layout.fragment_day_of_week, container, false)
     }
 
     override fun onStart() {
         super.onStart()
-        mActivity = activity as MainActivity
+        val mActivity = activity as MainActivity
         val bundle = arguments
-        val toolbar = activity!!.main_toolbar
+        val toolbar = mActivity.main_toolbar
         toolbar.title = bundle!!.getString("dayName")
         if (mActivity.prefs.getBoolean(CUSTOM_CONFIG, false))
             if (!mActivity.prefs.getBoolean(HIDE_CONTROLS, false)) {
@@ -55,9 +51,9 @@ class DOWFragment : Fragment() {
             }
         adapter = ScheduleAdapter(list, this, false)
         adapterEdit = ScheduleAdapter(list, this, true)
-        dialogView.adapter = adapter
-        dialogView.layoutManager = LinearLayoutManager(activity)
-        dialogView.addItemDecoration(DividerItemDecoration(dialogView.context, LinearLayoutManager(activity).orientation))
+        dialogRecycler.adapter = adapter
+        dialogRecycler.layoutManager = LinearLayoutManager(mActivity)
+        dialogRecycler.addItemDecoration(DividerItemDecoration(mActivity, LinearLayoutManager(mActivity).orientation))
         val job = mActivity.clazz
         if (!job.has(SCHEDULE))
             job.add(SCHEDULE, JsonObject())
@@ -136,7 +132,7 @@ class DOWFragment : Fragment() {
                         PrintWriter(FileWriter(File(mActivity.filesDir, BELLS_FILE)), true).println(bells)
                     }
                     edit = !edit
-                    dialogView.adapter = if (edit) adapterEdit else adapter
+                    dialogRecycler.adapter = if (edit) adapterEdit else adapter
                     if (edit) adapterEdit.notifyDataSetChanged() else adapter.notifyDataSetChanged()
                 }
                 R.id.menuAdd -> {
