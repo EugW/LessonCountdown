@@ -8,14 +8,13 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.google.gson.JsonParser
+import kotlinx.android.synthetic.main.fragment_search.*
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.list.search.SearchAdapter
@@ -26,15 +25,28 @@ import kotlin.collections.ArrayList
 
 class SearchDialog : DialogFragment() {
 
-    private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: SearchAdapter
     private var arrayList = ArrayList<SearchElement>()
     private var baseArray = ArrayList<SearchElement>()
     private lateinit var host: String
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val v = inflater.inflate(R.layout.fragment_search, container, false)
-        v.findViewById<EditText>(R.id.searchEditText).addTextChangedListener(object : TextWatcher {
+
+        return inflater.inflate(R.layout.fragment_search, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        val mActivity = activity as MainActivity
+        host = mActivity.prefs.getString(CUSTOM_ADDRESS, getString(R.string.host)) as String
+        if (host.isBlank())
+            host = getString(R.string.host)
+        adapter = SearchAdapter(arrayList, this)
+        searchRecycler.layoutManager = LinearLayoutManager(mActivity)
+        searchRecycler.addItemDecoration(androidx.recyclerview.widget.DividerItemDecoration(mActivity, LinearLayoutManager(mActivity).orientation))
+        searchRecycler.adapter = adapter
+        searchEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
@@ -56,21 +68,6 @@ class SearchDialog : DialogFragment() {
                     adapter.notifyDataSetChanged()
             }
         })
-        recyclerView = v.findViewById(R.id.searchRecycler)
-        return v
-    }
-
-    override fun onStart() {
-        super.onStart()
-        dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        val mActivity = activity as MainActivity
-        host = mActivity.prefs.getString(CUSTOM_ADDRESS, getString(R.string.host)) as String
-        if (host.isBlank())
-            host = getString(R.string.host)
-        adapter = SearchAdapter(arrayList, this)
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.addItemDecoration(androidx.recyclerview.widget.DividerItemDecoration(recyclerView.context, LinearLayoutManager(context).orientation))
-        recyclerView.adapter = adapter
         mActivity.queue.add(JsonObjectRequest("https://$host/classes?lang=${Locale.getDefault().language}", null,
                 Response.Listener {
                     try {

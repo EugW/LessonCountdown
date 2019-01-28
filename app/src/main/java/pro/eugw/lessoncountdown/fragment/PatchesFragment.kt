@@ -17,8 +17,8 @@ class PatchesFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_patches, container, false)
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         mActivity = activity as MainActivity
         mActivity.main_toolbar.title = getString(R.string.patches)
         mActivity.main_toolbar.menu.clear()

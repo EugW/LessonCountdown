@@ -32,8 +32,8 @@ class LCAPILoginFragment : DialogFragment() {
         return inflater.inflate(pro.eugw.lessoncountdown.R.layout.fragment_lcapi_login, container, false)
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         mActivity = activity as MainActivity
         val prefs = mActivity.prefs
         val host = prefs.getString(CUSTOM_ADDRESS, getString(pro.eugw.lessoncountdown.R.string.host))

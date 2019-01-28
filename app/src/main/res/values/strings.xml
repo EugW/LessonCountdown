@@ -69,7 +69,6 @@
     <string name="download">Download schedule</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
-    <string name="svCred">Save credentials</string>
     <string name="resetLogin">Reset login</string>
     <string name="newMark">New mark</string>
     <string name="regNoti">Register for receiving new marks notification</string>

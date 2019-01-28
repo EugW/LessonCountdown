@@ -33,8 +33,8 @@ class LCAPIMarksLogFragment : DialogFragment() {
         return inflater.inflate(R.layout.fragment_lcapi_marks_log, container, false)
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         adapter = MarksAdapter(marks)
         val mActivity = activity as MainActivity
@@ -59,11 +59,11 @@ class LCAPIMarksLogFragment : DialogFragment() {
                                 val from = sdf.format(calendar.time)
                                 mActivity.queue.add(JsonArrayRequest("https://api.kundelik.kz/v1/persons/$personId/schools/$schoolId/marks/$from/$to?access_token=$token",
                                         Response.Listener { response2 ->
-                                            val jarr = JSONArray()
+                                            val jArr = JSONArray()
                                             JsonParser().parse(response2.toString()).asJsonArray.forEach {
-                                                jarr.put(it.asJsonObject["lesson"].asString)
+                                                jArr.put(it.asJsonObject["lesson"].asString)
                                             }
-                                            mActivity.queue.add(JsonArrayRequest(Request.Method.POST, "https://api.kundelik.kz/v1/lessons/many?access_token=$token", jarr,
+                                            mActivity.queue.add(JsonArrayRequest(Request.Method.POST, "https://api.kundelik.kz/v1/lessons/many?access_token=$token", jArr,
                                                     Response.Listener { response3 ->
                                                         val sdf2 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.getDefault())
                                                         JsonParser().parse(response2.toString()).asJsonArray.sortedBy { sdf2.parse(it.asJsonObject["date"].asString).time }.forEach {

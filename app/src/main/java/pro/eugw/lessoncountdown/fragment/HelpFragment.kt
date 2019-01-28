@@ -19,8 +19,8 @@ class HelpFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_help, container, false)
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).main_toolbar.menu.clear()
         (activity as MainActivity).main_toolbar.title = getString(R.string.help)
         imageViewUltimate.setImageBitmap(BitmapFactory.decodeStream(resources.openRawResource(R.raw.lc_ic_hires)))

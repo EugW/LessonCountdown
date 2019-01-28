@@ -38,8 +38,8 @@ class DOWFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_day_of_week, container, false)
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val mActivity = activity as MainActivity
         val bundle = arguments
         val toolbar = mActivity.main_toolbar
@@ -182,8 +182,8 @@ class DOWFragment : Fragment() {
         }
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onDestroyView() {
+        super.onDestroyView()
         list.clear()
     }
 

@@ -56,7 +56,6 @@
     <string name="patches">Патчтар (Скоро)</string>
     <string name="utilities">Утилттер</string>
     <string name="download">Скачать расписание</string>
-    <string name="svCred">Сохранить данные</string>
     <string name="password">Пароль</string>
     <string name="login">Логин</string>
     <string name="resetLogin">Сбросить вход</string>

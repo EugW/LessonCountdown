@@ -48,7 +48,8 @@ class SettingsFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_settings, container, false)
     }
 
-    override fun onStart() {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         super.onStart()
         mActivity = activity as MainActivity
         mActivity.main_toolbar.title = getString(R.string.settings)
