@@ -50,7 +50,6 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        super.onStart()
         mActivity = activity as MainActivity
         mActivity.main_toolbar.title = getString(R.string.settings)
         mActivity.main_toolbar.menu.clear()
