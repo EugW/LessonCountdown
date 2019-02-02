@@ -8,8 +8,8 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.DialogFragment
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
@@ -22,72 +22,72 @@ import pro.eugw.lessoncountdown.list.search.SearchElement
 import pro.eugw.lessoncountdown.util.*
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.concurrent.thread
 
 class SearchDialog : DialogFragment() {
 
     private lateinit var adapter: SearchAdapter
-    private var arrayList = ArrayList<SearchElement>()
+    private var searchResults = ArrayList<SearchElement>()
     private var baseArray = ArrayList<SearchElement>()
     private lateinit var host: String
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-
+        super.onCreateView(inflater, container, savedInstanceState)
         return inflater.inflate(R.layout.fragment_search, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
         dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         val mActivity = activity as MainActivity
         host = mActivity.prefs.getString(CUSTOM_ADDRESS, getString(R.string.host)) as String
         if (host.isBlank())
             host = getString(R.string.host)
-        adapter = SearchAdapter(arrayList, this)
+        adapter = SearchAdapter(searchResults, this)
         searchRecycler.layoutManager = LinearLayoutManager(mActivity)
-        searchRecycler.addItemDecoration(androidx.recyclerview.widget.DividerItemDecoration(mActivity, LinearLayoutManager(mActivity).orientation))
+        searchRecycler.addItemDecoration(DividerItemDecoration(mActivity, LinearLayoutManager(mActivity).orientation))
         searchRecycler.adapter = adapter
         searchEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                val tamar = ArrayList<SearchElement>()
-                baseArray.forEach {
-                    val mmm = it
-                    var match = true
-                    s.toString().toUpperCase().split(" ").forEach { string ->
-                        if (!(mmm.number + mmm.letter + mmm.subgroup + mmm.school_name).replace(" ", "").toUpperCase().contains(string)) {
-                            match = false
+                thread(true) {
+                    val tamar = ArrayList<SearchElement>()
+                    baseArray.forEach {
+                        val mmm = it
+                        var match = true
+                        s.toString().toUpperCase().split(" ").forEach { string ->
+                            if (!(mmm.number + mmm.letter + mmm.subgroup + mmm.school_name).replace(" ", "").toUpperCase().contains(string)) {
+                                match = false
+                            }
                         }
+                        if (match)
+                            tamar.add(it)
                     }
-                    if (match)
-                        tamar.add(it)
+                    searchResults.clear()
+                    searchResults.addAll(tamar)
+                    mActivity.runOnUiThread {
+                        adapter.notifyDataSetChanged()
+                    }
                 }
-                arrayList.clear()
-                arrayList.addAll(tamar)
-                if (isVisible)
-                    adapter.notifyDataSetChanged()
             }
         })
         mActivity.queue.add(JsonObjectRequest("https://$host/classes?lang=${Locale.getDefault().language}", null,
                 Response.Listener {
-                    try {
+                    thread(true) {
                         JsonParser().parse(it.toString()).asJsonObject[CLASSES].asJsonArray.forEach {jE ->
                             baseArray.add(SearchElement(jE.asJsonObject[NUMBER].asString, jE.asJsonObject[LETTER].asString, jE.asJsonObject[SUBGROUP].asString, jE.asJsonObject[SCHOOL_ID].asString, jE.asJsonObject[SCHOOL_NAME].asString))
                         }
-                        arrayList.clear()
-                        arrayList.addAll(baseArray)
-                        if (isVisible)
+                        searchResults.clear()
+                        searchResults.addAll(baseArray)
+                        mActivity.runOnUiThread {
                             adapter.notifyDataSetChanged()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        if (isVisible)
-                            Toast.makeText(context, R.string.networkErr, Toast.LENGTH_SHORT).show()
-                        dismissAllowingStateLoss()
+                            progressBarSearch.visibility = View.GONE
+                            searchRecycler.visibility = View.VISIBLE
+                        }
                     }
                 },
-                Response.ErrorListener {
-
-                }
+                Response.ErrorListener {}
         ))
     }
 

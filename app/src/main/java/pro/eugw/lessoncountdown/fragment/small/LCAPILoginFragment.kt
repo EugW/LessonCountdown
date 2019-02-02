@@ -29,11 +29,12 @@ class LCAPILoginFragment : DialogFragment() {
     private lateinit var mActivity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        super.onCreateView(inflater, container, savedInstanceState)
         return inflater.inflate(pro.eugw.lessoncountdown.R.layout.fragment_lcapi_login, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
         mActivity = activity as MainActivity
         val prefs = mActivity.prefs
         val host = prefs.getString(CUSTOM_ADDRESS, getString(pro.eugw.lessoncountdown.R.string.host))

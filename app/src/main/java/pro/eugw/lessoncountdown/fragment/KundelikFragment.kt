@@ -39,11 +39,12 @@ class KundelikFragment : Fragment() {
     private lateinit var prefs: SharedPreferences
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        super.onCreateView(inflater, container, savedInstanceState)
         return inflater.inflate(R.layout.fragment_kundelik_panel, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
         mActivity = activity as MainActivity
         mActivity.main_toolbar.title = getString(R.string.kundelik)
         mActivity.main_toolbar.menu.clear()
@@ -94,9 +95,7 @@ class KundelikFragment : Fragment() {
             ))
         }
         buttonMarksLog.setOnClickListener {
-            val fragment = LCAPIMarksLogFragment()
-            fragment.setTargetFragment(this, SEARCH_REQUEST_CODE)
-            fragmentManager!!.beginTransaction().add(fragment, "search-dialog").commit()
+            LCAPIMarksLogFragment().show(mActivity.supportFragmentManager, "marks log")
         }
     }
 

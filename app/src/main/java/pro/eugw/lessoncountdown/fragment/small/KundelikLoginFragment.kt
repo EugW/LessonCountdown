@@ -32,11 +32,12 @@ class KundelikLoginFragment : DialogFragment() {
     private lateinit var mActivity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        super.onCreateView(inflater, container, savedInstanceState)
         return inflater.inflate(R.layout.fragment_kundelik_login, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
         mActivity = activity as MainActivity
         val url = "https://api.kundelik.kz/v1/authorizations/bycredentials"
         val jsonDetails = JSONObject()

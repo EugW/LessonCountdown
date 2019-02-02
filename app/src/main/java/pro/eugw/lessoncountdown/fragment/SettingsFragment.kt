@@ -44,12 +44,13 @@ class SettingsFragment : Fragment() {
     private var colorBackground = Color.parseColor("#ffffff")
     private lateinit var mActivity: MainActivity
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        super.onCreateView(inflater, container, savedInstanceState)
         return inflater.inflate(R.layout.fragment_settings, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
         mActivity = activity as MainActivity
         mActivity.main_toolbar.title = getString(R.string.settings)
         mActivity.main_toolbar.menu.clear()
@@ -71,7 +72,7 @@ class SettingsFragment : Fragment() {
         selClassLayout.setOnClickListener {
             val fragment = SearchDialog()
             fragment.setTargetFragment(this, SEARCH_REQUEST_CODE)
-            fragmentManager!!.beginTransaction().add(fragment, "search-dialog").commit()
+            fragment.show(mActivity.supportFragmentManager, "search-dialog")
         }
     }
 

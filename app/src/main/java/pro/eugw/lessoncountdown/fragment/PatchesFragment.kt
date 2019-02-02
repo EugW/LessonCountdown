@@ -14,11 +14,12 @@ class PatchesFragment : Fragment() {
     private lateinit var mActivity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        super.onCreateView(inflater, container, savedInstanceState)
         return inflater.inflate(R.layout.fragment_patches, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
         mActivity = activity as MainActivity
         mActivity.main_toolbar.title = getString(R.string.patches)
         mActivity.main_toolbar.menu.clear()

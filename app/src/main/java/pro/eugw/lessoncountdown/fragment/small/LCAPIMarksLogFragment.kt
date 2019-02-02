@@ -21,6 +21,7 @@ import pro.eugw.lessoncountdown.list.marks.MarksElement
 import pro.eugw.lessoncountdown.util.KUNDELIK_TOKEN
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.concurrent.thread
 
 class LCAPIMarksLogFragment : DialogFragment() {
 
@@ -30,11 +31,12 @@ class LCAPIMarksLogFragment : DialogFragment() {
     private var marks = ArrayList<MarksElement>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        super.onCreateView(inflater, container, savedInstanceState)
         return inflater.inflate(R.layout.fragment_lcapi_marks_log, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
         dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         adapter = MarksAdapter(marks)
         val mActivity = activity as MainActivity
@@ -65,23 +67,27 @@ class LCAPIMarksLogFragment : DialogFragment() {
                                             }
                                             mActivity.queue.add(JsonArrayRequest(Request.Method.POST, "https://api.kundelik.kz/v1/lessons/many?access_token=$token", jArr,
                                                     Response.Listener { response3 ->
-                                                        val sdf2 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.getDefault())
-                                                        JsonParser().parse(response2.toString()).asJsonArray.sortedBy { sdf2.parse(it.asJsonObject["date"].asString).time }.forEach {
-                                                            var name = "null"
-                                                            JsonParser().parse(response3.toString()).asJsonArray.forEach { el ->
-                                                                if (el.asJsonObject["id"].asString == it.asJsonObject["lesson"].asString)
-                                                                    name = el.asJsonObject["subject"].asJsonObject["name"].asString
+                                                        thread(true) {
+                                                            val sdf2 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.getDefault())
+                                                            JsonParser().parse(response2.toString()).asJsonArray.sortedBy { sdf2.parse(it.asJsonObject["date"].asString).time }.forEach {
+                                                                var name = "null"
+                                                                JsonParser().parse(response3.toString()).asJsonArray.forEach { el ->
+                                                                    if (el.asJsonObject["id"].asString == it.asJsonObject["lesson"].asString)
+                                                                        name = el.asJsonObject["subject"].asJsonObject["name"].asString
+                                                                }
+                                                                marks.add(0, MarksElement(it.asJsonObject["value"].asString, it.asJsonObject["date"].asString, name))
                                                             }
-                                                            marks.add(0, MarksElement(it.asJsonObject["value"].asString, it.asJsonObject["date"].asString, name))
+                                                            mActivity.runOnUiThread {
+                                                                adapter.notifyDataSetChanged()
+                                                                marksProgressBar.visibility = View.GONE
+                                                                recyclerViewMarksLog.visibility = View.VISIBLE
+                                                                //dialog?.window?.setLayout(mActivity.window.attributes.width, mActivity.window.attributes.height)
+                                                            }
                                                         }
-                                                        adapter.notifyDataSetChanged()
-                                                        recyclerViewMarksLog.visibility = View.VISIBLE
-                                                        marksProgressBar.visibility = View.GONE
                                                     },
                                                     Response.ErrorListener {
                                                     }
                                             ))
-
                                         },
                                         Response.ErrorListener {
                                         }
@@ -95,6 +101,5 @@ class LCAPIMarksLogFragment : DialogFragment() {
                 }
         ))
     }
-
 
 }
