@@ -8,15 +8,16 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.JsonObject
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
+import pro.eugw.lessoncountdown.util.network.JsObRe
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.random.Random
@@ -35,7 +36,7 @@ class FCMService : FirebaseMessagingService() {
     override fun onNewToken(p0: String) {
         super.onNewToken(p0)
         val host = prefs.getString(CUSTOM_ADDRESS, getString(R.string.host))
-        queue.add(JsonObjectRequest("https://$host/updateFCMToken?token=${prefs.getString(LCAPI_TOKEN, "")}&fcmtoken=$p0", null,
+        queue.add(JsObRe(Request.Method.GET, "https://$host/updateFCMToken?token=${prefs.getString(LCAPI_TOKEN, "")}&fcmtoken=$p0",
                 Response.Listener {},
                 Response.ErrorListener {}
         ))

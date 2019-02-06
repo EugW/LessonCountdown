@@ -11,8 +11,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.android.volley.Request
 import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
 import com.google.gson.JsonParser
 import kotlinx.android.synthetic.main.fragment_search.*
 import pro.eugw.lessoncountdown.R
@@ -20,6 +20,7 @@ import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.list.search.SearchAdapter
 import pro.eugw.lessoncountdown.list.search.SearchElement
 import pro.eugw.lessoncountdown.util.*
+import pro.eugw.lessoncountdown.util.network.JsObRe
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
@@ -72,7 +73,7 @@ class SearchDialog : DialogFragment() {
                 }
             }
         })
-        mActivity.queue.add(JsonObjectRequest("https://$host/classes?lang=${Locale.getDefault().language}", null,
+        mActivity.queue.add(JsObRe(Request.Method.GET, "https://$host/classes?lang=${Locale.getDefault().language}",
                 Response.Listener {
                     thread(true) {
                         JsonParser().parse(it.toString()).asJsonObject[CLASSES].asJsonArray.forEach {jE ->

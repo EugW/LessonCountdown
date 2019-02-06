@@ -9,16 +9,17 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.volley.Request
 import com.android.volley.Response
-import com.android.volley.toolbox.JsonArrayRequest
-import com.android.volley.toolbox.JsonObjectRequest
-import com.google.gson.JsonParser
+import com.google.gson.JsonArray
 import kotlinx.android.synthetic.main.fragment_lcapi_marks_log.*
-import org.json.JSONArray
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.list.marks.MarksAdapter
 import pro.eugw.lessoncountdown.list.marks.MarksElement
+import pro.eugw.lessoncountdown.util.KUNDELIK_ROLE
 import pro.eugw.lessoncountdown.util.KUNDELIK_TOKEN
+import pro.eugw.lessoncountdown.util.SUPPORTED_KUNDELIK_ROLES
+import pro.eugw.lessoncountdown.util.network.JsArRe
+import pro.eugw.lessoncountdown.util.network.JsObRe
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.concurrent.thread
@@ -43,35 +44,35 @@ class LCAPIMarksLogFragment : DialogFragment() {
         recyclerViewMarksLog.layoutManager = LinearLayoutManager(mActivity)
         recyclerViewMarksLog.addItemDecoration(DividerItemDecoration(mActivity, LinearLayoutManager(mActivity).orientation))
         recyclerViewMarksLog.adapter = adapter
-        if (!mActivity.prefs.contains(KUNDELIK_TOKEN)) {
+        if (!mActivity.prefs.contains(KUNDELIK_TOKEN) || !SUPPORTED_KUNDELIK_ROLES.contains(mActivity.prefs.getString(KUNDELIK_ROLE, ""))) {
             dismiss()
             return
         }
         val token = mActivity.prefs.getString(KUNDELIK_TOKEN, "")
-        mActivity.queue.add(JsonObjectRequest("https://api.kundelik.kz/v1/users/me?access_token=$token", null,
+        mActivity.queue.add(JsObRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me?access_token=$token",
                 Response.Listener { response ->
-                    personId = response.getString("personId")
-                    mActivity.queue.add(JsonArrayRequest("https://api.kundelik.kz/v1/users/me/schools?access_token=$token",
+                    personId = response["personId"].asString
+                    mActivity.queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me/schools?access_token=$token",
                             Response.Listener { response1 ->
-                                schoolId = response1.getString(0)
+                                schoolId = response1[0].asString
                                 val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                                 val calendar = Calendar.getInstance()
                                 val to = sdf.format(calendar.time)
                                 calendar.add(Calendar.MONTH, -1)
                                 val from = sdf.format(calendar.time)
-                                mActivity.queue.add(JsonArrayRequest("https://api.kundelik.kz/v1/persons/$personId/schools/$schoolId/marks/$from/$to?access_token=$token",
+                                mActivity.queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/persons/$personId/schools/$schoolId/marks/$from/$to?access_token=$token",
                                         Response.Listener { response2 ->
-                                            val jArr = JSONArray()
-                                            JsonParser().parse(response2.toString()).asJsonArray.forEach {
-                                                jArr.put(it.asJsonObject["lesson"].asString)
+                                            val jArr = JsonArray()
+                                            response2.forEach {
+                                                jArr.add(it.asJsonObject["lesson"].asString)
                                             }
-                                            mActivity.queue.add(JsonArrayRequest(Request.Method.POST, "https://api.kundelik.kz/v1/lessons/many?access_token=$token", jArr,
+                                            mActivity.queue.add(JsArRe(Request.Method.POST, "https://api.kundelik.kz/v1/lessons/many?access_token=$token", jArr,
                                                     Response.Listener { response3 ->
                                                         thread(true) {
                                                             val sdf2 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.getDefault())
-                                                            JsonParser().parse(response2.toString()).asJsonArray.sortedBy { sdf2.parse(it.asJsonObject["date"].asString).time }.forEach {
+                                                            response2.sortedBy { sdf2.parse(it.asJsonObject["date"].asString).time }.forEach {
                                                                 var name = "null"
-                                                                JsonParser().parse(response3.toString()).asJsonArray.forEach { el ->
+                                                                response3.forEach { el ->
                                                                     if (el.asJsonObject["id"].asString == it.asJsonObject["lesson"].asString)
                                                                         name = el.asJsonObject["subject"].asJsonObject["name"].asString
                                                                 }
@@ -81,7 +82,6 @@ class LCAPIMarksLogFragment : DialogFragment() {
                                                                 adapter.notifyDataSetChanged()
                                                                 marksProgressBar.visibility = View.GONE
                                                                 recyclerViewMarksLog.visibility = View.VISIBLE
-                                                                //dialog?.window?.setLayout(mActivity.window.attributes.width, mActivity.window.attributes.height)
                                                             }
                                                         }
                                                     },

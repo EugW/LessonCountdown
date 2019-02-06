@@ -12,18 +12,15 @@ import androidx.core.content.edit
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
-import com.android.volley.toolbox.JsonArrayRequest
-import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.navigation.NavigationView
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlinx.android.synthetic.main.activity_main.*
-import org.json.JSONArray
-import org.json.JSONObject
 import pro.eugw.lessoncountdown.MService
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.fragment.DOWFragment
@@ -31,6 +28,8 @@ import pro.eugw.lessoncountdown.fragment.HelpFragment
 import pro.eugw.lessoncountdown.fragment.KundelikFragment
 import pro.eugw.lessoncountdown.fragment.SettingsFragment
 import pro.eugw.lessoncountdown.util.*
+import pro.eugw.lessoncountdown.util.network.JsArRe
+import pro.eugw.lessoncountdown.util.network.JsObRe
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
@@ -101,10 +100,10 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             val host = prefs.getString(CUSTOM_ADDRESS, getString(R.string.host))
             val schoolId = prefs.getString(SCHOOL_ID, "")
             val className = URLEncoder.encode(prefs.getString(CLASS, ""), "UTF-8")
-            queue.add(JsonObjectRequest("https://$host/class?school_id=$schoolId&clazz=$className", null,
+            queue.add(JsObRe(Request.Method.GET, "https://$host/class?school_id=$schoolId&clazz=$className",
                     Response.Listener {
-                        PrintWriter(FileWriter(schedule), true).println(it.getJSONObject(SCHEDULE))
-                        PrintWriter(FileWriter(bells), true).println(it.getJSONObject(BELLS))
+                        PrintWriter(FileWriter(schedule), true).println(it[SCHEDULE].asJsonObject)
+                        PrintWriter(FileWriter(bells), true).println(it[BELLS].asJsonObject)
                         clazz = try {
                             val jsonObject = JsonObject()
                             val scheduleJ = JsonParser().parse(FileReader(schedule)).asJsonObject
@@ -144,17 +143,17 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         val token = prefs.getString(KUNDELIK_TOKEN, "")!!
         if (token.length < 5)
             return
-        queue.add(JsonObjectRequest("https://api.kundelik.kz/v1/users/me?access_token=$token", null,
+        queue.add(JsObRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me?access_token=$token",
                 Response.Listener { responsePerson ->
-                    val personId = responsePerson.getLong("personId")
+                    val personId = responsePerson["personId"].asString
                     Toast.makeText(this, "Person ID request succeed: $personId", Toast.LENGTH_SHORT).show()
-                    queue.add(JsonArrayRequest("https://api.kundelik.kz/v1/users/me/schools?access_token=$token",
+                    queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me/schools?access_token=$token",
                             Response.Listener { responseSchool ->
-                                val schoolId = responseSchool[0] as Long
+                                val schoolId = responseSchool[0].asString
                                 Toast.makeText(this, "School ID request succeed: $schoolId", Toast.LENGTH_SHORT).show()
-                                queue.add(JsonArrayRequest("https://api.kundelik.kz/v1/persons/$personId/schools/$schoolId/edu-groups?access_token=$token",
+                                queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/persons/$personId/schools/$schoolId/edu-groups?access_token=$token",
                                         Response.Listener { responseEduGroup ->
-                                            val eduGroupId = (responseEduGroup[0] as JSONObject).getLong("id")
+                                            val eduGroupId = responseEduGroup[0].asJsonObject["id"].asString
                                             Toast.makeText(this, "Edu Group ID request succeed: $eduGroupId", Toast.LENGTH_SHORT).show()
                                             val calendar = Calendar.getInstance()
                                             calendar.set(Calendar.DAY_OF_WEEK, 2)
@@ -163,9 +162,9 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                                             calendar.set(Calendar.DAY_OF_WEEK, 1)
                                             val lastDay = calendar.time
                                             val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                                            queue.add(JsonObjectRequest("https://api.kundelik.kz/v1/persons/$personId/groups/$eduGroupId/schedules?startDate=${sdf.format(firstDay)}&endDate=${sdf.format(lastDay)}&access_token=$token", null,
+                                            queue.add(JsObRe(Request.Method.GET, "https://api.kundelik.kz/v1/persons/$personId/groups/$eduGroupId/schedules?startDate=${sdf.format(firstDay)}&endDate=${sdf.format(lastDay)}&access_token=$token",
                                                     Response.Listener { responseSchedule ->
-                                                        val scheduleArray = responseSchedule.getJSONArray("days")
+                                                        val scheduleArray = responseSchedule["days"].asJsonArray
                                                         Toast.makeText(this, "Schedule request succeed: $scheduleArray", Toast.LENGTH_SHORT).show()
                                                         convertKundelikToMSchedule(scheduleArray)
                                                     },
@@ -190,11 +189,10 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         ))
     }
 
-    private fun convertKundelikToMSchedule(origin: JSONArray) {
+    private fun convertKundelikToMSchedule(origin: JsonArray) {
         val schedule = File(filesDir, SCHEDULE_FILE)
         val bells = File(filesDir, BELLS_FILE)
-        val array = JsonParser().parse(origin.toString()).asJsonArray
-        array.forEach {
+        origin.forEach {
             val obj = it.asJsonObject
             obj.remove("marks")
             obj.remove("works")
@@ -206,7 +204,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         }
         val scheduleObject = JsonObject()
         val bellsObject = JsonObject()
-        array.forEach {
+        origin.forEach {
             val lss = it.asJsonObject["lessons"].asJsonArray
             val sdlArr = JsonArray()
             val bllArr = JsonArray()
@@ -217,7 +215,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                 val hours = lesson.asJsonObject["hours"].asString.replace(" ", "")
                 bllArr.add(hours)
             }
-            var dow = array.indexOf(it) + 2
+            var dow = origin.indexOf(it) + 2
             if (dow == 8)
                 dow = 1
             scheduleObject.add("$dow", sdlArr)

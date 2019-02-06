@@ -75,4 +75,5 @@
     <string name="unregNoti">Unregister for receiving new marks notification</string>
     <string name="onMarkDate">on</string>
     <string name="marksLastList">Last marks for 30 days</string>
+    <string name="unsupportedRole">Unsupported role</string>
 </resources>

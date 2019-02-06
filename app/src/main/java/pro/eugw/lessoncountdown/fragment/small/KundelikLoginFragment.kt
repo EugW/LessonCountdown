@@ -14,12 +14,13 @@ import androidx.core.content.edit
 import androidx.fragment.app.DialogFragment
 import com.android.volley.Request
 import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
+import com.google.gson.JsonObject
 import kotlinx.android.synthetic.main.fragment_kundelik_login.*
-import org.json.JSONObject
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.util.*
+import pro.eugw.lessoncountdown.util.network.JsArRe
+import pro.eugw.lessoncountdown.util.network.JsObRe
 import java.io.File
 import java.security.SecureRandom
 import javax.crypto.Cipher
@@ -39,50 +40,29 @@ class KundelikLoginFragment : DialogFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         mActivity = activity as MainActivity
-        val url = "https://api.kundelik.kz/v1/authorizations/bycredentials"
-        val jsonDetails = JSONObject()
-        jsonDetails.put("username", editTextKundelikLogin.text)
-        jsonDetails.put("password", editTextKundelikPassword.text)
-        jsonDetails.put("client_id", CLIENT_ID)
-        jsonDetails.put("client_secret", CLIENT_SECRET)
-        jsonDetails.put("scope", KUNDELIK_SCOPE)
         buttonKundelikLogin.setOnClickListener {
             kundelikLoginLayout.visibility = View.GONE
             kundelikProgressBar.visibility = View.VISIBLE
-            mActivity.queue.add(JsonObjectRequest(Request.Method.POST, url, jsonDetails,
+            val jsonDetails = JsonObject()
+            jsonDetails.addProperty("username", editTextKundelikLogin.text.toString())
+            jsonDetails.addProperty("password", editTextKundelikPassword.text.toString())
+            jsonDetails.addProperty("client_id", CLIENT_ID)
+            jsonDetails.addProperty("client_secret", CLIENT_SECRET)
+            jsonDetails.addProperty("scope", KUNDELIK_SCOPE)
+            mActivity.queue.add(JsObRe(Request.Method.POST, "https://api.kundelik.kz/v1/authorizations/bycredentials", jsonDetails,
                     Response.Listener { response ->
-                        if (mActivity.prefs.contains(LCAPI_TOKEN)) {
-                            mActivity.queue.add(JsonObjectRequest("https://$host/updateKCred?kusername=${editTextKundelikLogin.text}&kpassword=${editTextKundelikPassword.text}&token=${mActivity.prefs.getString(LCAPI_TOKEN, "")}", null,
-                                    Response.Listener {
-                                        Toast.makeText(context, "Kundelik credentials successfully updated on server", Toast.LENGTH_SHORT).show()
-                                    },
-                                    Response.ErrorListener { error ->
-                                        Toast.makeText(context, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                        mActivity.queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me/roles?access_token=${response["accessToken"].asString}",
+                                Response.Listener {
+                                    when {
+                                        it.contains("EduStudent") -> continueAsStudent(response)
+                                        it.contains("EduStaff") -> continueAsStaff(response)
+                                        it.contains("EduParent") -> continueAsParent(response)
+                                        it.contains("OrganizationStaff") -> continueAsOrganizationStaff(response)
+                                        else -> continueAsUnknown(response)
                                     }
-                            ))
-                        }
-                        showResultDialog("Success", response.toString())
-                        mActivity.prefs.edit { putString(KUNDELIK_TOKEN, response.getString("accessToken")) }
-                        val cred = File(mActivity.filesDir, "encLogDet")
-                        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-                        val secureRandom = SecureRandom()
-                        var key = ByteArray(16)
-                        var iv = ByteArray(16)
-                        if (mActivity.prefs.contains(SECKEY1) && mActivity.prefs.contains(SECKEY2)) {
-                            key = Base64.decode(mActivity.prefs.getString(SECKEY1, ""), Base64.NO_WRAP)
-                            iv = Base64.decode(mActivity.prefs.getString(SECKEY2, ""), Base64.NO_WRAP)
-                        } else {
-                            secureRandom.nextBytes(key)
-                            secureRandom.nextBytes(iv)
-                        }
-                        mActivity.prefs.edit {
-                            putString(SECKEY1, Base64.encodeToString(key, Base64.NO_WRAP))
-                            putString(SECKEY2, Base64.encodeToString(iv, Base64.NO_WRAP))
-                        }
-                        cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(key, "AES"), IvParameterSpec(iv))
-                        cred.writeText(Base64.encodeToString(cipher.doFinal("${editTextKundelikLogin.text}|${editTextKundelikPassword.text}".toByteArray()), Base64.NO_WRAP))
-                        dismiss()
-                        mActivity.inflateKundelikFragment()
+                                },
+                                Response.ErrorListener {}
+                        ))
                     },
                     Response.ErrorListener { error ->
                         Toast.makeText(context, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
@@ -91,6 +71,82 @@ class KundelikLoginFragment : DialogFragment() {
                     }
             ))
         }
+    }
+
+    private fun continueAsStudent(response: JsonObject) {
+        mActivity.prefs.edit { putString(KUNDELIK_ROLE, "EduStudent") }
+        if (mActivity.prefs.contains(LCAPI_TOKEN)) {
+            mActivity.queue.add(JsObRe(Request.Method.GET, "https://$host/updateKCred?kusername=${editTextKundelikLogin.text}&kpassword=${editTextKundelikPassword.text}&token=${mActivity.prefs.getString(LCAPI_TOKEN, "")}",
+                    Response.Listener {
+                        Toast.makeText(context, "Kundelik credentials successfully updated on server", Toast.LENGTH_SHORT).show()
+                    },
+                    Response.ErrorListener { error ->
+                        Toast.makeText(context, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                    }
+            ))
+        }
+        showResultDialog("Success", response.toString())
+        mActivity.prefs.edit { putString(KUNDELIK_TOKEN, response["accessToken"].asString) }
+        saveEncodedCred()
+        dismiss()
+        mActivity.inflateKundelikFragment()
+    }
+
+    private fun continueAsStaff(response: JsonObject) {
+        mActivity.prefs.edit { putString(KUNDELIK_ROLE, "EduStaff") }
+        showResultDialog("Error", "EduStaff role is not supported yet\n$response")
+        mActivity.prefs.edit { putString(KUNDELIK_TOKEN, response["accessToken"].asString) }
+        saveEncodedCred()
+        dismiss()
+        mActivity.inflateKundelikFragment()
+    }
+
+    private fun continueAsParent(response: JsonObject) {
+        mActivity.prefs.edit { putString(KUNDELIK_ROLE, "EduParent") }
+        showResultDialog("Error", "EduParent role is not supported yet\n$response")
+        mActivity.prefs.edit { putString(KUNDELIK_TOKEN, response["accessToken"].asString) }
+        saveEncodedCred()
+        dismiss()
+        mActivity.inflateKundelikFragment()
+    }
+
+    private fun continueAsOrganizationStaff(response: JsonObject) {
+        mActivity.prefs.edit { putString(KUNDELIK_ROLE, "EduOrganizationStaff") }
+        showResultDialog("Error", "EduOrganizationStaff role is not supported yet\n$response")
+        mActivity.prefs.edit { putString(KUNDELIK_TOKEN, response["accessToken"].asString) }
+        saveEncodedCred()
+        dismiss()
+        mActivity.inflateKundelikFragment()
+    }
+
+    private fun continueAsUnknown(response: JsonObject) {
+        mActivity.prefs.edit { putString(KUNDELIK_ROLE, "Unknown") }
+        showResultDialog("Error", "Unknown role is not supported yet\n$response")
+        mActivity.prefs.edit { putString(KUNDELIK_TOKEN, response["accessToken"].asString) }
+        saveEncodedCred()
+        dismiss()
+        mActivity.inflateKundelikFragment()
+    }
+
+    private fun saveEncodedCred() {
+        val cred = File(mActivity.filesDir, "encLogDet")
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        val secureRandom = SecureRandom()
+        var key = ByteArray(16)
+        var iv = ByteArray(16)
+        if (mActivity.prefs.contains(SECKEY1) && mActivity.prefs.contains(SECKEY2)) {
+            key = Base64.decode(mActivity.prefs.getString(SECKEY1, ""), Base64.NO_WRAP)
+            iv = Base64.decode(mActivity.prefs.getString(SECKEY2, ""), Base64.NO_WRAP)
+        } else {
+            secureRandom.nextBytes(key)
+            secureRandom.nextBytes(iv)
+        }
+        mActivity.prefs.edit {
+            putString(SECKEY1, Base64.encodeToString(key, Base64.NO_WRAP))
+            putString(SECKEY2, Base64.encodeToString(iv, Base64.NO_WRAP))
+        }
+        cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(key, "AES"), IvParameterSpec(iv))
+        cred.writeText(Base64.encodeToString(cipher.doFinal("${editTextKundelikLogin.text}|${editTextKundelikPassword.text}".toByteArray()), Base64.NO_WRAP))
     }
 
     private fun showResultDialog(title: String, message: String) {
@@ -107,4 +163,5 @@ class KundelikLoginFragment : DialogFragment() {
         builder.setMessage(message)
         builder.create().show()
     }
+
 }

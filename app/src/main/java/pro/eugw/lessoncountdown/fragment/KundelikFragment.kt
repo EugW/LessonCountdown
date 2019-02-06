@@ -15,7 +15,6 @@ import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
 import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_kundelik_panel.*
 import org.json.JSONObject
@@ -25,6 +24,7 @@ import pro.eugw.lessoncountdown.fragment.small.KundelikLoginFragment
 import pro.eugw.lessoncountdown.fragment.small.LCAPILoginFragment
 import pro.eugw.lessoncountdown.fragment.small.LCAPIMarksLogFragment
 import pro.eugw.lessoncountdown.util.*
+import pro.eugw.lessoncountdown.util.network.JsObRe
 import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -55,32 +55,26 @@ class KundelikFragment : Fragment() {
         } else {
             mActivity.queue.add(tokenTestRequest())
         }
-        buttonKundelikDownload.setOnClickListener {
-            mActivity.initScheduleKundelik()
-        }
+        val host = prefs.getString(CUSTOM_ADDRESS, getString(R.string.host))
         buttonKundelikReset.setOnClickListener {
             prefs.edit {
                 remove(KUNDELIK_TOKEN)
+                remove(KUNDELIK_ROLE)
                 remove(SECKEY1)
                 remove(SECKEY2)
             }
             File(mActivity.filesDir, "encLogDet").delete()
+            mActivity.inflateKundelikFragment()
         }
-        val host = prefs.getString(CUSTOM_ADDRESS, getString(R.string.host))
-        when (prefs.contains(LCAPI_TOKEN)) {
-            true -> {
-                buttonRegisterNotification.visibility = View.GONE
-            }
-            false -> {
-                buttonUnregisterNotification.visibility = View.GONE
-            }
+        buttonKundelikDownload.setOnClickListener {
+            mActivity.initScheduleKundelik()
         }
         buttonRegisterNotification.setOnClickListener {
             LCAPILoginFragment().show(mActivity.supportFragmentManager, "lol")
         }
         buttonUnregisterNotification.setOnClickListener {
             val url = "https://$host/unregister?token=${prefs.getString(LCAPI_TOKEN, "")}"
-            mActivity.queue.add(JsonObjectRequest(url, null,
+            mActivity.queue.add(JsObRe(Request.Method.GET, url,
                     Response.Listener {
                         Toast.makeText(mActivity, "Success", Toast.LENGTH_SHORT).show()
                         prefs.edit {
@@ -97,13 +91,32 @@ class KundelikFragment : Fragment() {
         buttonMarksLog.setOnClickListener {
             LCAPIMarksLogFragment().show(mActivity.supportFragmentManager, "marks log")
         }
+        if (prefs.contains(LCAPI_TOKEN))
+            buttonRegisterNotification.visibility = View.GONE
+        else
+            buttonUnregisterNotification.visibility = View.GONE
+        if (!SUPPORTED_KUNDELIK_ROLES.contains(mActivity.prefs.getString(KUNDELIK_ROLE, "")) && mActivity.prefs.getString(KUNDELIK_TOKEN, "")!!.isNotBlank()) {
+            val str = "(${getString(R.string.unsupportedRole)}:${mActivity.prefs.getString(KUNDELIK_ROLE, "")})"
+            val str1 = getString(R.string.download) + str
+            buttonKundelikDownload.text = str1
+            buttonKundelikDownload.isClickable = false
+            val str2 = getString(R.string.regNoti) + str
+            buttonRegisterNotification.text = str2
+            buttonRegisterNotification.isClickable = false
+            val str3 = getString(R.string.unregNoti) + str
+            buttonUnregisterNotification.text = str3
+            buttonUnregisterNotification.isClickable = false
+            val str4 = getString(R.string.marksLastList) + str
+            buttonMarksLog.text = str4
+            buttonMarksLog.isClickable = false
+        }
     }
 
-    private fun tokenTestRequest(): JsonObjectRequest {
+    private fun tokenTestRequest(): JsObRe {
         val url = "https://api.kundelik.kz/v1/users/me?access_token=$token"
-        return JsonObjectRequest(Request.Method.GET, url, null,
+        return JsObRe(Request.Method.GET, url,
                 Response.Listener { response ->
-                    textViewKundelikName.text = response.getString("name")
+                    textViewKundelikName.text = response["name"].asString
                     Toast.makeText(mActivity, "Authentication succeed", Toast.LENGTH_SHORT).show()
                 },
                 Response.ErrorListener {
@@ -127,10 +140,10 @@ class KundelikFragment : Fragment() {
                         jsonDetails.put("client_id", CLIENT_ID)
                         jsonDetails.put("client_secret", CLIENT_SECRET)
                         jsonDetails.put("scope", KUNDELIK_SCOPE)
-                        mActivity.queue.add(JsonObjectRequest(Request.Method.POST, "https://api.kundelik.kz/v1/authorizations/bycredentials", jsonDetails,
+                        mActivity.queue.add(JsObRe(Request.Method.POST, "https://api.kundelik.kz/v1/authorizations/bycredentials", jsonDetails,
                                 Response.Listener { response ->
                                     Toast.makeText(context, "Token update succeed: $response", Toast.LENGTH_SHORT).show()
-                                    mActivity.prefs.edit { putString(KUNDELIK_TOKEN, response.getString("accessToken")) }
+                                    mActivity.prefs.edit { putString(KUNDELIK_TOKEN, response["accessToken"].asString) }
                                     mActivity.inflateKundelikFragment()
                                 },
                                 Response.ErrorListener { error ->

@@ -8,8 +8,8 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.edit
 import androidx.fragment.app.DialogFragment
+import com.android.volley.Request
 import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
 import com.google.firebase.iid.FirebaseInstanceId
 import kotlinx.android.synthetic.main.fragment_kundelik_panel.*
 import kotlinx.android.synthetic.main.fragment_lcapi_login.*
@@ -18,6 +18,7 @@ import pro.eugw.lessoncountdown.util.CUSTOM_ADDRESS
 import pro.eugw.lessoncountdown.util.LCAPI_TOKEN
 import pro.eugw.lessoncountdown.util.SECKEY1
 import pro.eugw.lessoncountdown.util.SECKEY2
+import pro.eugw.lessoncountdown.util.network.JsObRe
 import java.io.File
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
@@ -54,11 +55,11 @@ class LCAPILoginFragment : DialogFragment() {
                 val decoded = cipher.doFinal(encoded)
                 val credentials = String(decoded).split("|")
                 val url = "https://$host/register?username=${editTextLCAPILogin.text}&password=${editTextLCAPIPassword.text}&kusername=${credentials[0]}&kpassword=${credentials[1]}&fcmtoken=$token"
-                mActivity.queue.add(JsonObjectRequest(url, null,
+                mActivity.queue.add(JsObRe(Request.Method.GET, url,
                         Response.Listener { response ->
                             Toast.makeText(mActivity, "Success", Toast.LENGTH_SHORT).show()
                             prefs.edit {
-                                putString(LCAPI_TOKEN, response.getString("token"))
+                                putString(LCAPI_TOKEN, response["token"].asString)
                             }
                             buttonRegisterNotification.visibility = View.GONE
                             buttonUnregisterNotification.visibility = View.VISIBLE
