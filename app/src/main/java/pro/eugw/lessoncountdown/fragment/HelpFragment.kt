@@ -25,6 +25,8 @@ class HelpFragment : Fragment() {
         (activity as MainActivity).main_toolbar.menu.clear()
         (activity as MainActivity).main_toolbar.title = getString(R.string.help)
         imageViewUltimate.setImageBitmap(BitmapFactory.decodeStream(resources.openRawResource(R.raw.lc_ic_hires)))
+        textViewPP.movementMethod = LinkMovementMethod.getInstance()
+        textViewTermsAndConditions.movementMethod = LinkMovementMethod.getInstance()
         textViewDev.movementMethod = LinkMovementMethod.getInstance()
         textViewVKGroup.movementMethod = LinkMovementMethod.getInstance()
         textViewVer.text = BuildConfig.VERSION_NAME

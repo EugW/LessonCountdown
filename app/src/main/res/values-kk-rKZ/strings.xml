@@ -65,4 +65,8 @@
     <string name="onMarkDate">за</string>
     <string name="marksLastList">Последние оценки за 30 дней</string>
     <string name="unsupportedRole">Неподдерживаемая роль</string>
+    <string name="privacyPolicy">Политика Конфиденциальности</string>
+    <string name="requestPolicyAccept">Чтобы использовать мое приложение, вы должны принять <a href="http://lessoncountdown.brin.pw/privacy_policy.html">политику конфиденциальности</a> и <a href="http://lessoncountdown.brin.pw/terms_and_conditions.html">условия использования.</a></string>
+    <string name="helpPrivacyPolicy"><a href="http://lessoncountdown.brin.pw/privacy_policy.html">Политика конфиденциальности</a></string>
+    <string name="helpTermsAndConditions"><a href="http://lessoncountdown.brin.pw/terms_and_conditions.html">Условия использования</a></string>
 </resources>

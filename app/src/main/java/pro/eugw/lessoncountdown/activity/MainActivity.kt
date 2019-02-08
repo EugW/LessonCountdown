@@ -1,10 +1,13 @@
 package pro.eugw.lessoncountdown.activity
 
+import android.app.AlertDialog
 import android.content.*
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
+import android.text.method.LinkMovementMethod
 import android.view.MenuItem
+import android.widget.TextView
 import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -50,8 +53,35 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        prefs = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
         setContentView(R.layout.activity_main)
+        prefs = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
+        if (!prefs.getBoolean(LC_PP, false)) {
+            val dialog = AlertDialog.Builder(this)
+                    .setPositiveButton("Accept") { _, _ ->
+                        prefs.edit {
+                            putBoolean(LC_PP, true)
+                        }
+                    }
+                    .setNeutralButton("Decline") { _, _ ->
+                        prefs.edit {
+                            putBoolean(LC_PP, false)
+                        }
+                        finish()
+                        System.exit(0)
+                    }
+                    .setOnCancelListener {
+                        prefs.edit {
+                            putBoolean(LC_PP, false)
+                        }
+                        finish()
+                        System.exit(0)
+                    }
+                    .setTitle(R.string.privacyPolicy)
+                    .setMessage(R.string.requestPolicyAccept)
+                    .create()
+            dialog.show()
+            dialog.findViewById<TextView>(android.R.id.message).movementMethod = LinkMovementMethod.getInstance()
+        }
         val toggle = ActionBarDrawerToggle(this, drawer_layout, main_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()

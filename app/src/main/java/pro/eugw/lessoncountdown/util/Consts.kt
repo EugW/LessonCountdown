@@ -18,6 +18,7 @@ const val SECKEY1 = "secKey1"
 const val SECKEY2 = "secKey2"
 const val LCAPI_TOKEN = "LCAPIToken"
 const val KUNDELIK_ROLE = "kundelikRole"
+const val LC_PP = "lcPp"
 
 // ---broadcasts---
 
