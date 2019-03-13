@@ -10,12 +10,12 @@ import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.Toast
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
 import com.android.volley.Response
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_kundelik_panel.*
 import org.json.JSONObject
 import pro.eugw.lessoncountdown.R
@@ -28,9 +28,12 @@ import pro.eugw.lessoncountdown.util.network.JsObRe
 import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
+import kotlin.concurrent.thread
 
 class KundelikFragment : Fragment() {
 
@@ -46,16 +49,27 @@ class KundelikFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         mActivity = activity as MainActivity
-        mActivity.main_toolbar.title = getString(R.string.kundelik)
-        mActivity.main_toolbar.menu.clear()
         prefs = mActivity.prefs
         token = prefs.getString(KUNDELIK_TOKEN, "")!!
-        if (token.length < 5) {
-            KundelikLoginFragment().show(mActivity.supportFragmentManager, "lol")
-        } else {
-            mActivity.queue.add(tokenTestRequest())
-        }
         val host = prefs.getString(CUSTOM_ADDRESS, getString(R.string.host))
+        spinnerSelectMode.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                prefs.edit {
+                    putInt(LOCAL_MODE, position)
+                }
+            }
+        }
+        buttonSetDelay.setOnClickListener {
+            try {
+                prefs.edit {
+                    val dl = editTextServiceDelay.text.toString().toInt()
+                    putInt(LOCAL_SERVICE_DELAY, dl)
+                }
+            } catch (e: Exception) {
+                Toast.makeText(mActivity, "Mistake", Toast.LENGTH_SHORT).show()
+            }
+        }
         buttonKundelikReset.setOnClickListener {
             prefs.edit {
                 remove(KUNDELIK_TOKEN)
@@ -91,24 +105,58 @@ class KundelikFragment : Fragment() {
         buttonMarksLog.setOnClickListener {
             LCAPIMarksLogFragment().show(mActivity.supportFragmentManager, "marks log")
         }
-        if (prefs.contains(LCAPI_TOKEN))
-            buttonRegisterNotification.visibility = View.GONE
-        else
-            buttonUnregisterNotification.visibility = View.GONE
-        if (!SUPPORTED_KUNDELIK_ROLES.contains(mActivity.prefs.getString(KUNDELIK_ROLE, "")) && mActivity.prefs.getString(KUNDELIK_TOKEN, "")!!.isNotBlank()) {
-            val str = "(${getString(R.string.unsupportedRole)}:${mActivity.prefs.getString(KUNDELIK_ROLE, "")})"
-            val str1 = getString(R.string.download) + str
-            buttonKundelikDownload.text = str1
-            buttonKundelikDownload.isClickable = false
-            val str2 = getString(R.string.regNoti) + str
-            buttonRegisterNotification.text = str2
-            buttonRegisterNotification.isClickable = false
-            val str3 = getString(R.string.unregNoti) + str
-            buttonUnregisterNotification.text = str3
-            buttonUnregisterNotification.isClickable = false
-            val str4 = getString(R.string.marksLastList) + str
-            buttonMarksLog.text = str4
-            buttonMarksLog.isClickable = false
+        switchLocalMarksService.setOnCheckedChangeListener { _, isChecked ->
+            if (prefs.contains(LCAPI_TOKEN)) {
+                val url = "https://$host/unregister?token=${prefs.getString(LCAPI_TOKEN, "")}"
+                mActivity.queue.add(JsObRe(Request.Method.GET, url,
+                        Response.Listener {
+                            Toast.makeText(mActivity, "Success", Toast.LENGTH_SHORT).show()
+                            prefs.edit {
+                                remove(LCAPI_TOKEN)
+                            }
+                            buttonUnregisterNotification.visibility = View.GONE
+                            buttonRegisterNotification.visibility = View.VISIBLE
+                        },
+                        Response.ErrorListener { error ->
+                            Toast.makeText(mActivity, error.message, Toast.LENGTH_SHORT).show()
+                        }
+                ))
+            }
+            prefs.edit {
+                putBoolean(LOCAL_MARKS_SERVICE, isChecked)
+            }
+        }
+        switchLocalMarksService.isChecked = prefs.getBoolean(LOCAL_MARKS_SERVICE, false)
+        thread(true) {
+            if (token.length < 5) {
+                KundelikLoginFragment().show(mActivity.supportFragmentManager, "lol")
+            } else {
+                mActivity.queue.add(tokenTestRequest())
+            }
+            spinnerSelectMode.setSelection(prefs.getInt(LOCAL_MODE, 0))
+            localMarksLayout.visibility = if (prefs.getBoolean(LOCAL_MARKS_SERVICE, false)) View.VISIBLE else View.GONE
+            editTextServiceDelay.setText(prefs.getInt(LOCAL_SERVICE_DELAY, 15).toString())
+            if (prefs.contains(LAST_CHECK))
+                textViewLastCheck.text = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(prefs.getLong(LAST_CHECK, 0))
+            if (prefs.contains(LCAPI_TOKEN))
+                buttonRegisterNotification.visibility = View.GONE
+            else
+                buttonUnregisterNotification.visibility = View.GONE
+            if (!SUPPORTED_KUNDELIK_ROLES.contains(mActivity.prefs.getString(KUNDELIK_ROLE, "")) && mActivity.prefs.getString(KUNDELIK_TOKEN, "")!!.isNotBlank()) {
+                val str = "(${getString(R.string.unsupportedRole)}:${mActivity.prefs.getString(KUNDELIK_ROLE, "")})"
+                val str1 = getString(R.string.download) + str
+                buttonKundelikDownload.text = str1
+                buttonKundelikDownload.isClickable = false
+                val str2 = getString(R.string.regNoti) + str
+                buttonRegisterNotification.text = str2
+                buttonRegisterNotification.isClickable = false
+                val str3 = getString(R.string.unregNoti) + str
+                buttonUnregisterNotification.text = str3
+                buttonUnregisterNotification.isClickable = false
+                val str4 = getString(R.string.marksLastList) + str
+                buttonMarksLog.text = str4
+                buttonMarksLog.isClickable = false
+            }
         }
     }
 

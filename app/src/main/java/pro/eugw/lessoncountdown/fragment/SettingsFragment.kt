@@ -18,7 +18,6 @@ import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.custom_colors_layout.*
 import kotlinx.android.synthetic.main.custom_config_layout.*
 import kotlinx.android.synthetic.main.fragment_settings.*
@@ -52,8 +51,6 @@ class SettingsFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         mActivity = activity as MainActivity
-        mActivity.main_toolbar.title = getString(R.string.settings)
-        mActivity.main_toolbar.menu.clear()
         broadcastManager = mActivity.broadcastManager
         host = mActivity.prefs.getString(CUSTOM_ADDRESS, getString(R.string.host)) as String
         initClass()

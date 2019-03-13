@@ -1,6 +1,8 @@
 package pro.eugw.lessoncountdown.activity
 
+import android.app.AlarmManager
 import android.app.AlertDialog
+import android.app.PendingIntent
 import android.content.*
 import android.os.Bundle
 import android.os.Handler
@@ -9,12 +11,13 @@ import android.text.method.LinkMovementMethod
 import android.view.MenuItem
 import android.widget.TextView
 import android.widget.Toast
-import android.widget.ToggleButton
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.edit
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
@@ -24,6 +27,8 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.nav_header_main.*
+import kotlinx.android.synthetic.main.nav_header_main.view.*
 import pro.eugw.lessoncountdown.MService
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.fragment.DOWFragment
@@ -40,7 +45,8 @@ import java.io.PrintWriter
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.*
-
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 
 class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -53,8 +59,45 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        graphicalInit()
+        thread(true) {
+            variablesInit()
+            postInit()
+        }
+    }
+
+    private fun graphicalInit() {
         setContentView(R.layout.activity_main)
+        val toggle = ActionBarDrawerToggle(this, drawer_layout, main_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        drawer_layout.addDrawerListener(toggle)
+        toggle.syncState()
+        nav_view.setNavigationItemSelectedListener(this)
+        val toggleButton = nav_view.getHeaderView(0).toggleButton
+        toggleButton.setOnClickListener {
+            if (toggleButton.isChecked) {
+                File(filesDir, SERVICE_PID).createNewFile()
+                if (::broadcastManager.isInitialized)
+                    broadcastManager.sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("START", true))
+                else
+                    Toast.makeText(this, "BroadcastManager not initialized yet", Toast.LENGTH_SHORT).show()
+            } else {
+                File(filesDir, SERVICE_PID).delete()
+                if (::broadcastManager.isInitialized)
+                    broadcastManager.sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("STOP", true))
+                else
+                    Toast.makeText(this, "BroadcastManager not initialized yet", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun variablesInit() {
         prefs = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
+        queue = Volley.newRequestQueue(this)
+        broadcastManager = LocalBroadcastManager.getInstance(this)
+    }
+
+    private fun postInit() {
+        if (!::prefs.isInitialized || !::broadcastManager.isInitialized) return
         if (!prefs.getBoolean(LC_PP, false)) {
             val dialog = AlertDialog.Builder(this)
                     .setPositiveButton("Accept") { _, _ ->
@@ -82,30 +125,36 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             dialog.show()
             dialog.findViewById<TextView>(android.R.id.message).movementMethod = LinkMovementMethod.getInstance()
         }
-        val toggle = ActionBarDrawerToggle(this, drawer_layout, main_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawer_layout.addDrawerListener(toggle)
-        toggle.syncState()
-        nav_view.setNavigationItemSelectedListener(this)
-        queue = Volley.newRequestQueue(this)
-        broadcastManager = LocalBroadcastManager.getInstance(this)
-        val toggleButton = nav_view.getHeaderView(0).findViewById<ToggleButton>(R.id.toggleButton)
+        if (prefs.getBoolean(LOCAL_MARKS_SERVICE, false)) {
+            when (prefs.getInt(LOCAL_MODE, 0)) {
+                0 -> {
+                    val svcIntent = Intent(this, MarksListenerService::class.java)
+                    val pendingIntent = PendingIntent.getService(this, 0, svcIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                    val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                    alarmManager.cancel(pendingIntent)
+                    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000, (prefs.getInt(LOCAL_SERVICE_DELAY, 15) * 60 * 1000).toLong(), pendingIntent)
+                }
+                1 -> {
+                    val marksRequest = PeriodicWorkRequestBuilder<MarksListenerWorker>((prefs.getInt(LOCAL_SERVICE_DELAY, 15)).toLong(), TimeUnit.MINUTES).addTag(MAKRS_WORK).build()
+                    WorkManager.getInstance().cancelAllWorkByTag(MAKRS_WORK)
+                    WorkManager.getInstance().enqueue(marksRequest)
+                }
+            }
+        }
         broadcastManager.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent?) {
                 toggleButton.isChecked = p1!!.getBooleanExtra("isRun", false)
             }
         }, IntentFilter(baseContext.packageName + SERVICE_STATE))
-        toggleButton.setOnClickListener {
-            if (toggleButton.isChecked) {
-                File(filesDir, SERVICE_PID).createNewFile()
-                broadcastManager.sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("START", true))
-            } else {
-                File(filesDir, SERVICE_PID).delete()
-                broadcastManager.sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("STOP", true))
+        val service = Intent(this, MService::class.java)
+        broadcastManager.registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                stopService(service)
+                startService(service)
             }
-        }
+        }, IntentFilter(baseContext.packageName + PEND_SERVICE_RESTART))
         initClass()
         File(filesDir, SERVICE_PID).createNewFile()
-        val service = Intent(this, MService::class.java)
         startService(service)
         bindService(service, object : ServiceConnection {
             override fun onServiceDisconnected(p0: ComponentName?) {}
@@ -115,17 +164,12 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                 unbindService(this)
             }
         }, Context.BIND_AUTO_CREATE)
-        broadcastManager.registerReceiver(object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                stopService(service)
-                startService(service)
-            }
-        }, IntentFilter(baseContext.packageName + PEND_SERVICE_RESTART))
     }
 
     fun initClass() {
         val schedule = File(filesDir, SCHEDULE_FILE)
         val bells = File(filesDir, BELLS_FILE)
+        if (::queue.isInitialized && ::prefs.isInitialized)
         if (!prefs.getBoolean(CUSTOM_CONFIG, false)) {
             val host = prefs.getString(CUSTOM_ADDRESS, getString(R.string.host))
             val schoolId = prefs.getString(SCHOOL_ID, "")
@@ -170,6 +214,8 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
     }
 
     fun initScheduleKundelik() {
+        if (!(::prefs.isInitialized && ::queue.isInitialized))
+            return
         val token = prefs.getString(KUNDELIK_TOKEN, "")!!
         if (token.length < 5)
             return
@@ -253,6 +299,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         }
         PrintWriter(FileWriter(schedule), true).println(scheduleObject)
         PrintWriter(FileWriter(bells), true).println(bellsObject)
+
         prefs.edit {
             putBoolean(CUSTOM_CONFIG, true)
         }
@@ -272,24 +319,25 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
 
     private fun inflateDOWFragment(day: Int, dayName: String) {
         try {
-            val bundle = Bundle()
-            bundle.putString("day", day.toString())
-            bundle.putString("dayName", dayName)
             Handler(mainLooper).postDelayed({
+                main_toolbar.title = dayName
+                val bundle = Bundle()
+                bundle.putString("day", day.toString())
                 val fragment = DOWFragment()
                 fragment.arguments = bundle
                 supportFragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit()
-            }, 500)
+            }, FRAGMENT_DRAW_DELAY)
         } catch (e: Exception) {
-
         }
     }
 
     fun inflateKundelikFragment() {
         try {
+            main_toolbar.menu.clear()
             Handler(mainLooper).postDelayed({
+                main_toolbar.title = getString(R.string.kundelik)
                 supportFragmentManager.beginTransaction().replace(R.id.content_frame, KundelikFragment()).commit()
-            }, 500)
+            }, FRAGMENT_DRAW_DELAY)
         } catch (e: Exception) {
 
         }
@@ -308,9 +356,11 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
 
     private fun inflateSettingsFragment() {
         try {
+            main_toolbar.menu.clear()
             Handler(mainLooper).postDelayed({
+                main_toolbar.title = getString(R.string.settings)
                 supportFragmentManager.beginTransaction().replace(R.id.content_frame, SettingsFragment()).commit()
-             }, 500)
+             }, FRAGMENT_DRAW_DELAY)
         } catch (e: Exception) {
 
         }
@@ -318,14 +368,15 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
 
     private fun inflateHelpFragment() {
         try {
+            main_toolbar.menu.clear()
             Handler(mainLooper).postDelayed({
+                main_toolbar.title = getString(R.string.help)
                 supportFragmentManager.beginTransaction().replace(R.id.content_frame, HelpFragment()).commit()
-            }, 500)
+            }, FRAGMENT_DRAW_DELAY)
         } catch (e: Exception) {
 
         }
     }
-
 
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
@@ -352,7 +403,6 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         }
         return true
     }
-
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)

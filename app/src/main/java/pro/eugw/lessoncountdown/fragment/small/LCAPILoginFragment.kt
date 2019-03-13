@@ -11,7 +11,6 @@ import androidx.fragment.app.DialogFragment
 import com.android.volley.Request
 import com.android.volley.Response
 import com.google.firebase.iid.FirebaseInstanceId
-import kotlinx.android.synthetic.main.fragment_kundelik_panel.*
 import kotlinx.android.synthetic.main.fragment_lcapi_login.*
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.util.CUSTOM_ADDRESS
@@ -61,8 +60,8 @@ class LCAPILoginFragment : DialogFragment() {
                             prefs.edit {
                                 putString(LCAPI_TOKEN, response["token"].asString)
                             }
-                            buttonRegisterNotification.visibility = View.GONE
-                            buttonUnregisterNotification.visibility = View.VISIBLE
+                            //buttonRegisterNotification.visibility = View.GONE
+                            //buttonUnregisterNotification.visibility = View.VISIBLE
                             dismiss()
                         },
                         Response.ErrorListener { error ->

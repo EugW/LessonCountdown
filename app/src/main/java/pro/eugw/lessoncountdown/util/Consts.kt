@@ -19,6 +19,10 @@ const val SECKEY2 = "secKey2"
 const val LCAPI_TOKEN = "LCAPIToken"
 const val KUNDELIK_ROLE = "kundelikRole"
 const val LC_PP = "lcPp"
+const val LOCAL_MARKS_SERVICE = "localMarks"
+const val LOCAL_SERVICE_DELAY = "localMarksDelay"
+const val LOCAL_MODE = "localMode"
+const val LAST_CHECK = "lastCheck"
 
 // ---broadcasts---
 
@@ -52,6 +56,9 @@ const val SEARCH_REQUEST_CODE = 90
 
 // ---Other---
 
+const val MAKRS_WORK = "workerForMarksTag"
+const val FRAGMENT_DRAW_DELAY = 400L
+const val WORKER_CHANNEL_ID = "WRK-LC"
 const val FCM_CHANNEL_ID = "FCM-LC"
 const val CHANNEL_ID = "LessonChannel"
 const val TIME_GROUP = "TimeGroup"

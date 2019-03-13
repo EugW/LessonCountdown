@@ -14,6 +14,7 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_day_of_week.*
+import kotlinx.android.synthetic.main.fragment_day_of_week.view.*
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.list.schedule.ScheduleAdapter
@@ -23,6 +24,7 @@ import java.io.File
 import java.io.FileWriter
 import java.io.PrintWriter
 import java.util.*
+import kotlin.concurrent.thread
 
 class DOWFragment : Fragment() {
 
@@ -33,10 +35,17 @@ class DOWFragment : Fragment() {
     private var schedule = JsonObject()
     private var bells = JsonObject()
     private var day = "0"
+    private lateinit var homework: JsonObject
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        return inflater.inflate(R.layout.fragment_day_of_week, container, false)
+        val v = inflater.inflate(R.layout.fragment_day_of_week, container, false)
+        adapter = ScheduleAdapter(list, this, false)
+        adapterEdit = ScheduleAdapter(list, this, true)
+        v.dialogRecycler.adapter = adapter
+        v.dialogRecycler.layoutManager = LinearLayoutManager(activity)
+        v.dialogRecycler.addItemDecoration(DividerItemDecoration(activity, LinearLayoutManager(activity).orientation))
+        return v
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -44,45 +53,48 @@ class DOWFragment : Fragment() {
         val mActivity = activity as MainActivity
         val bundle = arguments
         val toolbar = mActivity.main_toolbar
-        toolbar.title = bundle!!.getString("dayName")
-        if (mActivity.prefs.getBoolean(CUSTOM_CONFIG, false))
-            if (!mActivity.prefs.getBoolean(HIDE_CONTROLS, false)) {
-                toolbar.menu.clear()
-                toolbar.inflateMenu(R.menu.dayofweek_menu)
+        thread(true) {
+            if (mActivity.prefs.getBoolean(CUSTOM_CONFIG, false))
+                if (!mActivity.prefs.getBoolean(HIDE_CONTROLS, false)) {
+                    mActivity.runOnUiThread {
+                        toolbar.menu.clear()
+                        toolbar.inflateMenu(R.menu.dayofweek_menu)
+                    }
+                }
+            val job = mActivity.clazz
+            if (!job.has(SCHEDULE))
+                job.add(SCHEDULE, JsonObject())
+            if (!job.has(BELLS))
+                job.add(BELLS, JsonObject())
+            schedule = job[SCHEDULE].asJsonObject
+            bells = job[BELLS].asJsonObject
+            day = bundle?.getString("day") as String
+            if (mActivity.prefs.getBoolean(EVEN_ODD_WEEKS, false) || schedule.has("${day}e")) {
+                val preEven = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) % 2 == 0
+                val even = if (!mActivity.prefs.getBoolean(INVERSE_EVEN_ODD_WEEKS, false)) preEven else !preEven
+                if (even) {
+                    day += "e"
+                    mActivity.runOnUiThread {
+                        toolbar.menu.findItem(R.id.menuEvenOdd).title = "E"
+                    }
+                } else
+                    mActivity.runOnUiThread {
+                        toolbar.menu.findItem(R.id.menuEvenOdd).title = "O"
+                    }
             }
-        adapter = ScheduleAdapter(list, this, false)
-        adapterEdit = ScheduleAdapter(list, this, true)
-        dialogRecycler.adapter = adapter
-        dialogRecycler.layoutManager = LinearLayoutManager(mActivity)
-        dialogRecycler.addItemDecoration(DividerItemDecoration(mActivity, LinearLayoutManager(mActivity).orientation))
-        val job = mActivity.clazz
-        if (!job.has(SCHEDULE))
-            job.add(SCHEDULE, JsonObject())
-        if (!job.has(BELLS))
-            job.add(BELLS, JsonObject())
-        schedule = job[SCHEDULE].asJsonObject
-        bells = job[BELLS].asJsonObject
-        day = bundle.getString("day") as String
-        if (mActivity.prefs.getBoolean(EVEN_ODD_WEEKS, false) || schedule.has("${day}e")) {
-            val preEven = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) % 2 == 0
-            val even = if (!mActivity.prefs.getBoolean(INVERSE_EVEN_ODD_WEEKS, false)) preEven else !preEven
-            if (even) {
-                day += "e"
-                toolbar.menu.findItem(R.id.menuEvenOdd).title = "E"
+            val homework = mActivity.homework
+            if (!schedule.has(day))
+                schedule.add(day, JsonArray())
+            if (!bells.has(day))
+                bells.add(day, JsonArray())
+            schedule.get(day).asJsonArray.forEachIndexed { index, jsonElement ->
+                list.add(ScheduleElement(jsonElement.asString, bells.get(day).asJsonArray[index].asString, if (homework.has(jsonElement.asString)) homework.get(jsonElement.asString).asString else ""))
             }
-            else
-                toolbar.menu.findItem(R.id.menuEvenOdd).title = "O"
+            mActivity.runOnUiThread {
+                adapterEdit.notifyDataSetChanged()
+                adapter.notifyDataSetChanged()
+            }
         }
-        val homework = mActivity.homework
-        if (!schedule.has(day))
-            schedule.add(day, JsonArray())
-        if (!bells.has(day))
-            bells.add(day, JsonArray())
-        schedule.get(day).asJsonArray.forEachIndexed { index, jsonElement ->
-            list.add(ScheduleElement(jsonElement.asString, bells.get(day).asJsonArray[index].asString, if (homework.has(jsonElement.asString)) homework.get(jsonElement.asString).asString else ""))
-        }
-        adapterEdit.notifyDataSetChanged()
-        adapter.notifyDataSetChanged()
         toolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menuEvenOdd -> {
