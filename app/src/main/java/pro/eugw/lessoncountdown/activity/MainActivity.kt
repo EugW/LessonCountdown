@@ -86,26 +86,26 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                     broadcastManager.sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("STOP", true))
                 }
             } catch (ne: UninitializedPropertyAccessException) {
-                EasyToast(this).shortShow("BroadcastManager uninitialized")
+                EasyToast.shortShow("BroadcastManager uninitialized", this)
             } catch (e: Exception) {
-                EasyToast(this).shortShow("BroadcastManager Exception")
+                EasyToast.shortShow("BroadcastManager Exception", this)
             }
         }
     }
 
     private fun variablesInit() {
+        broadcastManager = LocalBroadcastManager.getInstance(this)
         prefs = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
         queue = Volley.newRequestQueue(this)
-        broadcastManager = LocalBroadcastManager.getInstance(this)
     }
 
     private fun postInit() {
-        if (!::broadcastManager.isInitialized) {
-            EasyToast(this).shortShow("BroadcastManager uninitialized")
+        if (!this::broadcastManager.isInitialized) {
+            EasyToast.shortShow("BroadcastManager uninitialized", this)
             return
         }
-        if (!::prefs.isInitialized) {
-            EasyToast(this).shortShow("Prefs uninitialized")
+        if (!this::prefs.isInitialized) {
+            EasyToast.shortShow("Prefs uninitialized", this)
             return
         }
         if (!prefs.getBoolean(LC_PP, false)) {
@@ -185,7 +185,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
     fun initClass() {
         val schedule = File(filesDir, SCHEDULE_FILE)
         val bells = File(filesDir, BELLS_FILE)
-        if (::queue.isInitialized && ::prefs.isInitialized)
+        if (this::queue.isInitialized && this::prefs.isInitialized)
         if (!prefs.getBoolean(CUSTOM_CONFIG, false)) {
             val host = prefs.getString(CUSTOM_ADDRESS, getString(R.string.host))
             val schoolId = prefs.getString(SCHOOL_ID, "")
@@ -202,14 +202,14 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                             jsonObject.add(BELLS, bellsJ)
                             jsonObject
                         } catch (e: Exception) {
-                            EasyToast(this).shortShow(R.string.configErr)
+                            EasyToast.shortShow(R.string.configErr, this)
                             JsonObject()
                         }
                         initHomework()
                         inflateDOWFragment()
                     },
                     Response.ErrorListener {
-                        EasyToast(this).shortShow(R.string.networkErr)
+                        EasyToast.shortShow(R.string.networkErr, this)
                     }
             ))
         } else {
@@ -221,7 +221,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                 jsonObject.add(BELLS, bellsJ)
                 jsonObject
             } catch (e: Exception) {
-                EasyToast(this).shortShow(R.string.configErr)
+                EasyToast.shortShow(R.string.configErr, this)
                 JsonObject()
             }
             initHomework()
@@ -238,15 +238,15 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         queue.add(JsObRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me?access_token=$token",
                 Response.Listener { responsePerson ->
                     val personId = responsePerson["personId"].asString
-                    EasyToast(this).shortShow("Person ID request succeed: $personId")
+                    EasyToast.shortShow("Person ID request succeed: $personId", this)
                     queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me/schools?access_token=$token",
                             Response.Listener { responseSchool ->
                                 val schoolId = responseSchool[0].asString
-                                EasyToast(this).shortShow("School ID request succeed: $schoolId")
+                                EasyToast.shortShow("School ID request succeed: $schoolId", this)
                                 queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/persons/$personId/schools/$schoolId/edu-groups?access_token=$token",
                                         Response.Listener { responseEduGroup ->
                                             val eduGroupId = responseEduGroup[0].asJsonObject["id"].asString
-                                            EasyToast(this).shortShow("Edu Group ID request succeed: $eduGroupId")
+                                            EasyToast.shortShow("Edu Group ID request succeed: $eduGroupId", this)
                                             val calendar = Calendar.getInstance()
                                             calendar.set(Calendar.DAY_OF_WEEK, 2)
                                             val firstDay = calendar.time
@@ -257,26 +257,26 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                                             queue.add(JsObRe(Request.Method.GET, "https://api.kundelik.kz/v1/persons/$personId/groups/$eduGroupId/schedules?startDate=${sdf.format(firstDay)}&endDate=${sdf.format(lastDay)}&access_token=$token",
                                                     Response.Listener { responseSchedule ->
                                                         val scheduleArray = responseSchedule["days"].asJsonArray
-                                                        EasyToast(this).shortShow("Schedule request succeed: $scheduleArray")
+                                                        EasyToast.shortShow("Schedule request succeed: $scheduleArray", this)
                                                         convertKundelikToMSchedule(scheduleArray)
                                                     },
                                                     Response.ErrorListener { error ->
-                                                        EasyToast(this).shortShow("Schedule request failed: ${error.message}")
+                                                        EasyToast.shortShow("Schedule request failed: ${error.message}", this)
                                                     }
                                             ))
                                         },
                                         Response.ErrorListener { error ->
-                                            EasyToast(this).shortShow("Edu Group ID request failed: ${error.message}")
+                                            EasyToast.shortShow("Edu Group ID request failed: ${error.message}", this)
                                         }
                                 ))
                             },
                             Response.ErrorListener { error ->
-                                EasyToast(this).shortShow("School ID request failed: ${error.message}")
+                                EasyToast.shortShow("School ID request failed: ${error.message}", this)
                             }
                     ))
                 },
                 Response.ErrorListener { error ->
-                    EasyToast(this).shortShow("Person ID request failed: ${error.message}")
+                    EasyToast.shortShow("Person ID request failed: ${error.message}", this)
                 }
         ))
     }
@@ -315,7 +315,6 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         }
         PrintWriter(FileWriter(schedule), true).println(scheduleObject)
         PrintWriter(FileWriter(bells), true).println(bellsObject)
-
         prefs.edit {
             putBoolean(CUSTOM_CONFIG, true)
         }
