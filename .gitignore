@@ -9,3 +9,5 @@
 .externalNativeBuild
 /app/release
 /app/build
+/.idea
+/projectFilesBackup
