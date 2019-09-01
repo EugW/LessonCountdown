@@ -12,6 +12,4 @@ class MarksListenerWorker(context: Context, workerParameters: WorkerParameters) 
         return Result.success()
     }
 
-
-
 }

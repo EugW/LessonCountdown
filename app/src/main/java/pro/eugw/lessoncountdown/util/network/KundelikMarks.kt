@@ -32,11 +32,9 @@ class KundelikMarks {
             val file = File(applicationContext.filesDir, "savedMarks.json")
             if (file.exists())
                 jsonArray = JsonParser().parse(file.readText()).asJsonArray
-
             val prefs = applicationContext.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
-            if (!prefs.contains(KUNDELIK_TOKEN) || !SUPPORTED_KUNDELIK_ROLES.contains(prefs.getString(KUNDELIK_ROLE, ""))) {
+            if (!prefs.contains(KUNDELIK_TOKEN) || !SUPPORTED_KUNDELIK_ROLES.contains(prefs.getString(KUNDELIK_ROLE, "")))
                 return
-            }
             val token = prefs.getString(KUNDELIK_TOKEN, "")
             queue.add(JsObRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me?access_token=$token",
                     Response.Listener { response ->

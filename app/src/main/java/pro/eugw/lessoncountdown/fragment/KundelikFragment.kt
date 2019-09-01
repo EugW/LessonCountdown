@@ -16,8 +16,8 @@ import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
 import com.android.volley.Response
+import com.google.gson.JsonObject
 import kotlinx.android.synthetic.main.fragment_kundelik_panel.*
-import org.json.JSONObject
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.fragment.small.KundelikLoginFragment
@@ -182,12 +182,13 @@ class KundelikFragment : Fragment() {
                         val encoded = Base64.decode(cred.readText(), Base64.NO_WRAP)
                         val decoded = cipher.doFinal(encoded)
                         val credentials = String(decoded).split("|")
-                        val jsonDetails = JSONObject()
-                        jsonDetails.put("username", credentials[0])
-                        jsonDetails.put("password", credentials[1])
-                        jsonDetails.put("client_id", CLIENT_ID)
-                        jsonDetails.put("client_secret", CLIENT_SECRET)
-                        jsonDetails.put("scope", KUNDELIK_SCOPE)
+                        val jsonDetails = JsonObject()
+
+                        jsonDetails.addProperty("username", credentials[0])
+                        jsonDetails.addProperty("password", credentials[1])
+                        jsonDetails.addProperty("client_id", CLIENT_ID)
+                        jsonDetails.addProperty("client_secret", CLIENT_SECRET)
+                        jsonDetails.addProperty("scope", KUNDELIK_SCOPE)
                         mActivity.queue.add(JsObRe(Request.Method.POST, "https://api.kundelik.kz/v1/authorizations/bycredentials", jsonDetails,
                                 Response.Listener { response ->
                                     Toast.makeText(context, "Token update succeed: $response", Toast.LENGTH_SHORT).show()

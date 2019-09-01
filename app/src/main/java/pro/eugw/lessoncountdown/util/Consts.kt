@@ -56,7 +56,7 @@ const val SEARCH_REQUEST_CODE = 90
 
 // ---Other---
 
-const val MAKRS_WORK = "workerForMarksTag"
+const val MARKS_WORK = "workerForMarksTag"
 const val FRAGMENT_DRAW_DELAY = 400L
 const val WORKER_CHANNEL_ID = "WRK-LC"
 const val FCM_CHANNEL_ID = "FCM-LC"

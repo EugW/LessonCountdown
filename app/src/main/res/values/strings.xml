@@ -52,7 +52,9 @@
     <string-array name="modes">
         <item>@string/alarmManagerMode</item>
         <item>@string/workManagerMode</item>
+        <item>@string/serviceClassMode</item>
     </string-array>
+    <string name="serviceClassMode">Service mode</string>
     <string name="alarmManagerMode">AlarmManager mode</string>
     <string name="workManagerMode">WorkManager mode</string>
     <string name="notificationColor">Custom notification colors</string>

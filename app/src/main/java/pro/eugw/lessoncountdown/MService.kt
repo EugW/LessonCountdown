@@ -129,7 +129,7 @@ class MService : Service() {
                             lessons.append("${getString(R.string.lessonsRemaining)}: ${lessonArray.size - index}")
                         } else if (index < lessonArray.lastIndex) {
                             val nexS = lessonArray[index + 1].start
-                            if (current in (end + 1)..(nexS - 1)) {
+                            if (current in (end + 1) until nexS) {
                                 text.append(appendable(nexS, current))
                                 l2 = lessonArray[index + 1].lesson
                                 lessons.append("${getString(R.string.lessonsRemaining)}: ${lessonArray.lastIndex - index}")

@@ -76,4 +76,5 @@
     <string name="alarmManagerMode">Режим AlarmManager</string>
     <string name="workManagerMode">Режим WorkManager</string>
     <string name="lastCheck">"Последняя проверка: "</string>
+    <string name="serviceClassMode">Service mode</string>
 </resources>

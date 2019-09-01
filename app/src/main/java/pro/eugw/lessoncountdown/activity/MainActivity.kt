@@ -47,6 +47,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
+import kotlin.system.exitProcess
 
 class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -66,6 +67,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         }
     }
 
+
     private fun graphicalInit() {
         setContentView(R.layout.activity_main)
         val toggle = ActionBarDrawerToggle(this, drawer_layout, main_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
@@ -74,18 +76,19 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         nav_view.setNavigationItemSelectedListener(this)
         val toggleButton = nav_view.getHeaderView(0).toggleButton
         toggleButton.setOnClickListener {
-            if (toggleButton.isChecked) {
-                File(filesDir, SERVICE_PID).createNewFile()
-                if (::broadcastManager.isInitialized)
+            try {
+                if (toggleButton.isChecked) {
+                    File(filesDir, SERVICE_PID).createNewFile()
                     broadcastManager.sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("START", true))
-                else
-                    Toast.makeText(this, "BroadcastManager not initialized yet", Toast.LENGTH_SHORT).show()
-            } else {
-                File(filesDir, SERVICE_PID).delete()
-                if (::broadcastManager.isInitialized)
+
+                } else {
+                    File(filesDir, SERVICE_PID).delete()
                     broadcastManager.sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("STOP", true))
-                else
-                    Toast.makeText(this, "BroadcastManager not initialized yet", Toast.LENGTH_SHORT).show()
+                }
+            } catch (ne: UninitializedPropertyAccessException) {
+                EasyToast(this).shortShow("BroadcastManager uninitialized")
+            } catch (e: Exception) {
+                EasyToast(this).shortShow("BroadcastManager Exception")
             }
         }
     }
@@ -97,47 +100,60 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
     }
 
     private fun postInit() {
-        if (!::prefs.isInitialized || !::broadcastManager.isInitialized) return
+        if (!::broadcastManager.isInitialized) {
+            EasyToast(this).shortShow("BroadcastManager uninitialized")
+            return
+        }
+        if (!::prefs.isInitialized) {
+            EasyToast(this).shortShow("Prefs uninitialized")
+            return
+        }
         if (!prefs.getBoolean(LC_PP, false)) {
-            val dialog = AlertDialog.Builder(this)
-                    .setPositiveButton("Accept") { _, _ ->
-                        prefs.edit {
-                            putBoolean(LC_PP, true)
+            runOnUiThread {
+                val dialog = AlertDialog.Builder(this)
+                        .setPositiveButton("Accept") { _, _ ->
+                            prefs.edit {
+                                putBoolean(LC_PP, true)
+                            }
                         }
-                    }
-                    .setNeutralButton("Decline") { _, _ ->
-                        prefs.edit {
-                            putBoolean(LC_PP, false)
+                        .setNeutralButton("Decline") { _, _ ->
+                            prefs.edit {
+                                putBoolean(LC_PP, false)
+                            }
+                            finish()
+                            exitProcess(0)
                         }
-                        finish()
-                        System.exit(0)
-                    }
-                    .setOnCancelListener {
-                        prefs.edit {
-                            putBoolean(LC_PP, false)
+                        .setOnCancelListener {
+                            prefs.edit {
+                                putBoolean(LC_PP, false)
+                            }
+                            finish()
+                            exitProcess(0)
                         }
-                        finish()
-                        System.exit(0)
-                    }
-                    .setTitle(R.string.privacyPolicy)
-                    .setMessage(R.string.requestPolicyAccept)
-                    .create()
-            dialog.show()
-            dialog.findViewById<TextView>(android.R.id.message).movementMethod = LinkMovementMethod.getInstance()
+                        .setTitle(R.string.privacyPolicy)
+                        .setMessage(R.string.requestPolicyAccept)
+                        .create()
+                dialog.show()
+                dialog.findViewById<TextView>(android.R.id.message).movementMethod = LinkMovementMethod.getInstance()
+            }
         }
         if (prefs.getBoolean(LOCAL_MARKS_SERVICE, false)) {
             when (prefs.getInt(LOCAL_MODE, 0)) {
                 0 -> {
-                    val svcIntent = Intent(this, MarksListenerService::class.java)
+                    val svcIntent = Intent(this, MarksListenerAlarmService::class.java)
                     val pendingIntent = PendingIntent.getService(this, 0, svcIntent, PendingIntent.FLAG_UPDATE_CURRENT)
                     val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
                     alarmManager.cancel(pendingIntent)
                     alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000, (prefs.getInt(LOCAL_SERVICE_DELAY, 15) * 60 * 1000).toLong(), pendingIntent)
                 }
                 1 -> {
-                    val marksRequest = PeriodicWorkRequestBuilder<MarksListenerWorker>((prefs.getInt(LOCAL_SERVICE_DELAY, 15)).toLong(), TimeUnit.MINUTES).addTag(MAKRS_WORK).build()
-                    WorkManager.getInstance().cancelAllWorkByTag(MAKRS_WORK)
+                    val marksRequest = PeriodicWorkRequestBuilder<MarksListenerWorker>((prefs.getInt(LOCAL_SERVICE_DELAY, 15)).toLong(), TimeUnit.MINUTES).addTag(MARKS_WORK).build()
+                    WorkManager.getInstance().cancelAllWorkByTag(MARKS_WORK)
                     WorkManager.getInstance().enqueue(marksRequest)
+                }
+                2 -> {
+                    val mrksvc = Intent(this, MarksListenerService::class.java)
+                    startService(mrksvc)
                 }
             }
         }
@@ -186,14 +202,14 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                             jsonObject.add(BELLS, bellsJ)
                             jsonObject
                         } catch (e: Exception) {
-                            Toast.makeText(this, R.string.configErr, Toast.LENGTH_SHORT).show()
+                            EasyToast(this).shortShow(R.string.configErr)
                             JsonObject()
                         }
                         initHomework()
                         inflateDOWFragment()
                     },
                     Response.ErrorListener {
-                        Toast.makeText(this, R.string.networkErr, Toast.LENGTH_SHORT).show()
+                        EasyToast(this).shortShow(R.string.networkErr)
                     }
             ))
         } else {
@@ -205,7 +221,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                 jsonObject.add(BELLS, bellsJ)
                 jsonObject
             } catch (e: Exception) {
-                Toast.makeText(this, R.string.configErr, Toast.LENGTH_SHORT).show()
+                EasyToast(this).shortShow(R.string.configErr)
                 JsonObject()
             }
             initHomework()
@@ -222,15 +238,15 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         queue.add(JsObRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me?access_token=$token",
                 Response.Listener { responsePerson ->
                     val personId = responsePerson["personId"].asString
-                    Toast.makeText(this, "Person ID request succeed: $personId", Toast.LENGTH_SHORT).show()
+                    EasyToast(this).shortShow("Person ID request succeed: $personId")
                     queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me/schools?access_token=$token",
                             Response.Listener { responseSchool ->
                                 val schoolId = responseSchool[0].asString
-                                Toast.makeText(this, "School ID request succeed: $schoolId", Toast.LENGTH_SHORT).show()
+                                EasyToast(this).shortShow("School ID request succeed: $schoolId")
                                 queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/persons/$personId/schools/$schoolId/edu-groups?access_token=$token",
                                         Response.Listener { responseEduGroup ->
                                             val eduGroupId = responseEduGroup[0].asJsonObject["id"].asString
-                                            Toast.makeText(this, "Edu Group ID request succeed: $eduGroupId", Toast.LENGTH_SHORT).show()
+                                            EasyToast(this).shortShow("Edu Group ID request succeed: $eduGroupId")
                                             val calendar = Calendar.getInstance()
                                             calendar.set(Calendar.DAY_OF_WEEK, 2)
                                             val firstDay = calendar.time
@@ -241,26 +257,26 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                                             queue.add(JsObRe(Request.Method.GET, "https://api.kundelik.kz/v1/persons/$personId/groups/$eduGroupId/schedules?startDate=${sdf.format(firstDay)}&endDate=${sdf.format(lastDay)}&access_token=$token",
                                                     Response.Listener { responseSchedule ->
                                                         val scheduleArray = responseSchedule["days"].asJsonArray
-                                                        Toast.makeText(this, "Schedule request succeed: $scheduleArray", Toast.LENGTH_SHORT).show()
+                                                        EasyToast(this).shortShow("Schedule request succeed: $scheduleArray")
                                                         convertKundelikToMSchedule(scheduleArray)
                                                     },
                                                     Response.ErrorListener { error ->
-                                                        Toast.makeText(this, "Schedule request failed: ${error.message}", Toast.LENGTH_SHORT).show()
+                                                        EasyToast(this).shortShow("Schedule request failed: ${error.message}")
                                                     }
                                             ))
                                         },
                                         Response.ErrorListener { error ->
-                                            Toast.makeText(this, "Edu Group ID request failed: ${error.message}", Toast.LENGTH_SHORT).show()
+                                            EasyToast(this).shortShow("Edu Group ID request failed: ${error.message}")
                                         }
                                 ))
                             },
                             Response.ErrorListener { error ->
-                                Toast.makeText(this, "School ID request failed: ${error.message}", Toast.LENGTH_SHORT).show()
+                                EasyToast(this).shortShow("School ID request failed: ${error.message}")
                             }
                     ))
                 },
                 Response.ErrorListener { error ->
-                    Toast.makeText(this, "Person ID request failed: ${error.message}", Toast.LENGTH_SHORT).show()
+                    EasyToast(this).shortShow("Person ID request failed: ${error.message}")
                 }
         ))
     }

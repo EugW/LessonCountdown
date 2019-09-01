@@ -6,8 +6,8 @@ import com.android.volley.Response
 import com.android.volley.toolbox.HttpHeaderParser
 import com.android.volley.toolbox.JsonRequest
 import com.google.gson.JsonArray
+import com.google.gson.JsonParseException
 import com.google.gson.JsonParser
-import org.json.JSONException
 import java.io.UnsupportedEncodingException
 import java.nio.charset.Charset
 
@@ -21,7 +21,7 @@ class JsArRe(requestMethod: Int, urlS: String, body: Any, listener: Response.Lis
             Response.success(JsonParser().parse(jsonString).asJsonArray, HttpHeaderParser.parseCacheHeaders(response))
         } catch (e: UnsupportedEncodingException) {
             Response.error(ParseError(e))
-        } catch (je: JSONException) {
+        } catch (je: JsonParseException) {
             Response.error(ParseError(je))
         }
 
