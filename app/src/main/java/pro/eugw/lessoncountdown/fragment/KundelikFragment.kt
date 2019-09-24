@@ -60,6 +60,7 @@ class KundelikFragment : Fragment() {
                 }
             }
         }
+        textViewCNTR.text = prefs.getInt("CNTR", 0).toString()
         buttonSetDelay.setOnClickListener {
             try {
                 prefs.edit {
@@ -127,6 +128,7 @@ class KundelikFragment : Fragment() {
             }
         }
         switchLocalMarksService.isChecked = prefs.getBoolean(LOCAL_MARKS_SERVICE, false)
+        localMarksLayout.visibility = if (prefs.getBoolean(LOCAL_MARKS_SERVICE, false)) View.VISIBLE else View.GONE
         thread(true) {
             if (token.length < 5) {
                 KundelikLoginFragment().show(mActivity.supportFragmentManager, "lol")
@@ -134,7 +136,6 @@ class KundelikFragment : Fragment() {
                 mActivity.queue.add(tokenTestRequest())
             }
             spinnerSelectMode.setSelection(prefs.getInt(LOCAL_MODE, 0))
-            localMarksLayout.visibility = if (prefs.getBoolean(LOCAL_MARKS_SERVICE, false)) View.VISIBLE else View.GONE
             editTextServiceDelay.setText(prefs.getInt(LOCAL_SERVICE_DELAY, 15).toString())
             if (prefs.contains(LAST_CHECK))
                 textViewLastCheck.text = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(prefs.getLong(LAST_CHECK, 0))
@@ -183,7 +184,6 @@ class KundelikFragment : Fragment() {
                         val decoded = cipher.doFinal(encoded)
                         val credentials = String(decoded).split("|")
                         val jsonDetails = JsonObject()
-
                         jsonDetails.addProperty("username", credentials[0])
                         jsonDetails.addProperty("password", credentials[1])
                         jsonDetails.addProperty("client_id", CLIENT_ID)

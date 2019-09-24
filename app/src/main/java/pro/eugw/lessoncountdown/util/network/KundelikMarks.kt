@@ -24,11 +24,18 @@ import kotlin.random.Random
 class KundelikMarks {
     companion object {
         fun check(applicationContext: Context) {
+            val m1Builder = NotificationCompat.Builder(applicationContext, WORKER_CHANNEL_ID)
+                    .setContentTitle("NOTIFICATION TEST")
+                    .setContentText("TEST")
+                    .setSmallIcon(R.drawable.ic_oti)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setContentIntent(PendingIntent.getActivity(applicationContext, 0, Intent(applicationContext, MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
             val queue = Volley.newRequestQueue(applicationContext)!!
             var jsonArray = JsonArray()
             val mNotificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !mNotificationManager.notificationChannels.contains(NotificationChannel(WORKER_CHANNEL_ID, WORKER_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT)))
                 mNotificationManager.createNotificationChannel(NotificationChannel(WORKER_CHANNEL_ID, WORKER_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT))
+            mNotificationManager.notify(Random.nextInt(), m1Builder.build())
             val file = File(applicationContext.filesDir, "savedMarks.json")
             if (file.exists())
                 jsonArray = JsonParser().parse(file.readText()).asJsonArray
@@ -51,6 +58,7 @@ class KundelikMarks {
                                             Response.Listener { response2 ->
                                                 prefs.edit {
                                                     putLong(LAST_CHECK, System.currentTimeMillis())
+                                                    putInt("CNTR", prefs.getInt("CNTR", 0) + 1)
                                                 }
                                                 val newMarks = JsonArray()
                                                 response2.forEach {

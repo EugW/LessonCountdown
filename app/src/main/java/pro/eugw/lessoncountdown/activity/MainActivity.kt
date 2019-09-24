@@ -16,6 +16,7 @@ import androidx.core.content.edit
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.android.volley.Request
@@ -148,12 +149,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                 }
                 1 -> {
                     val marksRequest = PeriodicWorkRequestBuilder<MarksListenerWorker>((prefs.getInt(LOCAL_SERVICE_DELAY, 15)).toLong(), TimeUnit.MINUTES).addTag(MARKS_WORK).build()
-                    WorkManager.getInstance().cancelAllWorkByTag(MARKS_WORK)
-                    WorkManager.getInstance().enqueue(marksRequest)
-                }
-                2 -> {
-                    val mrksvc = Intent(this, MarksListenerService::class.java)
-                    startService(mrksvc)
+                    WorkManager.getInstance().enqueueUniquePeriodicWork(MARKS_WORK, ExistingPeriodicWorkPolicy.KEEP, marksRequest)
                 }
             }
         }
