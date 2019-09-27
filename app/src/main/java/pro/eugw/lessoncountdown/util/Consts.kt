@@ -21,7 +21,6 @@ const val KUNDELIK_ROLE = "kundelikRole"
 const val LC_PP = "lcPp"
 const val LOCAL_MARKS_SERVICE = "localMarks"
 const val LOCAL_SERVICE_DELAY = "localMarksDelay"
-const val LOCAL_MODE = "localMode"
 const val LAST_CHECK = "lastCheck"
 
 // ---broadcasts---

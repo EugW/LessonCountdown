@@ -1,8 +1,6 @@
 package pro.eugw.lessoncountdown.activity
 
-import android.app.AlarmManager
 import android.app.AlertDialog
-import android.app.PendingIntent
 import android.content.*
 import android.os.Bundle
 import android.os.Handler
@@ -139,19 +137,8 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             }
         }
         if (prefs.getBoolean(LOCAL_MARKS_SERVICE, false)) {
-            when (prefs.getInt(LOCAL_MODE, 0)) {
-                0 -> {
-                    val svcIntent = Intent(this, MarksListenerAlarmService::class.java)
-                    val pendingIntent = PendingIntent.getService(this, 0, svcIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-                    val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                    alarmManager.cancel(pendingIntent)
-                    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000, (prefs.getInt(LOCAL_SERVICE_DELAY, 15) * 60 * 1000).toLong(), pendingIntent)
-                }
-                1 -> {
-                    val marksRequest = PeriodicWorkRequestBuilder<MarksListenerWorker>((prefs.getInt(LOCAL_SERVICE_DELAY, 15)).toLong(), TimeUnit.MINUTES).addTag(MARKS_WORK).build()
-                    WorkManager.getInstance().enqueueUniquePeriodicWork(MARKS_WORK, ExistingPeriodicWorkPolicy.KEEP, marksRequest)
-                }
-            }
+            val marksRequest = PeriodicWorkRequestBuilder<MarksListenerWorker>((prefs.getInt(LOCAL_SERVICE_DELAY, 15)).toLong(), TimeUnit.MINUTES).build()
+            WorkManager.getInstance().enqueueUniquePeriodicWork(MARKS_WORK, ExistingPeriodicWorkPolicy.KEEP, marksRequest)
         }
         broadcastManager.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent?) {
@@ -170,7 +157,6 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         startService(service)
         bindService(service, object : ServiceConnection {
             override fun onServiceDisconnected(p0: ComponentName?) {}
-
             override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
                 toggleButton.isChecked = (p1 as MService.MBinder).service.running
                 unbindService(this)

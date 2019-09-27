@@ -10,7 +10,6 @@ import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import android.widget.Toast
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
@@ -52,15 +51,6 @@ class KundelikFragment : Fragment() {
         prefs = mActivity.prefs
         token = prefs.getString(KUNDELIK_TOKEN, "")!!
         val host = prefs.getString(CUSTOM_ADDRESS, getString(R.string.host))
-        spinnerSelectMode.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                prefs.edit {
-                    putInt(LOCAL_MODE, position)
-                }
-            }
-        }
-        textViewCNTR.text = prefs.getInt("CNTR", 0).toString()
         buttonSetDelay.setOnClickListener {
             try {
                 prefs.edit {
@@ -126,6 +116,7 @@ class KundelikFragment : Fragment() {
             prefs.edit {
                 putBoolean(LOCAL_MARKS_SERVICE, isChecked)
             }
+            localMarksLayout.visibility = if (prefs.getBoolean(LOCAL_MARKS_SERVICE, false)) View.VISIBLE else View.GONE
         }
         switchLocalMarksService.isChecked = prefs.getBoolean(LOCAL_MARKS_SERVICE, false)
         localMarksLayout.visibility = if (prefs.getBoolean(LOCAL_MARKS_SERVICE, false)) View.VISIBLE else View.GONE
@@ -135,7 +126,6 @@ class KundelikFragment : Fragment() {
             } else {
                 mActivity.queue.add(tokenTestRequest())
             }
-            spinnerSelectMode.setSelection(prefs.getInt(LOCAL_MODE, 0))
             editTextServiceDelay.setText(prefs.getInt(LOCAL_SERVICE_DELAY, 15).toString())
             if (prefs.contains(LAST_CHECK))
                 textViewLastCheck.text = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(prefs.getLong(LAST_CHECK, 0))

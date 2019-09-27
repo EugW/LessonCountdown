@@ -49,12 +49,6 @@
         <item>@string/friday</item>
         <item>@string/saturday</item>
     </string-array>
-    <string-array name="modes">
-        <item>@string/alarmManagerMode</item>
-        <item>@string/workManagerMode</item>
-    </string-array>
-    <string name="alarmManagerMode">AlarmManager mode</string>
-    <string name="workManagerMode">WorkManager mode</string>
     <string name="notificationColor">Custom notification colors</string>
     <string name="titleColor">Color of the lesson</string>
     <string name="timeColor">Time color</string>
@@ -89,6 +83,4 @@
     <string name="enableLocalMarksService">Enable local marks listener service</string>
     <string name="set">Set</string>
     <string name="delay">Delay (in minutes >= 15)</string>
-    <string name="selectMode">Select mode</string>
-    <string name="lastCheck">Last check:</string>
 </resources>

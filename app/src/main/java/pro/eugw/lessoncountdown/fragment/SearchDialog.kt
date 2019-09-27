@@ -57,8 +57,8 @@ class SearchDialog : DialogFragment() {
                     baseArray.forEach {
                         val mmm = it
                         var match = true
-                        s.toString().toUpperCase().split(" ").forEach { string ->
-                            if (!(mmm.number + mmm.letter + mmm.subgroup + mmm.school_name).replace(" ", "").toUpperCase().contains(string)) {
+                        s.toString().toUpperCase(Locale.getDefault()).split(" ").forEach { string ->
+                            if (!(mmm.number + mmm.letter + mmm.subgroup + mmm.school_name).replace(" ", "").toUpperCase(Locale.getDefault()).contains(string)) {
                                 match = false
                             }
                         }

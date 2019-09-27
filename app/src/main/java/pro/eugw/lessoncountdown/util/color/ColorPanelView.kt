@@ -11,6 +11,7 @@ import android.util.TypedValue
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import pro.eugw.lessoncountdown.R
+import kotlin.math.roundToInt
 
 /**
  * This class draws a panel which which will be filled with a mColor which can be set. It can be used to show the
@@ -60,9 +61,7 @@ class ColorPanelView @JvmOverloads constructor(context: Context, attrs: Attribut
         val a = getContext().obtainStyledAttributes(attrs, R.styleable.ColorPanelView)
         shape = a.getInt(R.styleable.ColorPanelView_cpv_colorShape, ColorShape.CIRCLE)
         showOldColor = a.getBoolean(R.styleable.ColorPanelView_cpv_showOldColor, false)
-        if (showOldColor && shape != ColorShape.CIRCLE) {
-            throw IllegalStateException("Color preview is only available in circle mode")
-        }
+        check(!(showOldColor && shape != ColorShape.CIRCLE)) { "Color preview is only available in circle mode" }
         mBorderColor = a.getColor(R.styleable.ColorPanelView_cpv_borderColor, DEFAULT_BORDER_COLOR)
         a.recycle()
         if (mBorderColor == DEFAULT_BORDER_COLOR) {
@@ -137,8 +136,8 @@ class ColorPanelView @JvmOverloads constructor(context: Context, attrs: Attribut
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         when (shape) {
             ColorShape.SQUARE -> {
-                val width = View.MeasureSpec.getSize(widthMeasureSpec)
-                val height = View.MeasureSpec.getSize(heightMeasureSpec)
+                val width = MeasureSpec.getSize(widthMeasureSpec)
+                val height = MeasureSpec.getSize(heightMeasureSpec)
                 setMeasuredDimension(width, height)
             }
             ColorShape.CIRCLE -> {
@@ -182,10 +181,10 @@ class ColorPanelView @JvmOverloads constructor(context: Context, attrs: Attribut
         val right = dRect.right - borderWidthPx
         colorRect = Rect(left, top, right, bottom)
         alphaPattern = AlphaPatternDrawable(DrawingUtils.dpToPx(context, 4f))
-        alphaPattern!!.setBounds(Math.round(colorRect!!.left.toFloat()),
-                Math.round(colorRect!!.top.toFloat()),
-                Math.round(colorRect!!.right.toFloat()),
-                Math.round(colorRect!!.bottom.toFloat()))
+        alphaPattern!!.setBounds(colorRect!!.left.toFloat().roundToInt(),
+                colorRect!!.top.toFloat().roundToInt(),
+                colorRect!!.right.toFloat().roundToInt(),
+                colorRect!!.bottom.toFloat().roundToInt())
     }
 
     /**

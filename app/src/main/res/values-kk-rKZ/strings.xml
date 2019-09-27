@@ -72,9 +72,4 @@
     <string name="enableLocalMarksService">Включить локальный сервис ожидания оценок</string>
     <string name="set">Установить</string>
     <string name="delay">Задержка (в минутах >= 15)</string>
-    <string name="selectMode">Выбрать режим</string>
-    <string name="alarmManagerMode">Режим AlarmManager</string>
-    <string name="workManagerMode">Режим WorkManager</string>
-    <string name="lastCheck">"Последняя проверка: "</string>
-    <string name="serviceClassMode">Service mode</string>
 </resources>

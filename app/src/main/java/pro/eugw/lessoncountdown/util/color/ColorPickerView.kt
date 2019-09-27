@@ -14,6 +14,7 @@ import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import pro.eugw.lessoncountdown.R
+import kotlin.math.max
 
 
 class ColorPickerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : View(context, attrs, defStyle) {
@@ -432,15 +433,15 @@ class ColorPickerView @JvmOverloads constructor(context: Context, attrs: Attribu
         val finalWidth: Int
         val finalHeight: Int
 
-        val widthMode = View.MeasureSpec.getMode(widthMeasureSpec)
-        val heightMode = View.MeasureSpec.getMode(heightMeasureSpec)
+        val widthMode = MeasureSpec.getMode(widthMeasureSpec)
+        val heightMode = MeasureSpec.getMode(heightMeasureSpec)
 
-        val widthAllowed = View.MeasureSpec.getSize(widthMeasureSpec) - paddingLeft - paddingRight
-        val heightAllowed = View.MeasureSpec.getSize(heightMeasureSpec) - paddingBottom - paddingTop
+        val widthAllowed = MeasureSpec.getSize(widthMeasureSpec) - paddingLeft - paddingRight
+        val heightAllowed = MeasureSpec.getSize(heightMeasureSpec) - paddingBottom - paddingTop
 
-        if (widthMode == View.MeasureSpec.EXACTLY || heightMode == View.MeasureSpec.EXACTLY) {
+        if (widthMode == MeasureSpec.EXACTLY || heightMode == MeasureSpec.EXACTLY) {
 
-            if (widthMode == View.MeasureSpec.EXACTLY && heightMode != View.MeasureSpec.EXACTLY) {
+            if (widthMode == MeasureSpec.EXACTLY && heightMode != MeasureSpec.EXACTLY) {
                 val h = widthAllowed - panelSpacingPx - huePanelWidthPx
 
 
@@ -452,7 +453,7 @@ class ColorPickerView @JvmOverloads constructor(context: Context, attrs: Attribu
 
                 finalWidth = widthAllowed
 
-            } else if (heightMode == View.MeasureSpec.EXACTLY && widthMode != View.MeasureSpec.EXACTLY) {
+            } else if (heightMode == MeasureSpec.EXACTLY && widthMode != MeasureSpec.EXACTLY) {
 
                 val w = heightAllowed + panelSpacingPx + huePanelWidthPx
 
@@ -508,19 +509,19 @@ class ColorPickerView @JvmOverloads constructor(context: Context, attrs: Attribu
     }
 
     override fun getPaddingTop(): Int {
-        return Math.max(super.getPaddingTop(), mRequiredPadding)
+        return max(super.getPaddingTop(), mRequiredPadding)
     }
 
     override fun getPaddingBottom(): Int {
-        return Math.max(super.getPaddingBottom(), mRequiredPadding)
+        return max(super.getPaddingBottom(), mRequiredPadding)
     }
 
     override fun getPaddingLeft(): Int {
-        return Math.max(super.getPaddingLeft(), mRequiredPadding)
+        return max(super.getPaddingLeft(), mRequiredPadding)
     }
 
     override fun getPaddingRight(): Int {
-        return Math.max(super.getPaddingRight(), mRequiredPadding)
+        return max(super.getPaddingRight(), mRequiredPadding)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {

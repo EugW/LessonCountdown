@@ -16,7 +16,6 @@ import java.io.FileReader
 import java.io.FileWriter
 import java.io.PrintWriter
 
-
 class ScheduleAdapter(private var list: List<ScheduleElement>, private var fragment: DOWFragment, private val edit: Boolean) : RecyclerView.Adapter<ScheduleHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScheduleHolder {
@@ -27,7 +26,7 @@ class ScheduleAdapter(private var list: List<ScheduleElement>, private var fragm
     override fun onBindViewHolder(holder: ScheduleHolder, position: Int) {
         val name = list[position].lesson
         val homework = list[position].homework
-        holder.imageHomework.visibility = if (!homework.isEmpty()) View.VISIBLE else View.GONE
+        holder.imageHomework.visibility = if (homework.isNotEmpty()) View.VISIBLE else View.GONE
         holder.lesson.text = if (edit) name else ((position + 1).toString() + ". " + name)
         holder.time.text = list[position].time
         if (edit) {
@@ -50,7 +49,7 @@ class ScheduleAdapter(private var list: List<ScheduleElement>, private var fragm
                 val builder = AlertDialog.Builder(fragment.activity)
                 builder.setTitle(fragment.getString(R.string.homework) + " - " + name)
                 val input = EditText(fragment.activity)
-                if (!homework.isEmpty())
+                if (homework.isNotEmpty())
                     input.setText(homework)
                 builder.setView(input)
                 builder.setPositiveButton(android.R.string.ok) { _, _ -> setList(name, input.text.toString(), position) }

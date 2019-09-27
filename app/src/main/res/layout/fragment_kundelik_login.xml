@@ -23,7 +23,8 @@
             android:layout_marginBottom="8dp"
             android:ems="10"
             android:hint="@string/login"
-            android:inputType="textPersonName" />
+            android:inputType="textPersonName"
+            android:importantForAutofill="no" />
 
         <EditText
             android:id="@+id/editTextKundelikPassword"
@@ -37,7 +38,8 @@
             android:layout_marginBottom="8dp"
             android:ems="10"
             android:hint="@string/password"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:importantForAutofill="no" />
 
         <Button
             android:id="@+id/buttonKundelikLogin"

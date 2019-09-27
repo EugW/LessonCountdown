@@ -3,6 +3,7 @@ package pro.eugw.lessoncountdown.util.color
 import android.graphics.*
 import android.graphics.Bitmap.Config
 import android.graphics.drawable.Drawable
+import kotlin.math.ceil
 
 /**
  * This drawable will draw a simple white and gray chessboard pattern.
@@ -54,8 +55,8 @@ internal class AlphaPatternDrawable(rectangleSize: Int) : Drawable() {
         super.onBoundsChange(bounds)
         val height = bounds.height()
         val width = bounds.width()
-        numRectanglesHorizontal = Math.ceil((width / rectangleSize).toDouble()).toInt()
-        numRectanglesVertical = Math.ceil((height / rectangleSize).toDouble()).toInt()
+        numRectanglesHorizontal = ceil((width / rectangleSize).toDouble()).toInt()
+        numRectanglesVertical = ceil((height / rectangleSize).toDouble()).toInt()
         generatePatternBitmap()
     }
 
