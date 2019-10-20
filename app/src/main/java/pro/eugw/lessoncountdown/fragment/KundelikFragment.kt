@@ -22,6 +22,7 @@ import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.fragment.small.KundelikLoginFragment
 import pro.eugw.lessoncountdown.fragment.small.LCAPILoginFragment
 import pro.eugw.lessoncountdown.fragment.small.LCAPIMarksLogFragment
+import pro.eugw.lessoncountdown.fragment.small.MarksLogFragment
 import pro.eugw.lessoncountdown.util.*
 import pro.eugw.lessoncountdown.util.network.JsObRe
 import java.io.File
@@ -120,6 +121,9 @@ class KundelikFragment : Fragment() {
         }
         switchLocalMarksService.isChecked = prefs.getBoolean(LOCAL_MARKS_SERVICE, false)
         localMarksLayout.visibility = if (prefs.getBoolean(LOCAL_MARKS_SERVICE, false)) View.VISIBLE else View.GONE
+        buttonViewLog.setOnClickListener {
+            MarksLogFragment(mActivity).show(mActivity.supportFragmentManager, "123")
+        }
         thread(true) {
             if (token.length < 5) {
                 KundelikLoginFragment().show(mActivity.supportFragmentManager, "lol")
@@ -196,7 +200,7 @@ class KundelikFragment : Fragment() {
                         val builder = AlertDialog.Builder(context)
                         builder.setPositiveButton("COPY") { _, _ ->
                             val clip = mActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            clip.primaryClip = ClipData.newPlainText("lcError", sw.toString())
+                            clip.setPrimaryClip(ClipData.newPlainText("lcError", sw.toString()))
                         }
                         builder.setNeutralButton("DISMISS") { _, _ ->
                         }

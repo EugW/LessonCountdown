@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/textViewTimeStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TimeStart"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewTimeEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TimeEnd"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewTimeStart" />
+
+    <TextView
+        android:id="@+id/textViewIStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="IStart"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewIEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="IEnd"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewIStart" />
+
+    <TextView
+        android:id="@+id/textViewOmBefore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="OmBefore"
+        app:layout_constraintEnd_toStartOf="@+id/textViewIStart"
+        app:layout_constraintStart_toEndOf="@+id/textViewTimeStart"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewOmAfter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="OmAfter"
+        app:layout_constraintEnd_toStartOf="@+id/textViewIEnd"
+        app:layout_constraintStart_toEndOf="@+id/textViewTimeEnd"
+        app:layout_constraintTop_toBottomOf="@+id/textViewOmBefore" />
+
+    <TextView
+        android:id="@+id/textViewDiffSize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="DiffSize"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewTimeEnd" />
+
+    <Button
+        android:id="@+id/buttongetNewMarks"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="newmarks"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewOmAfter" />
+
+    <TextView
+        android:id="@+id/textViewNotSent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NotSent"
+        app:layout_constraintEnd_toStartOf="@+id/buttongetNewMarks"
+        app:layout_constraintStart_toEndOf="@+id/textViewDiffSize"
+        app:layout_constraintTop_toBottomOf="@+id/textViewOmAfter" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

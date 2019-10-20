@@ -94,7 +94,7 @@ class SettingsFragment : Fragment() {
             jObject.add(SCHEDULE, JsonParser().parse(FileReader(File(mActivity.filesDir, SCHEDULE_FILE))))
             jObject.add(BELLS, JsonParser().parse(FileReader(File(mActivity.filesDir, BELLS_FILE))))
             val clip = mActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            clip.primaryClip = ClipData.newPlainText("lcConfig", jObject.toString())
+            clip.setPrimaryClip(ClipData.newPlainText("lcConfig", jObject.toString()))
         }
         buttonPaste.setOnClickListener {
             val clip = mActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

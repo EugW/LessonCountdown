@@ -153,7 +153,7 @@ class KundelikLoginFragment : DialogFragment() {
         val builder = AlertDialog.Builder(context)
         builder.setPositiveButton("COPY") { _, _ ->
             val clip = mActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            clip.primaryClip = ClipData.newPlainText("lcResponse", message)
+            clip.setPrimaryClip(ClipData.newPlainText("lcResponse", message))
             dismiss()
         }
         builder.setNeutralButton("DISMISS") { _, _ ->

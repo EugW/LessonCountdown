@@ -66,7 +66,6 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         }
     }
 
-
     private fun graphicalInit() {
         setContentView(R.layout.activity_main)
         val toggle = ActionBarDrawerToggle(this, drawer_layout, main_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
