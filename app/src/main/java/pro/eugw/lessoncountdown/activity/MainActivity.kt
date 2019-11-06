@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.content.*
 import android.os.Bundle
 import android.os.Handler
-import android.os.IBinder
 import android.text.method.LinkMovementMethod
 import android.view.MenuItem
 import android.widget.TextView
@@ -154,13 +153,6 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         initClass()
         File(filesDir, SERVICE_PID).createNewFile()
         startService(service)
-        bindService(service, object : ServiceConnection {
-            override fun onServiceDisconnected(p0: ComponentName?) {}
-            override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
-                toggleButton.isChecked = (p1 as MService.MBinder).service.running
-                unbindService(this)
-            }
-        }, Context.BIND_AUTO_CREATE)
     }
 
     fun initClass() {

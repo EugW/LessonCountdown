@@ -7,7 +7,6 @@ import android.app.Service
 import android.content.*
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.widget.RemoteViews
@@ -23,25 +22,26 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
+import kotlin.random.Random
 
 class MService : Service() {
 
     var running: Boolean = true
     private lateinit var runnable: () -> Unit
     private lateinit var instance: LocalBroadcastManager
-    private var mBinder = MBinder()
 
-    inner class MBinder : Binder() {
-        internal val service: MService
-            get() = this@MService
-    }
-
-    override fun onBind(intent: Intent?): IBinder {
-        return mBinder
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
     }
 
     override fun onCreate() {
         super.onCreate()
+        val statusController = StatusController.getInstance()
+        Thread.sleep(Random.nextInt(1, 10) * 1000L)
+        if (statusController.serviceStatus)
+            return
+        else
+            statusController.serviceStatus = true
         instance = LocalBroadcastManager.getInstance(this)
         val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val notificationLayout = RemoteViews(packageName, R.layout.notification_small)

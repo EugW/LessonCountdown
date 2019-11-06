@@ -37,6 +37,12 @@ class MarksListenerWorker(context: Context, workerParameters: WorkerParameters) 
     private lateinit var prefs: SharedPreferences
 
     override fun doWork(): Result {
+        val statusController = StatusController.getInstance()
+        Thread.sleep(Random.nextInt(1, 10) * 1000L)
+        if (statusController.workerStatus)
+            return Result.failure()
+        else
+            statusController.workerStatus = true
         val logEntry = JsonObject()
         logEntry.addProperty("timeStart", System.currentTimeMillis())
         var i = 0
