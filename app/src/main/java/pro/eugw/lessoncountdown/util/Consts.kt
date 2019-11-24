@@ -35,7 +35,6 @@ const val NOTIFICATION_STYLE_UPDATE = ".NOTIFICATION_STYLE_UPDATE"
 
 const val SCHEDULE_FILE = "schedule.json"
 const val BELLS_FILE = "bells.json"
-const val SERVICE_PID = "service.pid"
 
 // ---JsonObject properties---
 
@@ -55,6 +54,7 @@ const val SEARCH_REQUEST_CODE = 90
 
 // ---Other---
 
+const val TIME_NOTIFICATION_ID = 542
 const val MARKS_WORK = "workerForMarksTag"
 const val FRAGMENT_DRAW_DELAY = 400L
 const val WORKER_CHANNEL_ID = "WRK-LC"

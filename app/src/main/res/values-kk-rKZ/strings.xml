@@ -60,8 +60,6 @@
     <string name="login">Логин</string>
     <string name="resetLogin">Сбросить вход</string>
     <string name="newMark">Новая оценка</string>
-    <string name="regNoti">Зарегистрироваться для получения уведомлений о новых овенцках</string>
-    <string name="unregNoti">Отменить регистрацию для получения уведомлений о новых овенцках</string>
     <string name="onMarkDate">за</string>
     <string name="marksLastList">Последние оценки за 30 дней</string>
     <string name="unsupportedRole">Неподдерживаемая роль</string>

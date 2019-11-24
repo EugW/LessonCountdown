@@ -18,7 +18,7 @@ class JsObRe(requestMethod: Int, urlS: String, body: Any, listener: Response.Lis
     override fun parseNetworkResponse(response: NetworkResponse): Response<JsonObject> {
         return try {
             val jsonString = String(response.data, Charset.forName(HttpHeaderParser.parseCharset(headers, PROTOCOL_CHARSET)))
-            Response.success(JsonParser().parse(jsonString).asJsonObject, HttpHeaderParser.parseCacheHeaders(response))
+            Response.success(JsonParser.parseString(jsonString).asJsonObject, HttpHeaderParser.parseCacheHeaders(response))
         } catch (e: UnsupportedEncodingException) {
             Response.error(ParseError(e))
         } catch (je: JsonParseException) {

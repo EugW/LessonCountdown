@@ -76,7 +76,7 @@ class SearchDialog : DialogFragment() {
         mActivity.queue.add(JsObRe(Request.Method.GET, "https://$host/classes?lang=${Locale.getDefault().language}",
                 Response.Listener {
                     thread(true) {
-                        JsonParser().parse(it.toString()).asJsonObject[CLASSES].asJsonArray.forEach {jE ->
+                        JsonParser.parseString(it.toString()).asJsonObject[CLASSES].asJsonArray.forEach {jE ->
                             baseArray.add(SearchElement(jE.asJsonObject[NUMBER].asString, jE.asJsonObject[LETTER].asString, jE.asJsonObject[SUBGROUP].asString, jE.asJsonObject[SCHOOL_ID].asString, jE.asJsonObject[SCHOOL_NAME].asString))
                         }
                         searchResults.clear()

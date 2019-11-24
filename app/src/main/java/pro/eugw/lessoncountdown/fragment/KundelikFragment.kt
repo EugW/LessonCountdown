@@ -20,8 +20,6 @@ import kotlinx.android.synthetic.main.fragment_kundelik_panel.*
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.fragment.small.KundelikLoginFragment
-import pro.eugw.lessoncountdown.fragment.small.LCAPILoginFragment
-import pro.eugw.lessoncountdown.fragment.small.LCAPIMarksLogFragment
 import pro.eugw.lessoncountdown.fragment.small.MarksLogFragment
 import pro.eugw.lessoncountdown.util.*
 import pro.eugw.lessoncountdown.util.network.JsObRe
@@ -33,7 +31,6 @@ import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
-import kotlin.concurrent.thread
 
 class KundelikFragment : Fragment() {
 
@@ -51,17 +48,6 @@ class KundelikFragment : Fragment() {
         mActivity = activity as MainActivity
         prefs = mActivity.prefs
         token = prefs.getString(KUNDELIK_TOKEN, "")!!
-        val host = prefs.getString(CUSTOM_ADDRESS, getString(R.string.host))
-        buttonSetDelay.setOnClickListener {
-            try {
-                prefs.edit {
-                    val dl = editTextServiceDelay.text.toString().toInt()
-                    putInt(LOCAL_SERVICE_DELAY, dl)
-                }
-            } catch (e: Exception) {
-                Toast.makeText(mActivity, "Mistake", Toast.LENGTH_SHORT).show()
-            }
-        }
         buttonKundelikReset.setOnClickListener {
             prefs.edit {
                 remove(KUNDELIK_TOKEN)
@@ -75,45 +61,10 @@ class KundelikFragment : Fragment() {
         buttonKundelikDownload.setOnClickListener {
             mActivity.initScheduleKundelik()
         }
-        buttonRegisterNotification.setOnClickListener {
-            LCAPILoginFragment().show(mActivity.supportFragmentManager, "lol")
-        }
-        buttonUnregisterNotification.setOnClickListener {
-            val url = "https://$host/unregister?token=${prefs.getString(LCAPI_TOKEN, "")}"
-            mActivity.queue.add(JsObRe(Request.Method.GET, url,
-                    Response.Listener {
-                        Toast.makeText(mActivity, "Success", Toast.LENGTH_SHORT).show()
-                        prefs.edit {
-                            remove(LCAPI_TOKEN)
-                        }
-                        buttonUnregisterNotification.visibility = View.GONE
-                        buttonRegisterNotification.visibility = View.VISIBLE
-                    },
-                    Response.ErrorListener { error ->
-                        Toast.makeText(mActivity, error.message, Toast.LENGTH_SHORT).show()
-                    }
-            ))
-        }
         buttonMarksLog.setOnClickListener {
-            LCAPIMarksLogFragment().show(mActivity.supportFragmentManager, "marks log")
+            MarksLogFragment().show(mActivity.supportFragmentManager, "marks log")
         }
         switchLocalMarksService.setOnCheckedChangeListener { _, isChecked ->
-            if (prefs.contains(LCAPI_TOKEN)) {
-                val url = "https://$host/unregister?token=${prefs.getString(LCAPI_TOKEN, "")}"
-                mActivity.queue.add(JsObRe(Request.Method.GET, url,
-                        Response.Listener {
-                            Toast.makeText(mActivity, "Success", Toast.LENGTH_SHORT).show()
-                            prefs.edit {
-                                remove(LCAPI_TOKEN)
-                            }
-                            buttonUnregisterNotification.visibility = View.GONE
-                            buttonRegisterNotification.visibility = View.VISIBLE
-                        },
-                        Response.ErrorListener { error ->
-                            Toast.makeText(mActivity, error.message, Toast.LENGTH_SHORT).show()
-                        }
-                ))
-            }
             prefs.edit {
                 putBoolean(LOCAL_MARKS_SERVICE, isChecked)
             }
@@ -121,37 +72,22 @@ class KundelikFragment : Fragment() {
         }
         switchLocalMarksService.isChecked = prefs.getBoolean(LOCAL_MARKS_SERVICE, false)
         localMarksLayout.visibility = if (prefs.getBoolean(LOCAL_MARKS_SERVICE, false)) View.VISIBLE else View.GONE
-        buttonViewLog.setOnClickListener {
-            MarksLogFragment(mActivity).show(mActivity.supportFragmentManager, "123")
+        editTextServiceDelay.setText(prefs.getInt(LOCAL_SERVICE_DELAY, 15).toString())
+        if (token.length < 5) {
+            KundelikLoginFragment().show(mActivity.supportFragmentManager, "lol")
+        } else {
+            mActivity.queue.add(tokenTestRequest())
         }
-        thread(true) {
-            if (token.length < 5) {
-                KundelikLoginFragment().show(mActivity.supportFragmentManager, "lol")
-            } else {
-                mActivity.queue.add(tokenTestRequest())
-            }
-            editTextServiceDelay.setText(prefs.getInt(LOCAL_SERVICE_DELAY, 15).toString())
-            if (prefs.contains(LAST_CHECK))
-                textViewLastCheck.text = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(prefs.getLong(LAST_CHECK, 0))
-            if (prefs.contains(LCAPI_TOKEN))
-                buttonRegisterNotification.visibility = View.GONE
-            else
-                buttonUnregisterNotification.visibility = View.GONE
-            if (!SUPPORTED_KUNDELIK_ROLES.contains(mActivity.prefs.getString(KUNDELIK_ROLE, "")) && mActivity.prefs.getString(KUNDELIK_TOKEN, "")!!.isNotBlank()) {
-                val str = "(${getString(R.string.unsupportedRole)}:${mActivity.prefs.getString(KUNDELIK_ROLE, "")})"
-                val str1 = getString(R.string.download) + str
-                buttonKundelikDownload.text = str1
-                buttonKundelikDownload.isClickable = false
-                val str2 = getString(R.string.regNoti) + str
-                buttonRegisterNotification.text = str2
-                buttonRegisterNotification.isClickable = false
-                val str3 = getString(R.string.unregNoti) + str
-                buttonUnregisterNotification.text = str3
-                buttonUnregisterNotification.isClickable = false
-                val str4 = getString(R.string.marksLastList) + str
-                buttonMarksLog.text = str4
-                buttonMarksLog.isClickable = false
-            }
+        if (prefs.contains(LAST_CHECK))
+            textViewLastCheck.text = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(prefs.getLong(LAST_CHECK, 0))
+        if (!SUPPORTED_KUNDELIK_ROLES.contains(mActivity.prefs.getString(KUNDELIK_ROLE, "")) && mActivity.prefs.getString(KUNDELIK_TOKEN, "")!!.isNotBlank()) {
+            val str = "(${getString(R.string.unsupportedRole)}:${mActivity.prefs.getString(KUNDELIK_ROLE, "")})"
+            val str1 = getString(R.string.download) + str
+            buttonKundelikDownload.text = str1
+            buttonKundelikDownload.isClickable = false
+            val str4 = getString(R.string.marksLastList) + str
+            buttonMarksLog.text = str4
+            buttonMarksLog.isClickable = false
         }
     }
 

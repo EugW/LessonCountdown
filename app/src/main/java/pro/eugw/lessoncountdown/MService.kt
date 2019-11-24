@@ -7,7 +7,6 @@ import android.app.Service
 import android.content.*
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.os.Build
 import android.os.IBinder
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
@@ -22,7 +21,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
-import kotlin.random.Random
 
 class MService : Service() {
 
@@ -36,12 +34,6 @@ class MService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val statusController = StatusController.getInstance()
-        Thread.sleep(Random.nextInt(1, 10) * 1000L)
-        if (statusController.serviceStatus)
-            return
-        else
-            statusController.serviceStatus = true
         instance = LocalBroadcastManager.getInstance(this)
         val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val notificationLayout = RemoteViews(packageName, R.layout.notification_small)
@@ -50,8 +42,8 @@ class MService : Service() {
             defaultColors(notificationLayout, prefs)
         }
         val mBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle(CHANNEL_ID)
-                .setContentText(CHANNEL_ID)
+                .setContentTitle("LessonCountdown")
+                .setContentText("Time notification")
                 .setSmallIcon(R.drawable.ic_oti)
                 .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_oti))
                 .setAutoCancel(false)
@@ -60,9 +52,9 @@ class MService : Service() {
                 .setShowWhen(false)
                 .setContentIntent(PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
                 .setCustomContentView(notificationLayout)
-                .setGroup(TIME_GROUP)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            mNotificationManager.createNotificationChannel(NotificationChannel(CHANNEL_ID, CHANNEL_ID, NotificationManager.IMPORTANCE_LOW))
+                .setGroup(TIME_GROUP).build()
+        startForeground(TIME_NOTIFICATION_ID, mBuilder)
+        mNotificationManager.createNotificationChannel(NotificationChannel(CHANNEL_ID, CHANNEL_ID, NotificationManager.IMPORTANCE_LOW))
         instance.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent) {
                 if (p1.getBooleanExtra("cVal", false)) {
@@ -81,7 +73,7 @@ class MService : Service() {
         }, IntentFilter(baseContext.packageName + NOTIFICATION_STYLE_UPDATE))
         runnable = {
             val schedule = try {
-                JsonParser().parse(FileReader(File(filesDir, SCHEDULE_FILE))).asJsonObject
+                JsonParser.parseReader(FileReader(File(filesDir, SCHEDULE_FILE))).asJsonObject
             } catch (e: Exception) {
                 JsonObject()
             }
@@ -95,17 +87,17 @@ class MService : Service() {
             val lessonArray = ArrayList<LessonTime>()
             try {
                 schedule[dow].asJsonArray.forEachIndexed { index, jsonElement ->
-                    val s = JsonParser().parse(FileReader(File(filesDir, BELLS_FILE))).asJsonObject[dow].asJsonArray[index].asString.split("-")
+                    val s = JsonParser.parseReader(FileReader(File(filesDir, BELLS_FILE))).asJsonObject[dow].asJsonArray[index].asString.split("-")
                     val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US)
                     val yrr = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-                    lessonArray.add(LessonTime(sdf.parse(yrr.format(Date()) + " " + s[0]).time, sdf.parse(yrr.format(Date()) + " " + s[1]).time, jsonElement.asString))
+                    lessonArray.add(LessonTime(sdf.parse(yrr.format(Date()) + " " + s[0])!!.time, sdf.parse(yrr.format(Date()) + " " + s[1])!!.time, jsonElement.asString))
                 }
             } catch (e: Exception) {
                 lessonArray.clear()
             }
             running = true
             instance.sendBroadcast(Intent(baseContext.packageName + SERVICE_STATE).putExtra("isRun", running))
-            if (lessonArray.isNotEmpty() && File(filesDir, SERVICE_PID).exists())
+            if (lessonArray.isNotEmpty())
                 while (running && System.currentTimeMillis() <= lessonArray.last().end) {
                     var l1 = ""
                     var l2 = ""
@@ -140,12 +132,13 @@ class MService : Service() {
                     notificationLayout.setTextViewText(R.id.textViewNext, l2)
                     notificationLayout.setTextViewText(R.id.textViewText, text)
                     notificationLayout.setTextViewText(R.id.textViewLessons, lessons)
-                    mNotificationManager.notify(0, mBuilder.build())
+                    mNotificationManager.notify(TIME_NOTIFICATION_ID, mBuilder)
                     Thread.sleep(5000)
                 }
             running = false
             instance.sendBroadcast(Intent(baseContext.packageName + SERVICE_STATE).putExtra("isRun", running))
-            mNotificationManager.cancel(0)
+            mNotificationManager.cancel(TIME_NOTIFICATION_ID)
+            stopSelf()
         }
         thread(true, block = runnable)
         instance.registerReceiver(object : BroadcastReceiver() {

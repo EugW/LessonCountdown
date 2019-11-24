@@ -61,7 +61,7 @@ class ScheduleAdapter(private var list: List<ScheduleElement>, private var fragm
 
     private fun setList(prop: String, homework: String, position: Int) {
         val file = File(fragment.activity!!.filesDir, "homework.json")
-        val jsonObject = JsonParser().parse(FileReader(file)).asJsonObject
+        val jsonObject = JsonParser.parseReader(FileReader(file)).asJsonObject
         list[position].homework = homework
         jsonObject.addProperty(prop, homework)
         PrintWriter(FileWriter(file), true).println(jsonObject)

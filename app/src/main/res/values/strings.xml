@@ -71,8 +71,6 @@
     <string name="password">Password</string>
     <string name="resetLogin">Reset login</string>
     <string name="newMark">New mark</string>
-    <string name="regNoti">Register for receiving new marks notification</string>
-    <string name="unregNoti">Unregister for receiving new marks notification</string>
     <string name="onMarkDate">on</string>
     <string name="marksLastList">Last marks for 30 days</string>
     <string name="unsupportedRole">Unsupported role</string>
@@ -83,4 +81,5 @@
     <string name="enableLocalMarksService">Enable local marks listener service</string>
     <string name="set">Set</string>
     <string name="delay">Delay (in minutes >= 15)</string>
+    <string name="viewLog" translatable="false">ViewLog</string>
 </resources>

@@ -13,9 +13,7 @@ import androidx.core.content.edit
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
+import androidx.work.*
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
@@ -75,11 +73,8 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         toggleButton.setOnClickListener {
             try {
                 if (toggleButton.isChecked) {
-                    File(filesDir, SERVICE_PID).createNewFile()
                     broadcastManager.sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("START", true))
-
                 } else {
-                    File(filesDir, SERVICE_PID).delete()
                     broadcastManager.sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("STOP", true))
                 }
             } catch (ne: UninitializedPropertyAccessException) {
@@ -135,24 +130,26 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             }
         }
         if (prefs.getBoolean(LOCAL_MARKS_SERVICE, false)) {
-            val marksRequest = PeriodicWorkRequestBuilder<MarksListenerWorker>((prefs.getInt(LOCAL_SERVICE_DELAY, 15)).toLong(), TimeUnit.MINUTES).build()
+            val marksRequest = PeriodicWorkRequestBuilder<MarksListenerWorker>(prefs.getInt(LOCAL_SERVICE_DELAY, 15).toLong(), TimeUnit.MINUTES)
+                    .setConstraints(Constraints.NONE)
+                    .setBackoffCriteria(BackoffPolicy.LINEAR, 1, TimeUnit.MINUTES).build()
             WorkManager.getInstance().enqueueUniquePeriodicWork(MARKS_WORK, ExistingPeriodicWorkPolicy.KEEP, marksRequest)
         }
         broadcastManager.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent?) {
-                toggleButton.isChecked = p1!!.getBooleanExtra("isRun", false)
+                if (toggleButton != null)
+                    toggleButton.isChecked = p1!!.getBooleanExtra("isRun", false)
             }
         }, IntentFilter(baseContext.packageName + SERVICE_STATE))
         val service = Intent(this, MService::class.java)
         broadcastManager.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 stopService(service)
-                startService(service)
+                startForegroundService(service)
             }
         }, IntentFilter(baseContext.packageName + PEND_SERVICE_RESTART))
         initClass()
-        File(filesDir, SERVICE_PID).createNewFile()
-        startService(service)
+        startForegroundService(service)
     }
 
     fun initClass() {
@@ -169,8 +166,8 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                         PrintWriter(FileWriter(bells), true).println(it[BELLS].asJsonObject)
                         clazz = try {
                             val jsonObject = JsonObject()
-                            val scheduleJ = JsonParser().parse(FileReader(schedule)).asJsonObject
-                            val bellsJ = JsonParser().parse(FileReader(bells)).asJsonObject
+                            val scheduleJ = JsonParser.parseReader(FileReader(schedule)).asJsonObject
+                            val bellsJ = JsonParser.parseReader(FileReader(bells)).asJsonObject
                             jsonObject.add(SCHEDULE, scheduleJ)
                             jsonObject.add(BELLS, bellsJ)
                             jsonObject
@@ -188,8 +185,8 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         } else {
             clazz = try {
                 val jsonObject = JsonObject()
-                val scheduleJ = JsonParser().parse(FileReader(schedule)).asJsonObject
-                val bellsJ = JsonParser().parse(FileReader(bells)).asJsonObject
+                val scheduleJ = JsonParser.parseReader(FileReader(schedule)).asJsonObject
+                val bellsJ = JsonParser.parseReader(FileReader(bells)).asJsonObject
                 jsonObject.add(SCHEDULE, scheduleJ)
                 jsonObject.add(BELLS, bellsJ)
                 jsonObject
@@ -298,7 +295,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         val file = File(filesDir, "homework.json")
         if (!file.exists())
             PrintWriter(FileWriter(file), true).println(JsonObject())
-        homework = JsonParser().parse(FileReader(file)).asJsonObject
+        homework = JsonParser.parseReader(FileReader(file)).asJsonObject
     }
 
     private fun inflateDOWFragment() {
@@ -327,7 +324,6 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                 supportFragmentManager.beginTransaction().replace(R.id.content_frame, KundelikFragment()).commit()
             }, FRAGMENT_DRAW_DELAY)
         } catch (e: Exception) {
-
         }
     }
 
@@ -398,7 +394,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-        super.onRestoreInstanceState(savedInstanceState)
+        super.onRestoreInstanceState(savedInstanceState!!)
         saved = false
     }
 

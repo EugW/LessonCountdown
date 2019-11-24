@@ -91,15 +91,15 @@ class SettingsFragment : Fragment() {
         switchInverseEvenOddWeeks.setOnCheckedChangeListener { _, state -> mActivity.prefs.edit { putBoolean(INVERSE_EVEN_ODD_WEEKS, state) } }
         buttonCopy.setOnClickListener {
             val jObject = JsonObject()
-            jObject.add(SCHEDULE, JsonParser().parse(FileReader(File(mActivity.filesDir, SCHEDULE_FILE))))
-            jObject.add(BELLS, JsonParser().parse(FileReader(File(mActivity.filesDir, BELLS_FILE))))
+            jObject.add(SCHEDULE, JsonParser.parseReader(FileReader(File(mActivity.filesDir, SCHEDULE_FILE))))
+            jObject.add(BELLS, JsonParser.parseReader(FileReader(File(mActivity.filesDir, BELLS_FILE))))
             val clip = mActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             clip.setPrimaryClip(ClipData.newPlainText("lcConfig", jObject.toString()))
         }
         buttonPaste.setOnClickListener {
             val clip = mActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             try {
-                val jObject = JsonParser().parse(clip.primaryClip?.getItemAt(0)?.text.toString()).asJsonObject
+                val jObject = JsonParser.parseString(clip.primaryClip?.getItemAt(0)?.text.toString()).asJsonObject
                 if (jObject.has("1e")
                         || jObject.has("2e")
                         || jObject.has("3e")
