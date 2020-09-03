@@ -33,9 +33,7 @@ class DOWFragment : Fragment() {
     private lateinit var adapterEdit: ScheduleAdapter
     private var edit = false
     private var schedule = JsonObject()
-    private var bells = JsonObject()
     private var day = "0"
-    private lateinit var homework: JsonObject
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -54,20 +52,16 @@ class DOWFragment : Fragment() {
         val bundle = arguments
         val toolbar = mActivity.main_toolbar
         thread(true) {
-            if (mActivity.prefs.getBoolean(CUSTOM_CONFIG, false))
-                if (!mActivity.prefs.getBoolean(HIDE_CONTROLS, false)) {
-                    mActivity.runOnUiThread {
-                        toolbar.menu.clear()
-                        toolbar.inflateMenu(R.menu.dayofweek_menu)
-                    }
+            if (!mActivity.prefs.getBoolean(HIDE_CONTROLS, false)) {
+                mActivity.runOnUiThread {
+                    toolbar.menu.clear()
+                    toolbar.inflateMenu(R.menu.dayofweek_menu)
                 }
-            val job = mActivity.clazz
+            }
+            val job = mActivity.schedule
             if (!job.has(SCHEDULE))
                 job.add(SCHEDULE, JsonObject())
-            if (!job.has(BELLS))
-                job.add(BELLS, JsonObject())
             schedule = job[SCHEDULE].asJsonObject
-            bells = job[BELLS].asJsonObject
             day = bundle?.getString("day") as String
             if (mActivity.prefs.getBoolean(EVEN_ODD_WEEKS, false) || schedule.has("${day}e")) {
                 val preEven = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) % 2 == 0
@@ -82,13 +76,10 @@ class DOWFragment : Fragment() {
                         toolbar.menu.findItem(R.id.menuEvenOdd).title = "O"
                     }
             }
-            val homework = mActivity.homework
             if (!schedule.has(day))
                 schedule.add(day, JsonArray())
-            if (!bells.has(day))
-                bells.add(day, JsonArray())
-            schedule.get(day).asJsonArray.forEachIndexed { index, jsonElement ->
-                list.add(ScheduleElement(jsonElement.asString, bells.get(day).asJsonArray[index].asString, if (homework.has(jsonElement.asString)) homework.get(jsonElement.asString).asString else ""))
+            schedule.get(day).asJsonArray.forEach { jsonElement ->
+                list.add(ScheduleElement(jsonElement.asJsonObject["lesson"].asString, jsonElement.asJsonObject["time"].asString, jsonElement.asJsonObject["cabinet"].asString))
             }
             mActivity.runOnUiThread {
                 adapterEdit.notifyDataSetChanged()
@@ -104,10 +95,8 @@ class DOWFragment : Fragment() {
                             list.clear()
                             if (!schedule.has(day))
                                 schedule.add(day, JsonArray())
-                            if (!bells.has(day))
-                                bells.add(day, JsonArray())
-                            schedule.get(day).asJsonArray.forEachIndexed { index, jsonElement ->
-                                list.add(ScheduleElement(jsonElement.asString, bells.get(day).asJsonArray[index].asString, if (homework.has(jsonElement.asString)) homework.get(jsonElement.asString).asString else ""))
+                            schedule.get(day).asJsonArray.forEach { jsonElement ->
+                                list.add(ScheduleElement(jsonElement.asJsonObject["lesson"].asString, jsonElement.asJsonObject["time"].asString, jsonElement.asJsonObject["cabinet"].asString))
                             }
                             toolbar.menu.findItem(R.id.menuEvenOdd).title = "O"
                         }
@@ -115,8 +104,8 @@ class DOWFragment : Fragment() {
                             day = day[0].toString()
                             list.clear()
                             println(day)
-                            schedule.get(day).asJsonArray.forEachIndexed { index, jsonElement ->
-                                list.add(ScheduleElement(jsonElement.asString, bells.get(day).asJsonArray[index].asString, if (homework.has(jsonElement.asString)) homework.get(jsonElement.asString).asString else ""))
+                            schedule.get(day).asJsonArray.forEach { jsonElement ->
+                                list.add(ScheduleElement(jsonElement.asJsonObject["lesson"].asString, jsonElement.asJsonObject["time"].asString, jsonElement.asJsonObject["cabinet"].asString))
                             }
                             toolbar.menu.findItem(R.id.menuEvenOdd).title = "E"
                         }
@@ -127,8 +116,6 @@ class DOWFragment : Fragment() {
                     if (edit) {
                         while (schedule[day].asJsonArray.size() > 0)
                             schedule[day].asJsonArray.remove(0)
-                        while (bells[day].asJsonArray.size() > 0)
-                            bells[day].asJsonArray.remove(0)
                         list.map {
                             if (it.lesson.isBlank()) {
                                 Toast.makeText(activity, getString(R.string.lessonErr).replace("xxx", (list.indexOf(it) + 1).toString()), Toast.LENGTH_SHORT).show()
@@ -138,11 +125,13 @@ class DOWFragment : Fragment() {
                                 Toast.makeText(activity, getString(R.string.timeErr).replace("xxx", (list.indexOf(it) + 1).toString()), Toast.LENGTH_SHORT).show()
                                 return@setOnMenuItemClickListener true
                             }
-                            schedule[day].asJsonArray.add(it.lesson)
-                            bells[day].asJsonArray.add(it.time)
+                            val lessonObject = JsonObject()
+                            lessonObject.addProperty("lesson", it.lesson)
+                            lessonObject.addProperty("time", it.time)
+                            lessonObject.addProperty("cabinet", it.cabinet)
+                            schedule[day].asJsonArray.add(lessonObject)
                         }
-                        PrintWriter(FileWriter(File(mActivity.filesDir, SCHEDULE_FILE)), true).println(schedule)
-                        PrintWriter(FileWriter(File(mActivity.filesDir, BELLS_FILE)), true).println(bells)
+                        File(mActivity.filesDir, SCHEDULE_FILE).writeText(schedule.toString())
                     }
                     edit = !edit
                     dialogRecycler.adapter = if (edit) adapterEdit else adapter

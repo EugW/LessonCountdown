@@ -13,6 +13,7 @@
     <string name="editMode">Edit mode</string>
     <string name="lesson">Lesson</string>
     <string name="time">Time</string>
+    <string name="cabinet">Cabinet</string>
     <string name="add">Add</string>
     <string name="addIndex">Add after:</string>
     <string name="remove">Remove</string>

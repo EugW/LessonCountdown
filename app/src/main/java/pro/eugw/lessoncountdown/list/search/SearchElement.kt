@@ -1,3 +1,3 @@
 package pro.eugw.lessoncountdown.list.search
 
-class SearchElement(var number: String, var letter: String, var subgroup: String, var school_id: String, var school_name: String)
+class SearchElement(val groupName: String, val groupPath: String)

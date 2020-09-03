@@ -7,18 +7,14 @@ import android.os.Handler
 import android.text.method.LinkMovementMethod
 import android.view.MenuItem
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.edit
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.work.*
-import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
 import com.google.android.material.navigation.NavigationView
-import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlinx.android.synthetic.main.activity_main.*
@@ -28,19 +24,11 @@ import pro.eugw.lessoncountdown.MService
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.fragment.DOWFragment
 import pro.eugw.lessoncountdown.fragment.HelpFragment
-import pro.eugw.lessoncountdown.fragment.KundelikFragment
 import pro.eugw.lessoncountdown.fragment.SettingsFragment
 import pro.eugw.lessoncountdown.util.*
-import pro.eugw.lessoncountdown.util.network.JsArRe
-import pro.eugw.lessoncountdown.util.network.JsObRe
 import java.io.File
 import java.io.FileReader
-import java.io.FileWriter
-import java.io.PrintWriter
-import java.net.URLEncoder
-import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
@@ -49,8 +37,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
     lateinit var prefs: SharedPreferences
     lateinit var broadcastManager: LocalBroadcastManager
     lateinit var queue: RequestQueue
-    var clazz = JsonObject()
-    var homework = JsonObject()
+    var schedule = JsonObject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,14 +77,6 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
     }
 
     private fun postInit() {
-        if (!this::broadcastManager.isInitialized) {
-            EasyToast.shortShow("BroadcastManager uninitialized", this)
-            return
-        }
-        if (!this::prefs.isInitialized) {
-            EasyToast.shortShow("Prefs uninitialized", this)
-            return
-        }
         if (!prefs.getBoolean(LC_PP, false)) {
             runOnUiThread {
                 val dialog = AlertDialog.Builder(this)
@@ -127,12 +106,6 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                 dialog.findViewById<TextView>(android.R.id.message).movementMethod = LinkMovementMethod.getInstance()
             }
         }
-        if (prefs.getBoolean(LOCAL_MARKS_SERVICE, false)) {
-            val marksRequest = PeriodicWorkRequestBuilder<MarksListenerWorker>(prefs.getInt(LOCAL_SERVICE_DELAY, 15).toLong(), TimeUnit.MINUTES)
-                    .setConstraints(Constraints.NONE)
-                    .setBackoffCriteria(BackoffPolicy.LINEAR, 1, TimeUnit.MINUTES).build()
-            WorkManager.getInstance().enqueueUniquePeriodicWork(MARKS_WORK, ExistingPeriodicWorkPolicy.KEEP, marksRequest)
-        }
         broadcastManager.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent?) {
                 if (toggleButton != null)
@@ -146,154 +119,26 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                 startForegroundService(service)
             }
         }, IntentFilter(baseContext.packageName + PEND_SERVICE_RESTART))
-        initClass()
+        updateSchedule()
+        inflateDOWFragment()
         startForegroundService(service)
     }
 
-    fun initClass() {
+    fun updateSchedule() {
+        schedule = initSchedule()
+    }
+
+    private fun initSchedule(): JsonObject {
         val schedule = File(filesDir, SCHEDULE_FILE)
-        val bells = File(filesDir, BELLS_FILE)
-        if (this::queue.isInitialized && this::prefs.isInitialized)
-        if (!prefs.getBoolean(CUSTOM_CONFIG, false)) {
-            val host = prefs.getString(CUSTOM_ADDRESS, getString(R.string.host))
-            val schoolId = prefs.getString(SCHOOL_ID, "")
-            val className = URLEncoder.encode(prefs.getString(CLASS, ""), "UTF-8")
-            queue.add(JsObRe(Request.Method.GET, "https://$host/class?school_id=$schoolId&clazz=$className",
-                    {
-                        PrintWriter(FileWriter(schedule), true).println(it[SCHEDULE].asJsonObject)
-                        PrintWriter(FileWriter(bells), true).println(it[BELLS].asJsonObject)
-                        clazz = try {
-                            val jsonObject = JsonObject()
-                            val scheduleJ = JsonParser.parseReader(FileReader(schedule)).asJsonObject
-                            val bellsJ = JsonParser.parseReader(FileReader(bells)).asJsonObject
-                            jsonObject.add(SCHEDULE, scheduleJ)
-                            jsonObject.add(BELLS, bellsJ)
-                            jsonObject
-                        } catch (e: Exception) {
-                            EasyToast.shortShow(R.string.configErr, this)
-                            JsonObject()
-                        }
-                        initHomework()
-                        inflateDOWFragment()
-                    },
-                    {
-                        EasyToast.shortShow(R.string.networkErr, this)
-                    }
-            ))
-        } else {
-            clazz = try {
-                val jsonObject = JsonObject()
-                val scheduleJ = JsonParser.parseReader(FileReader(schedule)).asJsonObject
-                val bellsJ = JsonParser.parseReader(FileReader(bells)).asJsonObject
-                jsonObject.add(SCHEDULE, scheduleJ)
-                jsonObject.add(BELLS, bellsJ)
-                jsonObject
-            } catch (e: Exception) {
-                EasyToast.shortShow(R.string.configErr, this)
-                JsonObject()
-            }
-            initHomework()
-            inflateDOWFragment()
+        return try {
+            val jsonObject = JsonObject()
+            val scheduleJ = JsonParser.parseReader(FileReader(schedule)).asJsonObject
+            jsonObject.add(SCHEDULE, scheduleJ)
+            jsonObject
+        } catch (e: Exception) {
+            EasyToast.shortShow(R.string.configErr, this)
+            JsonObject()
         }
-    }
-
-    fun initScheduleKundelik() {
-        if (!(::prefs.isInitialized && ::queue.isInitialized))
-            return
-        val token = prefs.getString(KUNDELIK_TOKEN, "")!!
-        if (token.length < 5)
-            return
-        queue.add(JsObRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me?access_token=$token",
-                { responsePerson ->
-                    val personId = responsePerson["personId"].asString
-                    EasyToast.shortShow("Person ID request succeed: $personId", this)
-                    queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me/schools?access_token=$token",
-                            { responseSchool ->
-                                val schoolId = responseSchool[0].asString
-                                EasyToast.shortShow("School ID request succeed: $schoolId", this)
-                                queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/persons/$personId/schools/$schoolId/edu-groups?access_token=$token",
-                                        { responseEduGroup ->
-                                            val eduGroupId = responseEduGroup[0].asJsonObject["id"].asString
-                                            EasyToast.shortShow("Edu Group ID request succeed: $eduGroupId", this)
-                                            val calendar = Calendar.getInstance()
-                                            calendar.set(Calendar.DAY_OF_WEEK, 2)
-                                            val firstDay = calendar.time
-                                            calendar.add(Calendar.WEEK_OF_YEAR, 1)
-                                            calendar.set(Calendar.DAY_OF_WEEK, 1)
-                                            val lastDay = calendar.time
-                                            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                                            queue.add(JsObRe(Request.Method.GET, "https://api.kundelik.kz/v1/persons/$personId/groups/$eduGroupId/schedules?startDate=${sdf.format(firstDay)}&endDate=${sdf.format(lastDay)}&access_token=$token",
-                                                    { responseSchedule ->
-                                                        val scheduleArray = responseSchedule["days"].asJsonArray
-                                                        EasyToast.shortShow("Schedule request succeed: $scheduleArray", this)
-                                                        convertKundelikToMSchedule(scheduleArray)
-                                                    },
-                                                    { error ->
-                                                        EasyToast.shortShow("Schedule request failed: ${error.message}", this)
-                                                    }
-                                            ))
-                                        },
-                                        { error ->
-                                            EasyToast.shortShow("Edu Group ID request failed: ${error.message}", this)
-                                        }
-                                ))
-                            },
-                            { error ->
-                                EasyToast.shortShow("School ID request failed: ${error.message}", this)
-                            }
-                    ))
-                },
-                { error ->
-                    EasyToast.shortShow("Person ID request failed: ${error.message}", this)
-                }
-        ))
-    }
-
-    private fun convertKundelikToMSchedule(origin: JsonArray) {
-        val schedule = File(filesDir, SCHEDULE_FILE)
-        val bells = File(filesDir, BELLS_FILE)
-        origin.forEach {
-            val obj = it.asJsonObject
-            obj.remove("marks")
-            obj.remove("works")
-            obj.remove("homeworks")
-            obj.remove("workTypes")
-            obj.remove("lessonLogEntries")
-            obj.remove("teaches")
-            obj.remove("nextDate")
-        }
-        val scheduleObject = JsonObject()
-        val bellsObject = JsonObject()
-        origin.forEach {
-            val lss = it.asJsonObject["lessons"].asJsonArray
-            val sdlArr = JsonArray()
-            val bllArr = JsonArray()
-            lss.forEach { lesson ->
-                val subId = lesson.asJsonObject["subjectId"].asLong
-                val name = it.asJsonObject["subjects"].asJsonArray.find { prd -> prd.asJsonObject["id"].asLong == subId }!!.asJsonObject["name"].asString
-                sdlArr.add(name)
-                val hours = lesson.asJsonObject["hours"].asString.replace(" ", "")
-                bllArr.add(hours)
-            }
-            var dow = origin.indexOf(it) + 2
-            if (dow == 8)
-                dow = 1
-            scheduleObject.add("$dow", sdlArr)
-            bellsObject.add("$dow", bllArr)
-        }
-        PrintWriter(FileWriter(schedule), true).println(scheduleObject)
-        PrintWriter(FileWriter(bells), true).println(bellsObject)
-        prefs.edit {
-            putBoolean(CUSTOM_CONFIG, true)
-        }
-        initClass()
-    }
-
-    private fun initHomework() {
-        val file = File(filesDir, "homework.json")
-        if (!file.exists())
-            PrintWriter(FileWriter(file), true).println(JsonObject())
-        homework = JsonParser.parseReader(FileReader(file)).asJsonObject
     }
 
     private fun inflateDOWFragment() {
@@ -312,28 +157,6 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             }, FRAGMENT_DRAW_DELAY)
         } catch (e: Exception) {
         }
-    }
-
-    fun inflateKundelikFragment() {
-        try {
-            main_toolbar.menu.clear()
-            Handler(mainLooper).postDelayed({
-                main_toolbar.title = getString(R.string.kundelik)
-                supportFragmentManager.beginTransaction().replace(R.id.content_frame, KundelikFragment()).commit()
-            }, FRAGMENT_DRAW_DELAY)
-        } catch (e: Exception) {
-        }
-    }
-
-    private fun inflatePatchesFragment() {
-        /*if (saved)
-            return
-        Handler(mainLooper).postDelayed({
-            try {
-                supportFragmentManager.beginTransaction().replace(R.id.content_frame, PatchesFragment()).commit()
-            } catch (e: Exception) { }
-        }, 500)*/
-        Toast.makeText(this, R.string.patches, Toast.LENGTH_SHORT).show()
     }
 
     private fun inflateSettingsFragment() {
@@ -378,8 +201,6 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             R.id.menuFriday -> inflateDOWFragment(6, item.title.toString())
             R.id.menuSaturday -> inflateDOWFragment(7, item.title.toString())
             R.id.menuSunday -> inflateDOWFragment(1, item.title.toString())
-            R.id.menuKundelik -> inflateKundelikFragment()
-            R.id.menuPatches -> inflatePatchesFragment()
             R.id.menuSettings -> inflateSettingsFragment()
             R.id.menuHelp -> inflateHelpFragment()
         }

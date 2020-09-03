@@ -10,7 +10,7 @@ class ScheduleHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     val lesson: TextView = itemView.textLesson
     val time: TextView = itemView.textTime
-    val imageHomework: ImageView = itemView.imageHomework
+    val cabinet: TextView = itemView.textCabinet
     val layout: View = itemView.layoutAll
 
 }

@@ -13,15 +13,7 @@ const val TIME_COLOR = "timeColor"
 const val LESSONS_COLOR = "lessonsColor"
 const val BACKGROUND_COLOR = "backgroundColor"
 const val CUSTOM_ADDRESS = "cAddress"
-const val KUNDELIK_TOKEN = "kundelikToken"
-const val SECKEY1 = "secKey1"
-const val SECKEY2 = "secKey2"
-const val LCAPI_TOKEN = "LCAPIToken"
-const val KUNDELIK_ROLE = "kundelikRole"
 const val LC_PP = "lcPp"
-const val LOCAL_MARKS_SERVICE = "localMarks"
-const val LOCAL_SERVICE_DELAY = "localMarksDelay"
-const val LAST_CHECK = "lastCheck"
 
 // ---broadcasts---
 
@@ -34,19 +26,10 @@ const val NOTIFICATION_STYLE_UPDATE = ".NOTIFICATION_STYLE_UPDATE"
 // ---files---
 
 const val SCHEDULE_FILE = "schedule.json"
-const val BELLS_FILE = "bells.json"
 
 // ---JsonObject properties---
 
 const val SCHEDULE = "schedule"
-const val BELLS = "bells"
-const val CLASSES = "classes"
-const val NUMBER = "number"
-const val LETTER = "letter"
-const val SUBGROUP = "subgroup"
-const val CLASS = "class"
-const val SCHOOL_ID = "school_id"
-const val SCHOOL_NAME = "school_name"
 
 // ---Request codes---
 
@@ -55,15 +38,8 @@ const val SEARCH_REQUEST_CODE = 90
 // ---Other---
 
 const val TIME_NOTIFICATION_ID = 542
-const val MARKS_WORK = "workerForMarksTag"
 const val FRAGMENT_DRAW_DELAY = 400L
-const val WORKER_CHANNEL_ID = "WRK-LC"
-const val FCM_CHANNEL_ID = "FCM-LC"
 const val CHANNEL_ID = "LessonChannel"
 const val TIME_GROUP = "TimeGroup"
 const val COLOR_PICKER_DIALOG = "color-picker-dialog"
 const val HTTP_TIMEOUT = 3000
-const val CLIENT_ID = "387d44e3e0c94265a9e4a4caaad5111c"
-const val CLIENT_SECRET = "8a7d709cfdbb4047b0ea8947afe89d67"
-const val KUNDELIK_SCOPE = "CommonInfo,ContactInfo,FriendsAndRelatives,EducationalInfo,SocialInfo,Files,Wall,Messages,Schools,Relatives,EduGroups,Lessons,Marks,EduWorks,Avatar"
-val SUPPORTED_KUNDELIK_ROLES = arrayOf("EduStudent")

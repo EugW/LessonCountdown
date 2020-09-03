@@ -86,11 +86,11 @@ class MService : Service() {
             }
             val lessonArray = ArrayList<LessonTime>()
             try {
-                schedule[dow].asJsonArray.forEachIndexed { index, jsonElement ->
-                    val s = JsonParser.parseReader(FileReader(File(filesDir, BELLS_FILE))).asJsonObject[dow].asJsonArray[index].asString.split("-")
+                schedule[dow].asJsonArray.forEach { jsonElement ->
+                    val s = jsonElement.asJsonObject["time"].asString.split("-")
                     val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US)
                     val yrr = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-                    lessonArray.add(LessonTime(sdf.parse(yrr.format(Date()) + " " + s[0])!!.time, sdf.parse(yrr.format(Date()) + " " + s[1])!!.time, jsonElement.asString))
+                    lessonArray.add(LessonTime(sdf.parse(yrr.format(Date()) + " " + s[0])!!.time, sdf.parse(yrr.format(Date()) + " " + s[1])!!.time, jsonElement.asJsonObject["lesson"].asString, jsonElement.asJsonObject["cabinet"].asString))
                 }
             } catch (e: Exception) {
                 lessonArray.clear()

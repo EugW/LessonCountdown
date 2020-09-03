@@ -12,14 +12,17 @@ import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.volley.Request
-import com.google.gson.JsonParser
+import com.android.volley.toolbox.StringRequest
 import kotlinx.android.synthetic.main.fragment_search.*
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.list.search.SearchAdapter
 import pro.eugw.lessoncountdown.list.search.SearchElement
-import pro.eugw.lessoncountdown.util.*
+import pro.eugw.lessoncountdown.util.EasyToast
+import pro.eugw.lessoncountdown.util.SCHEDULE_FILE
+import pro.eugw.lessoncountdown.util.SEARCH_REQUEST_CODE
 import pro.eugw.lessoncountdown.util.network.JsObRe
+import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
@@ -29,7 +32,6 @@ class SearchDialog : DialogFragment() {
     private lateinit var adapter: SearchAdapter
     private var searchResults = ArrayList<SearchElement>()
     private var baseArray = ArrayList<SearchElement>()
-    private lateinit var host: String
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -40,9 +42,6 @@ class SearchDialog : DialogFragment() {
         super.onActivityCreated(savedInstanceState)
         dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         val mActivity = activity as MainActivity
-        host = mActivity.prefs.getString(CUSTOM_ADDRESS, getString(R.string.host)) as String
-        if (host.isBlank())
-            host = getString(R.string.host)
         adapter = SearchAdapter(searchResults, this)
         searchRecycler.layoutManager = LinearLayoutManager(mActivity)
         searchRecycler.addItemDecoration(DividerItemDecoration(mActivity, LinearLayoutManager(mActivity).orientation))
@@ -57,7 +56,7 @@ class SearchDialog : DialogFragment() {
                         val mmm = it
                         var match = true
                         s.toString().toUpperCase(Locale.getDefault()).split(" ").forEach { string ->
-                            if (!(mmm.number + mmm.letter + mmm.subgroup + mmm.school_name).replace(" ", "").toUpperCase(Locale.getDefault()).contains(string)) {
+                            if (!(mmm.groupName).toUpperCase(Locale.getDefault()).contains(string)) {
                                 match = false
                             }
                         }
@@ -72,11 +71,10 @@ class SearchDialog : DialogFragment() {
                 }
             }
         })
-        mActivity.queue.add(JsObRe(Request.Method.GET, "https://$host/classes?lang=${Locale.getDefault().language}",
-                {
-                    thread(true) {
-                        JsonParser.parseString(it.toString()).asJsonObject[CLASSES].asJsonArray.forEach {jE ->
-                            baseArray.add(SearchElement(jE.asJsonObject[NUMBER].asString, jE.asJsonObject[LETTER].asString, jE.asJsonObject[SUBGROUP].asString, jE.asJsonObject[SCHOOL_ID].asString, jE.asJsonObject[SCHOOL_NAME].asString))
+        mActivity.queue.add(JsObRe(Request.Method.GET,
+                "https://raw.githubusercontent.com/EugW/PGUPS-rasp-storage/master/listing.json", {
+                        it["list"].asJsonArray.forEach { groupElement ->
+                            baseArray.add(SearchElement(it[groupElement.asString].asJsonObject["name"].asString, it[groupElement.asString].asJsonObject["path"].asString))
                         }
                         searchResults.clear()
                         searchResults.addAll(baseArray)
@@ -85,14 +83,18 @@ class SearchDialog : DialogFragment() {
                             progressBarSearch.visibility = View.GONE
                             searchRecycler.visibility = View.VISIBLE
                         }
-                    }
                 },
                 {}
         ))
     }
 
-    fun choose(id: String, number: String, letter: String, subgroup: String) {
-        targetFragment!!.onActivityResult(SEARCH_REQUEST_CODE, Activity.RESULT_OK, Intent().putExtra(CLASS, "$number.$letter.$subgroup").putExtra(SCHOOL_ID, id))
+    fun choose(groupPath: String) {
+        val mActivity = activity as MainActivity
+        mActivity.queue.add(StringRequest("https://raw.githubusercontent.com/EugW/PGUPS-rasp-storage/master/$groupPath", {
+            File(mActivity.filesDir, SCHEDULE_FILE).writeText(it)
+            EasyToast.shortShow("Downloaded", mActivity)
+            mActivity.updateSchedule()
+        }, {}))
         dismissAllowingStateLoss()
     }
 

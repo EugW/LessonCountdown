@@ -15,11 +15,10 @@ class SearchAdapter(private var arrayList: ArrayList<SearchElement>, private val
     override fun getItemCount(): Int = arrayList.size
 
     override fun onBindViewHolder(holder: SearchHolder, position: Int) {
-        val clazzS = arrayList[position].number + arrayList[position].letter + " " + arrayList[position].subgroup
-        holder.clazz.text = clazzS
-        holder.info.text = arrayList[position].school_name
+        holder.clazz.text = arrayList[position].groupName
+        holder.info.text = arrayList[position].groupPath
         holder.item.setOnClickListener {
-            context.choose(arrayList[position].school_id, arrayList[position].number, arrayList[position].letter, arrayList[position].subgroup)
+            context.choose(arrayList[position].groupPath)
         }
     }
 

@@ -70,4 +70,5 @@
     <string name="enableLocalMarksService">Включить локальный сервис ожидания оценок</string>
     <string name="set">Установить</string>
     <string name="delay">Задержка (в минутах >= 15)</string>
+    <string name="cabinet">Кабинет</string>
 </resources>
