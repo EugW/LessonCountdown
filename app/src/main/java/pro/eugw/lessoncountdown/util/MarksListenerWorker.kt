@@ -61,10 +61,10 @@ class MarksListenerWorker(val context: Context, workerParameters: WorkerParamete
             return Result.success()
         val token = prefs.getString(KUNDELIK_TOKEN, "")
         queue.add(JsObRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me?access_token=$token",
-                Response.Listener { response ->
+                { response ->
                     val personId = response["personId"].asString
                     queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me/schools?access_token=$token",
-                            Response.Listener { response1 ->
+                            { response1 ->
                                 val schoolId = response1[0].asString
                                 val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                                 val calendar = Calendar.getInstance()
@@ -72,7 +72,7 @@ class MarksListenerWorker(val context: Context, workerParameters: WorkerParamete
                                 calendar.add(Calendar.MONTH, -1)
                                 val from = sdf.format(calendar.time)
                                 queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/persons/$personId/schools/$schoolId/marks/$from/$to?access_token=$token",
-                                        Response.Listener { response2 ->
+                                        { response2 ->
                                             val newMarks = JsonArray()
                                             response2.forEach {
                                                 if (!oldMarksArray.contains(it))
@@ -85,7 +85,7 @@ class MarksListenerWorker(val context: Context, workerParameters: WorkerParamete
                                                 subjNames.add(it.asJsonObject["lesson"].asString)
                                             }
                                             queue.add(JsArRe(Request.Method.POST, "https://api.kundelik.kz/v1/lessons/many?access_token=$token", subjNames,
-                                                    Response.Listener { response3 ->
+                                                    { response3 ->
                                                         var mmr = 0
                                                         newMarks.forEach {
                                                             mmr++
@@ -105,22 +105,22 @@ class MarksListenerWorker(val context: Context, workerParameters: WorkerParamete
                                                         }
                                                         finished = true
                                                     },
-                                                    Response.ErrorListener {
+                                                    {
                                                         finished = true
                                                     }
                                             ))
                                         },
-                                        Response.ErrorListener {
+                                        {
                                             finished = true
                                         }
                                 ))
                             },
-                            Response.ErrorListener {
+                            {
                                 finished = true
                             }
                     ))
                 },
-                Response.ErrorListener {
+                {
                     finished = true
                 }
         ))

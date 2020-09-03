@@ -13,7 +13,6 @@ import android.widget.Toast
 import androidx.core.content.edit
 import androidx.fragment.app.DialogFragment
 import com.android.volley.Request
-import com.android.volley.Response
 import com.google.gson.JsonObject
 import kotlinx.android.synthetic.main.fragment_kundelik_login.*
 import pro.eugw.lessoncountdown.R
@@ -50,9 +49,9 @@ class KundelikLoginFragment : DialogFragment() {
             jsonDetails.addProperty("client_secret", CLIENT_SECRET)
             jsonDetails.addProperty("scope", KUNDELIK_SCOPE)
             mActivity.queue.add(JsObRe(Request.Method.POST, "https://api.kundelik.kz/v1/authorizations/bycredentials", jsonDetails,
-                    Response.Listener { response ->
+                    { response ->
                         mActivity.queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me/roles?access_token=${response["accessToken"].asString}",
-                                Response.Listener {
+                                {
                                     when {
                                         it.contains("EduStudent") -> continueAsStudent(response)
                                         it.contains("EduStaff") -> continueAsStaff(response)
@@ -61,10 +60,10 @@ class KundelikLoginFragment : DialogFragment() {
                                         else -> continueAsUnknown(response)
                                     }
                                 },
-                                Response.ErrorListener {}
+                                {}
                         ))
                     },
-                    Response.ErrorListener { error ->
+                    { error ->
                         Toast.makeText(context, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
                         showResultDialog("Error", error.message.toString())
                         dismiss()
@@ -77,10 +76,10 @@ class KundelikLoginFragment : DialogFragment() {
         mActivity.prefs.edit { putString(KUNDELIK_ROLE, "EduStudent") }
         if (mActivity.prefs.contains(LCAPI_TOKEN)) {
             mActivity.queue.add(JsObRe(Request.Method.GET, "https://$host/updateKCred?kusername=${editTextKundelikLogin.text}&kpassword=${editTextKundelikPassword.text}&token=${mActivity.prefs.getString(LCAPI_TOKEN, "")}",
-                    Response.Listener {
+                    {
                         Toast.makeText(context, "Kundelik credentials successfully updated on server", Toast.LENGTH_SHORT).show()
                     },
-                    Response.ErrorListener { error ->
+                    { error ->
                         Toast.makeText(context, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
                     }
             ))

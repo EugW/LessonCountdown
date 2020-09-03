@@ -14,7 +14,6 @@ import android.widget.Toast
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
-import com.android.volley.Response
 import com.google.gson.JsonObject
 import kotlinx.android.synthetic.main.fragment_kundelik_panel.*
 import pro.eugw.lessoncountdown.R
@@ -94,11 +93,11 @@ class KundelikFragment : Fragment() {
     private fun tokenTestRequest(): JsObRe {
         val url = "https://api.kundelik.kz/v1/users/me?access_token=$token"
         return JsObRe(Request.Method.GET, url,
-                Response.Listener { response ->
+                { response ->
                     textViewKundelikName.text = response["name"].asString
                     Toast.makeText(mActivity, "Authentication succeed", Toast.LENGTH_SHORT).show()
                 },
-                Response.ErrorListener {
+                {
                     Toast.makeText(mActivity, "Token is out of date. Updating...", Toast.LENGTH_SHORT).show()
                     val cred = File(mActivity.filesDir, "encLogDet")
                     if (!cred.exists()) {
@@ -120,12 +119,12 @@ class KundelikFragment : Fragment() {
                         jsonDetails.addProperty("client_secret", CLIENT_SECRET)
                         jsonDetails.addProperty("scope", KUNDELIK_SCOPE)
                         mActivity.queue.add(JsObRe(Request.Method.POST, "https://api.kundelik.kz/v1/authorizations/bycredentials", jsonDetails,
-                                Response.Listener { response ->
+                                { response ->
                                     Toast.makeText(context, "Token update succeed: $response", Toast.LENGTH_SHORT).show()
                                     mActivity.prefs.edit { putString(KUNDELIK_TOKEN, response["accessToken"].asString) }
                                     mActivity.inflateKundelikFragment()
                                 },
-                                Response.ErrorListener { error ->
+                                { error ->
                                     Toast.makeText(context, "Token update failed: $error", Toast.LENGTH_SHORT).show()
                                 }
                         ))

@@ -16,7 +16,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.*
 import com.android.volley.Request
 import com.android.volley.RequestQueue
-import com.android.volley.Response
 import com.android.volley.toolbox.Volley
 import com.google.android.material.navigation.NavigationView
 import com.google.gson.JsonArray
@@ -52,7 +51,6 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
     lateinit var queue: RequestQueue
     var clazz = JsonObject()
     var homework = JsonObject()
-    private var saved = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -161,7 +159,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             val schoolId = prefs.getString(SCHOOL_ID, "")
             val className = URLEncoder.encode(prefs.getString(CLASS, ""), "UTF-8")
             queue.add(JsObRe(Request.Method.GET, "https://$host/class?school_id=$schoolId&clazz=$className",
-                    Response.Listener {
+                    {
                         PrintWriter(FileWriter(schedule), true).println(it[SCHEDULE].asJsonObject)
                         PrintWriter(FileWriter(bells), true).println(it[BELLS].asJsonObject)
                         clazz = try {
@@ -178,7 +176,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                         initHomework()
                         inflateDOWFragment()
                     },
-                    Response.ErrorListener {
+                    {
                         EasyToast.shortShow(R.string.networkErr, this)
                     }
             ))
@@ -206,15 +204,15 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         if (token.length < 5)
             return
         queue.add(JsObRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me?access_token=$token",
-                Response.Listener { responsePerson ->
+                { responsePerson ->
                     val personId = responsePerson["personId"].asString
                     EasyToast.shortShow("Person ID request succeed: $personId", this)
                     queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me/schools?access_token=$token",
-                            Response.Listener { responseSchool ->
+                            { responseSchool ->
                                 val schoolId = responseSchool[0].asString
                                 EasyToast.shortShow("School ID request succeed: $schoolId", this)
                                 queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/persons/$personId/schools/$schoolId/edu-groups?access_token=$token",
-                                        Response.Listener { responseEduGroup ->
+                                        { responseEduGroup ->
                                             val eduGroupId = responseEduGroup[0].asJsonObject["id"].asString
                                             EasyToast.shortShow("Edu Group ID request succeed: $eduGroupId", this)
                                             val calendar = Calendar.getInstance()
@@ -225,27 +223,27 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                                             val lastDay = calendar.time
                                             val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                                             queue.add(JsObRe(Request.Method.GET, "https://api.kundelik.kz/v1/persons/$personId/groups/$eduGroupId/schedules?startDate=${sdf.format(firstDay)}&endDate=${sdf.format(lastDay)}&access_token=$token",
-                                                    Response.Listener { responseSchedule ->
+                                                    { responseSchedule ->
                                                         val scheduleArray = responseSchedule["days"].asJsonArray
                                                         EasyToast.shortShow("Schedule request succeed: $scheduleArray", this)
                                                         convertKundelikToMSchedule(scheduleArray)
                                                     },
-                                                    Response.ErrorListener { error ->
+                                                    { error ->
                                                         EasyToast.shortShow("Schedule request failed: ${error.message}", this)
                                                     }
                                             ))
                                         },
-                                        Response.ErrorListener { error ->
+                                        { error ->
                                             EasyToast.shortShow("Edu Group ID request failed: ${error.message}", this)
                                         }
                                 ))
                             },
-                            Response.ErrorListener { error ->
+                            { error ->
                                 EasyToast.shortShow("School ID request failed: ${error.message}", this)
                             }
                     ))
                 },
-                Response.ErrorListener { error ->
+                { error ->
                     EasyToast.shortShow("Person ID request failed: ${error.message}", this)
                 }
         ))
@@ -386,16 +384,6 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             R.id.menuHelp -> inflateHelpFragment()
         }
         return true
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        saved = true
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-        super.onRestoreInstanceState(savedInstanceState!!)
-        saved = false
     }
 
 }

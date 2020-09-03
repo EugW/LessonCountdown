@@ -12,7 +12,6 @@ import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.volley.Request
-import com.android.volley.Response
 import com.google.gson.JsonParser
 import kotlinx.android.synthetic.main.fragment_search.*
 import pro.eugw.lessoncountdown.R
@@ -74,7 +73,7 @@ class SearchDialog : DialogFragment() {
             }
         })
         mActivity.queue.add(JsObRe(Request.Method.GET, "https://$host/classes?lang=${Locale.getDefault().language}",
-                Response.Listener {
+                {
                     thread(true) {
                         JsonParser.parseString(it.toString()).asJsonObject[CLASSES].asJsonArray.forEach {jE ->
                             baseArray.add(SearchElement(jE.asJsonObject[NUMBER].asString, jE.asJsonObject[LETTER].asString, jE.asJsonObject[SUBGROUP].asString, jE.asJsonObject[SCHOOL_ID].asString, jE.asJsonObject[SCHOOL_NAME].asString))
@@ -88,7 +87,7 @@ class SearchDialog : DialogFragment() {
                         }
                     }
                 },
-                Response.ErrorListener {}
+                {}
         ))
     }
 

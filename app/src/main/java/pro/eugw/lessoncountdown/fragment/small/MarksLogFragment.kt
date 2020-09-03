@@ -8,7 +8,6 @@ import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.volley.Request
-import com.android.volley.Response
 import com.google.gson.JsonArray
 import kotlinx.android.synthetic.main.fragment_marks_log.*
 import pro.eugw.lessoncountdown.R
@@ -50,10 +49,10 @@ class MarksLogFragment : DialogFragment() {
         }
         val token = mActivity.prefs.getString(KUNDELIK_TOKEN, "")
         mActivity.queue.add(JsObRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me?access_token=$token",
-                Response.Listener { response ->
+                { response ->
                     personId = response["personId"].asString
                     mActivity.queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/users/me/schools?access_token=$token",
-                            Response.Listener { response1 ->
+                            { response1 ->
                                 schoolId = response1[0].asString
                                 val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                                 val calendar = Calendar.getInstance()
@@ -61,13 +60,13 @@ class MarksLogFragment : DialogFragment() {
                                 calendar.add(Calendar.MONTH, -1)
                                 val from = sdf.format(calendar.time)
                                 mActivity.queue.add(JsArRe(Request.Method.GET, "https://api.kundelik.kz/v1/persons/$personId/schools/$schoolId/marks/$from/$to?access_token=$token",
-                                        Response.Listener { response2 ->
+                                        { response2 ->
                                             val jArr = JsonArray()
                                             response2.forEach {
                                                 jArr.add(it.asJsonObject["lesson"].asString)
                                             }
                                             mActivity.queue.add(JsArRe(Request.Method.POST, "https://api.kundelik.kz/v1/lessons/many?access_token=$token", jArr,
-                                                    Response.Listener { response3 ->
+                                                    { response3 ->
                                                         thread(true) {
                                                             val sdf2 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.getDefault())
                                                             response2.sortedBy { sdf2.parse(it.asJsonObject["date"].asString)!!.time }.forEach {
@@ -85,19 +84,19 @@ class MarksLogFragment : DialogFragment() {
                                                             }
                                                         }
                                                     },
-                                                    Response.ErrorListener {
+                                                    {
                                                     }
                                             ))
                                         },
-                                        Response.ErrorListener {
+                                        {
                                         }
                                 ))
                             },
-                            Response.ErrorListener {
+                            {
                             }
                     ))
                 },
-                Response.ErrorListener {
+                {
                 }
         ))
     }

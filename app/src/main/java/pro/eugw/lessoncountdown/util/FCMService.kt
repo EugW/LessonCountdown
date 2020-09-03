@@ -10,7 +10,6 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.android.volley.Request
 import com.android.volley.RequestQueue
-import com.android.volley.Response
 import com.android.volley.toolbox.Volley
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -37,8 +36,8 @@ class FCMService : FirebaseMessagingService() {
         super.onNewToken(p0)
         val host = prefs.getString(CUSTOM_ADDRESS, getString(R.string.host))
         queue.add(JsObRe(Request.Method.GET, "https://$host/updateFCMToken?token=${prefs.getString(LCAPI_TOKEN, "")}&fcmtoken=$p0",
-                Response.Listener {},
-                Response.ErrorListener {}
+                {},
+                {}
         ))
 
     }

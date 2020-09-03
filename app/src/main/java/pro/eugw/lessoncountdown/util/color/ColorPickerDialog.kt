@@ -42,14 +42,14 @@ class ColorPickerDialog : DialogFragment(), OnTouchListener, ColorPickerView.OnC
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        color = savedInstanceState?.getInt(ARG_COLOR) ?: arguments!!.getInt(ARG_COLOR)
+        color = savedInstanceState?.getInt(ARG_COLOR) ?: requireArguments().getInt(ARG_COLOR)
 
-        val rootView = FrameLayout(context!!)
+        val rootView = FrameLayout(requireContext())
         rootView.addView(createPickerView())
 
         val selectedButtonStringRes = getString(R.string.cpv_select)
 
-        val builder = AlertDialog.Builder(context!!).setView(rootView)
+        val builder = AlertDialog.Builder(requireContext()).setView(rootView)
 
         builder.setPositiveButton(selectedButtonStringRes) { _, _ -> colorPickerDialogListener!!.onColorSelected(dialogId, color) }
 
@@ -92,14 +92,14 @@ class ColorPickerDialog : DialogFragment(), OnTouchListener, ColorPickerView.OnC
 
         try {
             val value = TypedValue()
-            val typedArray = activity!!.obtainStyledAttributes(value.data, intArrayOf(android.R.attr.textColorPrimary))
+            val typedArray = requireActivity().obtainStyledAttributes(value.data, intArrayOf(android.R.attr.textColorPrimary))
             val arrowColor = typedArray.getColor(0, Color.BLACK)
             typedArray.recycle()
             arrowRight.setColorFilter(arrowColor)
         } catch (ignored: Exception) {
         }
 
-        oldColorPanel.mColor = arguments!!.getInt(ARG_COLOR)
+        oldColorPanel.mColor = requireArguments().getInt(ARG_COLOR)
         colorPicker!!.setColor(color, true)
         newColorPanel!!.mColor = color
         setHex(color)
@@ -116,7 +116,7 @@ class ColorPickerDialog : DialogFragment(), OnTouchListener, ColorPickerView.OnC
 
         hexEditText!!.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                val imm = activity!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 imm.showSoftInput(hexEditText, InputMethodManager.SHOW_IMPLICIT)
             }
         }
@@ -128,7 +128,7 @@ class ColorPickerDialog : DialogFragment(), OnTouchListener, ColorPickerView.OnC
     override fun onTouch(v: View, event: MotionEvent): Boolean {
         if (v != hexEditText && hexEditText!!.hasFocus()) {
             hexEditText!!.clearFocus()
-            val imm = activity!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(hexEditText!!.windowToken, 0)
             hexEditText!!.clearFocus()
             return true
@@ -142,7 +142,7 @@ class ColorPickerDialog : DialogFragment(), OnTouchListener, ColorPickerView.OnC
         if (!fromEditText) {
             setHex(newColor)
             if (hexEditText!!.hasFocus()) {
-                val imm = activity!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 imm.hideSoftInputFromWindow(hexEditText!!.windowToken, 0)
                 hexEditText!!.clearFocus()
             }
