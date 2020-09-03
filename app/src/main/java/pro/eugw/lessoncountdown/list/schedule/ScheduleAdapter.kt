@@ -21,7 +21,7 @@ class ScheduleAdapter(private var list: List<ScheduleElement>, private var fragm
         holder.lesson.text = if (edit) name else ((position + 1).toString() + ". " + name)
         holder.time.text = list[position].time
         holder.cabinet.text = list[position].cabinet
-        if (list[position].cabinet.isBlank())
+        if (list[position].cabinet.isBlank() && !edit)
             holder.cabinet.visibility = View.GONE
         if (edit) {
             holder.lesson.addTextChangedListener(object : TextWatcher {

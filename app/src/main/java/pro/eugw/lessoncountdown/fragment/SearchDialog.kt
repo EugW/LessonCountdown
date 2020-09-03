@@ -92,7 +92,6 @@ class SearchDialog : DialogFragment() {
         val mActivity = activity as MainActivity
         mActivity.queue.add(StringRequest("https://raw.githubusercontent.com/EugW/PGUPS-rasp-storage/master/$groupPath", {
             File(mActivity.filesDir, SCHEDULE_FILE).writeText(it)
-            EasyToast.shortShow("Downloaded", mActivity)
             mActivity.updateSchedule()
         }, {}))
         dismissAllowingStateLoss()
