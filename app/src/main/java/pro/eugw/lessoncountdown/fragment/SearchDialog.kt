@@ -1,7 +1,5 @@
 package pro.eugw.lessoncountdown.fragment
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -18,9 +16,7 @@ import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.list.search.SearchAdapter
 import pro.eugw.lessoncountdown.list.search.SearchElement
-import pro.eugw.lessoncountdown.util.EasyToast
 import pro.eugw.lessoncountdown.util.SCHEDULE_FILE
-import pro.eugw.lessoncountdown.util.SEARCH_REQUEST_CODE
 import pro.eugw.lessoncountdown.util.network.JsObRe
 import java.io.File
 import java.util.*

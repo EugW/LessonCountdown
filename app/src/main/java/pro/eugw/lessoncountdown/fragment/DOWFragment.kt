@@ -21,8 +21,12 @@ import pro.eugw.lessoncountdown.list.schedule.ScheduleAdapter
 import pro.eugw.lessoncountdown.list.schedule.ScheduleElement
 import pro.eugw.lessoncountdown.util.*
 import java.io.File
-import java.io.FileWriter
-import java.io.PrintWriter
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.Month
+import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalAdjuster
+import java.time.temporal.TemporalAdjusters
 import java.util.*
 import kotlin.concurrent.thread
 
@@ -64,8 +68,7 @@ class DOWFragment : Fragment() {
             schedule = job[SCHEDULE].asJsonObject
             day = bundle?.getString("day") as String
             if (mActivity.prefs.getBoolean(EVEN_ODD_WEEKS, false) || schedule.has("${day}e")) {
-                val preEven = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) % 2 == 0
-                val even = if (!mActivity.prefs.getBoolean(INVERSE_EVEN_ODD_WEEKS, false)) preEven else !preEven
+                val even = isEvenWeek(LocalDate.now())
                 if (even) {
                     day += "e"
                     mActivity.runOnUiThread {
@@ -91,7 +94,7 @@ class DOWFragment : Fragment() {
                 R.id.menuEvenOdd -> {
                     when (toolbar.menu.findItem(R.id.menuEvenOdd).title) {
                         "E" -> {
-                            day = if (day.length > 1) day else day + "e"
+                            day = day[0].toString()
                             list.clear()
                             if (!schedule.has(day))
                                 schedule.add(day, JsonArray())
@@ -101,9 +104,8 @@ class DOWFragment : Fragment() {
                             toolbar.menu.findItem(R.id.menuEvenOdd).title = "O"
                         }
                         "O" -> {
-                            day = day[0].toString()
+                            day = if (day.length > 1) day else day + "e"
                             list.clear()
-                            println(day)
                             schedule.get(day).asJsonArray.forEach { jsonElement ->
                                 list.add(ScheduleElement(jsonElement.asJsonObject["lesson"].asString, jsonElement.asJsonObject["time"].asString, jsonElement.asJsonObject["cabinet"].asString))
                             }
@@ -187,6 +189,15 @@ class DOWFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         list.clear()
+    }
+
+    fun isEvenWeek(date: LocalDate): Boolean {
+        val september1st: LocalDate = LocalDate.of(date.year, Month.SEPTEMBER, 1)
+        val adjuster: TemporalAdjuster = TemporalAdjusters.ofDateAdjuster { d ->
+            september1st.minusYears(if (d.isBefore(september1st)) 1 else 0)
+                    .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        }
+        return date.with(adjuster).until(date, ChronoUnit.WEEKS).toInt() % 2 != 0
     }
 
 }

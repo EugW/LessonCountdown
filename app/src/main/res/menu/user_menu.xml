@@ -22,9 +22,6 @@
             <item
                 android:id="@+id/menuSaturday"
                 android:title="@string/saturday" />
-            <item
-                android:id="@+id/menuSunday"
-                android:title="@string/sunday" />
         </menu>
     </item>
 

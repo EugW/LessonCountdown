@@ -37,6 +37,7 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
     lateinit var prefs: SharedPreferences
     lateinit var broadcastManager: LocalBroadcastManager
     lateinit var queue: RequestQueue
+    var evenWeek = false
     var schedule = JsonObject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,9 +64,9 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
                     broadcastManager.sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("STOP", true))
                 }
             } catch (ne: UninitializedPropertyAccessException) {
-                EasyToast.shortShow("BroadcastManager uninitialized", this)
+                shortShow("BroadcastManager uninitialized", this)
             } catch (e: Exception) {
-                EasyToast.shortShow("BroadcastManager Exception", this)
+                shortShow("BroadcastManager Exception", this)
             }
         }
     }
@@ -125,18 +126,14 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
     }
 
     fun updateSchedule() {
-        schedule = initSchedule()
-    }
-
-    private fun initSchedule(): JsonObject {
-        val schedule = File(filesDir, SCHEDULE_FILE)
-        return try {
+        val schedFile = File(filesDir, SCHEDULE_FILE)
+        schedule = try {
             val jsonObject = JsonObject()
-            val scheduleJ = JsonParser.parseReader(FileReader(schedule)).asJsonObject
+            val scheduleJ = JsonParser.parseReader(FileReader(schedFile)).asJsonObject
             jsonObject.add(SCHEDULE, scheduleJ)
             jsonObject
         } catch (e: Exception) {
-            EasyToast.shortShow(R.string.configErr, this)
+            shortShow(R.string.configErr, this)
             JsonObject()
         }
     }
@@ -200,7 +197,6 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             R.id.menuThursday -> inflateDOWFragment(5, item.title.toString())
             R.id.menuFriday -> inflateDOWFragment(6, item.title.toString())
             R.id.menuSaturday -> inflateDOWFragment(7, item.title.toString())
-            R.id.menuSunday -> inflateDOWFragment(1, item.title.toString())
             R.id.menuSettings -> inflateSettingsFragment()
             R.id.menuHelp -> inflateHelpFragment()
         }
