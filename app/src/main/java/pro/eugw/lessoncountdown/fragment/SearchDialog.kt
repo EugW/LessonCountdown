@@ -70,7 +70,8 @@ class SearchDialog : DialogFragment() {
         mActivity.queue.add(JsObRe(Request.Method.GET,
                 "https://raw.githubusercontent.com/EugW/PGUPS-rasp-storage/master/listing.json", {
                         it["list"].asJsonArray.forEach { groupElement ->
-                            baseArray.add(SearchElement(it[groupElement.asString].asJsonObject["name"].asString, it[groupElement.asString].asJsonObject["path"].asString))
+                            baseArray.add(SearchElement(it[groupElement.asString].asJsonObject["name"].asString,
+                                    it[groupElement.asString].asJsonObject["path"].asString))
                         }
                         searchResults.clear()
                         searchResults.addAll(baseArray)

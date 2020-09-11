@@ -19,14 +19,12 @@ import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
 import pro.eugw.lessoncountdown.list.schedule.ScheduleAdapter
 import pro.eugw.lessoncountdown.list.schedule.ScheduleElement
-import pro.eugw.lessoncountdown.util.*
+import pro.eugw.lessoncountdown.util.HIDE_CONTROLS
+import pro.eugw.lessoncountdown.util.SCHEDULE
+import pro.eugw.lessoncountdown.util.SCHEDULE_FILE
+import pro.eugw.lessoncountdown.util.isEvenWeek
 import java.io.File
-import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.Month
-import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalAdjuster
-import java.time.temporal.TemporalAdjusters
 import java.util.*
 import kotlin.concurrent.thread
 
@@ -67,18 +65,16 @@ class DOWFragment : Fragment() {
                 job.add(SCHEDULE, JsonObject())
             schedule = job[SCHEDULE].asJsonObject
             day = bundle?.getString("day") as String
-            if (mActivity.prefs.getBoolean(EVEN_ODD_WEEKS, false) || schedule.has("${day}e")) {
-                val even = isEvenWeek(LocalDate.now())
-                if (even) {
-                    day += "e"
-                    mActivity.runOnUiThread {
-                        toolbar.menu.findItem(R.id.menuEvenOdd).title = "E"
-                    }
-                } else
-                    mActivity.runOnUiThread {
-                        toolbar.menu.findItem(R.id.menuEvenOdd).title = "O"
-                    }
-            }
+            val even = isEvenWeek(LocalDate.now())
+            if (even) {
+                day += "e"
+                mActivity.runOnUiThread {
+                    toolbar.menu.findItem(R.id.menuEvenOdd).title = "E"
+                }
+            } else
+                mActivity.runOnUiThread {
+                    toolbar.menu.findItem(R.id.menuEvenOdd).title = "O"
+                }
             if (!schedule.has(day))
                 schedule.add(day, JsonArray())
             schedule.get(day).asJsonArray.forEach { jsonElement ->
@@ -189,15 +185,6 @@ class DOWFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         list.clear()
-    }
-
-    fun isEvenWeek(date: LocalDate): Boolean {
-        val september1st: LocalDate = LocalDate.of(date.year, Month.SEPTEMBER, 1)
-        val adjuster: TemporalAdjuster = TemporalAdjusters.ofDateAdjuster { d ->
-            september1st.minusYears(if (d.isBefore(september1st)) 1 else 0)
-                    .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-        }
-        return date.with(adjuster).until(date, ChronoUnit.WEEKS).toInt() % 2 != 0
     }
 
 }

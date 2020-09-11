@@ -29,92 +29,42 @@ import pro.eugw.lessoncountdown.util.*
 import java.io.File
 import java.io.FileReader
 import java.util.*
-import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
 class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     lateinit var prefs: SharedPreferences
-    lateinit var broadcastManager: LocalBroadcastManager
     lateinit var queue: RequestQueue
-    var evenWeek = false
     var schedule = JsonObject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        graphicalInit()
-        thread(true) {
-            variablesInit()
-            postInit()
-        }
-    }
-
-    private fun graphicalInit() {
+        prefs = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
+        queue = Volley.newRequestQueue(this)
         setContentView(R.layout.activity_main)
         val toggle = ActionBarDrawerToggle(this, drawer_layout, main_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
         nav_view.setNavigationItemSelectedListener(this)
-        val toggleButton = nav_view.getHeaderView(0).toggleButton
-        toggleButton.setOnClickListener {
+        nav_view.getHeaderView(0).toggleButton.setOnCheckedChangeListener { _, b ->
             try {
-                if (toggleButton.isChecked) {
-                    broadcastManager.sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("START", true))
+                if (b) {
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("START", true))
                 } else {
-                    broadcastManager.sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("STOP", true))
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("STOP", true))
                 }
-            } catch (ne: UninitializedPropertyAccessException) {
-                shortShow("BroadcastManager uninitialized", this)
             } catch (e: Exception) {
-                shortShow("BroadcastManager Exception", this)
+                shortShow("LocalBroadcastManager.getInstance(this) Exception", this)
             }
         }
-    }
-
-    private fun variablesInit() {
-        broadcastManager = LocalBroadcastManager.getInstance(this)
-        prefs = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
-        queue = Volley.newRequestQueue(this)
-    }
-
-    private fun postInit() {
-        if (!prefs.getBoolean(LC_PP, false)) {
-            runOnUiThread {
-                val dialog = AlertDialog.Builder(this)
-                        .setPositiveButton("Accept") { _, _ ->
-                            prefs.edit {
-                                putBoolean(LC_PP, true)
-                            }
-                        }
-                        .setNeutralButton("Decline") { _, _ ->
-                            prefs.edit {
-                                putBoolean(LC_PP, false)
-                            }
-                            finish()
-                            exitProcess(0)
-                        }
-                        .setOnCancelListener {
-                            prefs.edit {
-                                putBoolean(LC_PP, false)
-                            }
-                            finish()
-                            exitProcess(0)
-                        }
-                        .setTitle(R.string.privacyPolicy)
-                        .setMessage(R.string.requestPolicyAccept)
-                        .create()
-                dialog.show()
-                dialog.findViewById<TextView>(android.R.id.message).movementMethod = LinkMovementMethod.getInstance()
-            }
-        }
-        broadcastManager.registerReceiver(object : BroadcastReceiver() {
+        LocalBroadcastManager.getInstance(this).registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent?) {
                 if (toggleButton != null)
                     toggleButton.isChecked = p1!!.getBooleanExtra("isRun", false)
             }
         }, IntentFilter(baseContext.packageName + SERVICE_STATE))
         val service = Intent(this, MService::class.java)
-        broadcastManager.registerReceiver(object : BroadcastReceiver() {
+        LocalBroadcastManager.getInstance(this).registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 stopService(service)
                 startForegroundService(service)
@@ -123,6 +73,31 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         updateSchedule()
         inflateDOWFragment()
         startForegroundService(service)
+        if (!prefs.getBoolean(LC_PP, false)) {
+            runOnUiThread {
+                val dialog = AlertDialog.Builder(this)
+                        .setPositiveButton("Accept") { _, _ ->
+                            prefs.edit {
+                                putBoolean(LC_PP, true)
+                            }
+                        }.setNeutralButton("Decline") { _, _ ->
+                            prefs.edit {
+                                putBoolean(LC_PP, false)
+                            }
+                            finish()
+                            exitProcess(0)
+                        }.setOnCancelListener {
+                            prefs.edit {
+                                putBoolean(LC_PP, false)
+                            }
+                            finish()
+                            exitProcess(0)
+                        }.setTitle(R.string.privacyPolicy)
+                        .setMessage(R.string.requestPolicyAccept).create()
+                dialog.show()
+                dialog.findViewById<TextView>(android.R.id.message).movementMethod = LinkMovementMethod.getInstance()
+            }
+        }
     }
 
     fun updateSchedule() {
@@ -136,10 +111,14 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             shortShow(R.string.configErr, this)
             JsonObject()
         }
+        shortShow("Schedule updated!", this)
     }
 
     private fun inflateDOWFragment() {
-        inflateDOWFragment(Calendar.getInstance().get(Calendar.DAY_OF_WEEK), resources.getStringArray(R.array.days)[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1])
+        with(Calendar.getInstance().get(Calendar.DAY_OF_WEEK)) {
+            if (this in 2..7)
+                inflateDOWFragment(this, resources.getStringArray(R.array.days)[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1])
+        }
     }
 
     private fun inflateDOWFragment(day: Int, dayName: String) {

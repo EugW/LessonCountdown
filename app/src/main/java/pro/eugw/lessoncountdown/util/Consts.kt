@@ -4,10 +4,7 @@ package pro.eugw.lessoncountdown.util
 
 const val APP_PREFERENCES = "newPrefs"
 const val CUSTOM_COLOR = "CustomColor"
-const val CUSTOM_CONFIG = "CustomCfg"
 const val HIDE_CONTROLS = "hideControls"
-const val EVEN_ODD_WEEKS = "evenOddWeeks"
-const val INVERSE_EVEN_ODD_WEEKS = "inverseEvenOddWeeks"
 const val TITLE_COLOR = "titleColor"
 const val TIME_COLOR = "timeColor"
 const val LESSONS_COLOR = "lessonsColor"
@@ -42,4 +39,3 @@ const val FRAGMENT_DRAW_DELAY = 400L
 const val CHANNEL_ID = "LessonChannel"
 const val TIME_GROUP = "TimeGroup"
 const val COLOR_PICKER_DIALOG = "color-picker-dialog"
-const val HTTP_TIMEOUT = 3000

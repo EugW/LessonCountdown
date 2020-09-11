@@ -9,9 +9,8 @@ android {
         applicationId "pro.eugw.lessoncountdown"
         minSdkVersion 26
         targetSdkVersion 30
-        versionCode 75
-        versionName "2.8.1"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        versionCode 76
+        versionName "2.8.2"
     }
     compileOptions {
         targetCompatibility "1.8"
