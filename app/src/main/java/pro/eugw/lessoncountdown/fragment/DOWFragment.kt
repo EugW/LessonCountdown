@@ -53,6 +53,7 @@ class DOWFragment : Fragment() {
         val mActivity = activity as MainActivity
         val bundle = arguments
         val toolbar = mActivity.main_toolbar
+        toolbar.title = bundle?.getString("dayName")
         thread(true) {
             if (!mActivity.prefs.getBoolean(HIDE_CONTROLS, false)) {
                 mActivity.runOnUiThread {
@@ -64,7 +65,7 @@ class DOWFragment : Fragment() {
             if (!job.has(SCHEDULE))
                 job.add(SCHEDULE, JsonObject())
             schedule = job[SCHEDULE].asJsonObject
-            day = bundle?.getString("day") as String
+            day = bundle?.getString("day").toString()
             val even = isEvenWeek(LocalDate.now())
             if (even) {
                 day += "e"

@@ -7,6 +7,7 @@ import android.os.Handler
 import android.text.method.LinkMovementMethod
 import android.view.MenuItem
 import android.widget.TextView
+import android.widget.ToggleButton
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.edit
 import androidx.core.view.GravityCompat
@@ -46,21 +47,24 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
         nav_view.setNavigationItemSelectedListener(this)
-        nav_view.getHeaderView(0).toggleButton.setOnCheckedChangeListener { _, b ->
+        nav_view.getHeaderView(0).toggleButton.setOnClickListener {
             try {
-                if (b) {
-                    LocalBroadcastManager.getInstance(this).sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("START", true))
-                } else {
-                    LocalBroadcastManager.getInstance(this).sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("STOP", true))
-                }
+                LocalBroadcastManager.getInstance(this).sendBroadcast(Intent(baseContext.packageName + SERVICE_SIGNAL).putExtra("SIG", !(it as ToggleButton).isChecked))
             } catch (e: Exception) {
                 shortShow("LocalBroadcastManager.getInstance(this) Exception", this)
             }
         }
         LocalBroadcastManager.getInstance(this).registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent?) {
-                if (toggleButton != null)
-                    toggleButton.isChecked = p1!!.getBooleanExtra("isRun", false)
+                if (p1 != null) {
+                    if (toggleButton != null)
+                        toggleButton.isChecked = p1.getBooleanExtra("isRun", false)
+/*                    if (p1.getBooleanExtra("isRun", false)) {
+                        shortShow("Service started", this@MainActivity)
+                    } else {
+                        shortShow("Service stopped", this@MainActivity)
+                    }*/
+                }
             }
         }, IntentFilter(baseContext.packageName + SERVICE_STATE))
         val service = Intent(this, MService::class.java)
@@ -111,7 +115,6 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
             shortShow(R.string.configErr, this)
             JsonObject()
         }
-        shortShow("Schedule updated!", this)
     }
 
     private fun inflateDOWFragment() {
@@ -124,9 +127,9 @@ class MainActivity : FragmentActivity(), NavigationView.OnNavigationItemSelected
     private fun inflateDOWFragment(day: Int, dayName: String) {
         try {
             Handler(mainLooper).postDelayed({
-                main_toolbar.title = dayName
                 val bundle = Bundle()
                 bundle.putString("day", day.toString())
+                bundle.putString("dayName", dayName)
                 val fragment = DOWFragment()
                 fragment.arguments = bundle
                 supportFragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit()

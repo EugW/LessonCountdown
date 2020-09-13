@@ -1,6 +1,5 @@
 package pro.eugw.lessoncountdown
 
-import android.annotation.SuppressLint
 import android.app.*
 import android.content.*
 import android.graphics.BitmapFactory
@@ -43,7 +42,7 @@ class MService : Service() {
         registerReceivers(notificationLayout, prefs)
         mNotificationManager.createNotificationChannel(NotificationChannel(CHANNEL_ID, CHANNEL_ID,
                 NotificationManager.IMPORTANCE_LOW))
-        val mBuilder = Notification.Builder(this, CHANNEL_ID)
+        val mNotification = Notification.Builder(this, CHANNEL_ID)
                 .setContentTitle("LessonCountdown")
                 .setContentText("Time notification")
                 .setSmallIcon(R.drawable.ic_oti)
@@ -55,8 +54,15 @@ class MService : Service() {
                         MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
                 .setCustomContentView(notificationLayout)
                 .setGroup(TIME_GROUP).build()
-        startForeground(TIME_NOTIFICATION_ID, mBuilder)
         runnable = {
+            running = true
+            LocalBroadcastManager.getInstance(this).sendBroadcast(Intent(baseContext.packageName + SERVICE_STATE).putExtra("isRun", running))
+            wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
+                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "LCEndlessService::lock").apply {
+                    acquire(24 * 3600 * 1000)
+                }
+            }
+            startForeground(TIME_NOTIFICATION_ID, mNotification)
             val schedule = try {
                 JsonParser.parseReader(FileReader(File(filesDir, SCHEDULE_FILE))).asJsonObject
             } catch (e: Exception) {
@@ -78,8 +84,6 @@ class MService : Service() {
             } catch (e: Exception) {
                 lessonArray.clear()
             }
-            running = true
-            LocalBroadcastManager.getInstance(this).sendBroadcast(Intent(baseContext.packageName + SERVICE_STATE).putExtra("isRun", running))
             if (lessonArray.isNotEmpty())
                 while (running && System.currentTimeMillis() <= lessonArray.last().end) {
                     var l1 = ""
@@ -115,12 +119,11 @@ class MService : Service() {
                     notificationLayout.setTextViewText(R.id.textViewNext, l2)
                     notificationLayout.setTextViewText(R.id.textViewText, text)
                     notificationLayout.setTextViewText(R.id.textViewLessons, lessons)
-                    mNotificationManager.notify(TIME_NOTIFICATION_ID, mBuilder)
+                    mNotificationManager.notify(TIME_NOTIFICATION_ID, mNotification)
                     Thread.sleep(5000)
                 }
             running = false
             LocalBroadcastManager.getInstance(this).sendBroadcast(Intent(baseContext.packageName + SERVICE_STATE).putExtra("isRun", running))
-            mNotificationManager.cancel(TIME_NOTIFICATION_ID)
             wakeLock?.let {
                 if (it.isHeld) {
                     it.release()
@@ -128,17 +131,10 @@ class MService : Service() {
             }
             flags?.let { stopForeground(it) }
             stopForeground(true)
-            stopSelf()
         }
     }
 
-    @SuppressLint("WakelockTimeout")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
-                    newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "LCEndlessService::lock").apply {
-                        acquire()
-                    }
-                }
         this.flags = flags
         thread(true, block = runnable)
         return START_STICKY
@@ -181,8 +177,10 @@ class MService : Service() {
         }, IntentFilter(baseContext.packageName + NOTIFICATION_STYLE_UPDATE))
         LocalBroadcastManager.getInstance(this).registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent) {
-                if (p1.getBooleanExtra("STOP", false)) {
+                if (p1.getBooleanExtra("SIG", false)) {
                     running = false
+                } else {
+                    thread(true, block = runnable)
                 }
             }
         }, IntentFilter(baseContext.packageName + SERVICE_SIGNAL))

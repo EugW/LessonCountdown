@@ -18,6 +18,7 @@ import pro.eugw.lessoncountdown.list.search.SearchAdapter
 import pro.eugw.lessoncountdown.list.search.SearchElement
 import pro.eugw.lessoncountdown.util.SCHEDULE_FILE
 import pro.eugw.lessoncountdown.util.network.JsObRe
+import pro.eugw.lessoncountdown.util.shortShow
 import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
@@ -90,6 +91,7 @@ class SearchDialog : DialogFragment() {
         mActivity.queue.add(StringRequest("https://raw.githubusercontent.com/EugW/PGUPS-rasp-storage/master/$groupPath", {
             File(mActivity.filesDir, SCHEDULE_FILE).writeText(it)
             mActivity.updateSchedule()
+            shortShow("Schedule updated!", mActivity)
         }, {}))
         dismissAllowingStateLoss()
     }
