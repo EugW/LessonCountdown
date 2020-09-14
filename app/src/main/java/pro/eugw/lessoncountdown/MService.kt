@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.IBinder
 import android.os.PowerManager
+import android.view.View
 import android.widget.RemoteViews
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.gson.JsonObject
@@ -88,37 +89,40 @@ class MService : Service() {
                 while (running && System.currentTimeMillis() <= lessonArray.last().end) {
                     var l1 = ""
                     var l2 = ""
-                    val text = StringBuilder()
-                    val lessons = StringBuilder()
+                    var text = ""
+                    var cabinet = ""
                     lessonArray.forEachIndexed { index, lessonTime ->
                         val start = lessonTime.start
                         val end = lessonTime.end
                         val current = System.currentTimeMillis()
                         if (current in start..end) {
                             l1 = lessonTime.lesson
-                            if (index < lessonArray.size - 1) {
+                            if (index < lessonArray.size - 1)
                                 l2 = lessonArray[index + 1].lesson
-                            }
-                            text.append(appendable(end, current))
-                            lessons.append("${getString(R.string.lessonsRemaining)}: ${lessonArray.lastIndex - index}")
+                            text = appendable(end, current)
+                            cabinet = lessonTime.cabinet
                         } else if (current < lessonArray.first().start && index == 0) {
                             val nolS = lessonArray.first().start
-                            text.append(appendable(nolS, current))
+                            text = appendable(nolS, current)
                             l2 = lessonArray.first().lesson
-                            lessons.append("${getString(R.string.lessonsRemaining)}: ${lessonArray.size - index}")
+                            cabinet = lessonTime.cabinet
                         } else if (index < lessonArray.lastIndex) {
                             val nexS = lessonArray[index + 1].start
                             if (current in (end + 1) until nexS) {
-                                text.append(appendable(nexS, current))
+                                text = appendable(nexS, current)
                                 l2 = lessonArray[index + 1].lesson
-                                lessons.append("${getString(R.string.lessonsRemaining)}: ${lessonArray.lastIndex - index}")
+                                cabinet = lessonArray[index + 1].cabinet
                             }
                         }
                     }
+                    if (l2.isNotBlank())
+                        notificationLayout.setViewVisibility(R.id.imageViewNextArrow, View.VISIBLE)
+                    else
+                        notificationLayout.setViewVisibility(R.id.imageViewNextArrow, View.GONE)
                     notificationLayout.setTextViewText(R.id.textViewCurrent, l1)
                     notificationLayout.setTextViewText(R.id.textViewNext, l2)
                     notificationLayout.setTextViewText(R.id.textViewText, text)
-                    notificationLayout.setTextViewText(R.id.textViewLessons, lessons)
+                    notificationLayout.setTextViewText(R.id.textViewCabinet, cabinet)
                     mNotificationManager.notify(TIME_NOTIFICATION_ID, mNotification)
                     Thread.sleep(5000)
                 }
@@ -132,11 +136,11 @@ class MService : Service() {
             flags?.let { stopForeground(it) }
             stopForeground(true)
         }
+        thread(true, block = runnable)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         this.flags = flags
-        thread(true, block = runnable)
         return START_STICKY
     }
 
@@ -149,7 +153,7 @@ class MService : Service() {
                 Color.parseColor("#000000")))
         notificationLayout.setTextColor(R.id.textViewText, prefs.getInt(TIME_COLOR,
                 Color.parseColor("#999999")))
-        notificationLayout.setTextColor(R.id.textViewLessons, prefs.getInt(LESSONS_COLOR,
+        notificationLayout.setTextColor(R.id.textViewCabinet, prefs.getInt(LESSONS_COLOR,
                 Color.parseColor("#999999")))
         notificationLayout.setInt(R.id.layoutNotification, "setBackgroundColor",
                 prefs.getInt(BACKGROUND_COLOR, Color.parseColor("#ffffff")))
