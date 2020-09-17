@@ -1,20 +1,18 @@
 package pro.eugw.lessoncountdown.fragment
 
 import android.app.Activity
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
+import android.app.AlertDialog
+import android.content.*
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.android.synthetic.main.custom_colors_layout.*
-import kotlinx.android.synthetic.main.custom_config_layout.*
 import kotlinx.android.synthetic.main.fragment_settings.*
 import pro.eugw.lessoncountdown.R
 import pro.eugw.lessoncountdown.activity.MainActivity
@@ -22,10 +20,10 @@ import pro.eugw.lessoncountdown.util.*
 import pro.eugw.lessoncountdown.util.color.ColorPickerDialog
 import pro.eugw.lessoncountdown.util.color.ColorPickerDialogListener
 import java.io.File
+import kotlin.Exception
 
 class SettingsFragment : Fragment() {
 
-    private lateinit var host: String
     private var colorTitle = Color.parseColor("#000000")
     private var colorTime = Color.parseColor("#999999")
     private var colorLessons = Color.parseColor("#999999")
@@ -40,10 +38,27 @@ class SettingsFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         mActivity = activity as MainActivity
-        host = mActivity.prefs.getString(CUSTOM_ADDRESS, getString(R.string.host)) as String
-        selClassLayout.setOnClickListener {
+        selectClass.setOnClickListener {
             val fragment = SearchDialog()
             fragment.show(mActivity.supportFragmentManager, "search-dialog")
+        }
+        selectPeriod.setOnClickListener {
+            val periodView = EditText(mActivity)
+            periodView.setText(mActivity.prefs.getLong(SERVICE_PERIOD, 5000).toString())
+            val builder = AlertDialog.Builder(mActivity)
+                    .setView(periodView)
+                    .setPositiveButton("OK") { _, _ ->
+                        try {
+                            mActivity.prefs.edit(true) {
+                                putLong(SERVICE_PERIOD, periodView.text.toString().toLong())
+                            }
+                            LocalBroadcastManager.getInstance(mActivity).sendBroadcast(Intent(mActivity.packageName + PERIOD_UPDATE)
+                                    .putExtra("period", periodView.text.toString().toLong()))
+                        } catch (e: Exception) {
+                            shortShow("Something wrong", mActivity)
+                        }
+                    }.setNegativeButton(R.string.cancel) { _, _ -> }
+            builder.create().show()
         }
         initCustomCfg()
         initCustomColors()
@@ -69,13 +84,15 @@ class SettingsFragment : Fragment() {
         switchNotificationColor.setOnCheckedChangeListener { _, state ->
             if (state) {
                 includedColors.visibility = View.VISIBLE
-                LocalBroadcastManager.getInstance(context!!).sendBroadcast(localIntent.putExtra("cVal", true))
+                LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(localIntent.putExtra("cVal", true))
             }
             else {
                 includedColors.visibility = View.GONE
-                LocalBroadcastManager.getInstance(context!!).sendBroadcast(localIntent.putExtra("cVal", false))
+                LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(localIntent.putExtra("cVal", false))
             }
-            mActivity.prefs.edit().putBoolean(CUSTOM_COLOR, state).apply()
+            mActivity.prefs.edit(true) {
+                putBoolean(CUSTOM_COLOR, state)
+            }
         }
         val title = buttonChooseDialogTitle
         colorTitle = mActivity.prefs.getInt(TITLE_COLOR, Color.parseColor("#000000"))
@@ -88,7 +105,9 @@ class SettingsFragment : Fragment() {
                 override fun onColorSelected(dialogId: Int, color: Int) {
                     colorTitle = color
                     title.setBackgroundColor(color)
-                    mActivity.prefs.edit().putInt(TITLE_COLOR, colorTitle).apply()
+                    mActivity.prefs.edit(true) {
+                        putInt(TITLE_COLOR, colorTitle)
+                    }
                     LocalBroadcastManager.getInstance(context!!).sendBroadcast(localIntent)
                 }
             })
@@ -105,7 +124,9 @@ class SettingsFragment : Fragment() {
                 override fun onColorSelected(dialogId: Int, color: Int) {
                     colorTime = color
                     textTime.setBackgroundColor(color)
-                    mActivity.prefs.edit().putInt(TIME_COLOR, colorTime).apply()
+                    mActivity.prefs.edit(true) {
+                        putInt(TIME_COLOR, colorTime)
+                    }
                     LocalBroadcastManager.getInstance(context!!).sendBroadcast(localIntent)
                 }
             })
@@ -122,7 +143,9 @@ class SettingsFragment : Fragment() {
                 override fun onColorSelected(dialogId: Int, color: Int) {
                     colorLessons = color
                     textLessons.setBackgroundColor(color)
-                    mActivity.prefs.edit().putInt(LESSONS_COLOR, colorLessons).apply()
+                    mActivity.prefs.edit(true) {
+                        putInt(LESSONS_COLOR, colorLessons)
+                    }
                     LocalBroadcastManager.getInstance(context!!).sendBroadcast(localIntent)
                 }
             })
@@ -139,7 +162,9 @@ class SettingsFragment : Fragment() {
                 override fun onColorSelected(dialogId: Int, color: Int) {
                     colorBackground = color
                     background.setBackgroundColor(color)
-                    mActivity.prefs.edit().putInt(BACKGROUND_COLOR, colorBackground).apply()
+                    mActivity.prefs.edit(true) {
+                        putInt(BACKGROUND_COLOR, colorBackground)
+                    }
                     LocalBroadcastManager.getInstance(context!!).sendBroadcast(localIntent)
                 }
             })

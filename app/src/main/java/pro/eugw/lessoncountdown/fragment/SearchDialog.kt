@@ -78,8 +78,8 @@ class SearchDialog : DialogFragment() {
                         searchResults.addAll(baseArray)
                         mActivity.runOnUiThread {
                             adapter.notifyDataSetChanged()
-                            progressBarSearch.visibility = View.GONE
-                            searchRecycler.visibility = View.VISIBLE
+                            progressBarSearch?.visibility = View.GONE
+                            searchRecycler?.visibility = View.VISIBLE
                         }
                 },
                 {}

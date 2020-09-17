@@ -25,6 +25,7 @@ class MService : Service() {
 
     private var wakeLock: PowerManager.WakeLock? = null
     private var flags: Int? = null
+    private var period: Long = 5000
     private var running: Boolean = true
     private lateinit var runnable: () -> Unit
 
@@ -40,6 +41,7 @@ class MService : Service() {
         if (prefs.getBoolean(CUSTOM_COLOR, false)) {
             defaultColors(notificationLayout, prefs)
         }
+        period = prefs.getLong(SERVICE_PERIOD, 5000)
         registerReceivers(notificationLayout, prefs)
         mNotificationManager.createNotificationChannel(NotificationChannel(CHANNEL_ID, CHANNEL_ID,
                 NotificationManager.IMPORTANCE_LOW))
@@ -125,7 +127,7 @@ class MService : Service() {
                     notificationLayout.setTextViewText(R.id.textViewText, text)
                     notificationLayout.setTextViewText(R.id.textViewCabinet, cabinet)
                     mNotificationManager.notify(TIME_NOTIFICATION_ID, mNotification)
-                    Thread.sleep(5000)
+                    Thread.sleep(period)
                 }
             running = false
             LocalBroadcastManager.getInstance(this).sendBroadcast(Intent(baseContext.packageName + SERVICE_STATE).putExtra("isRun", running))
@@ -164,6 +166,13 @@ class MService : Service() {
             "${(arg[0] - arg[1]) / 60000} ${getString(R.string.min)} ${(arg[0] - arg[1]) / 1000 % 60} ${getString(R.string.sec)}"
 
     private fun registerReceivers(notificationLayout: RemoteViews, prefs: SharedPreferences) {
+        LocalBroadcastManager.getInstance(this).registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(p0: Context?, p1: Intent?) {
+                if (p1 != null) {
+                    period = p1.getLongExtra("period", 5000)
+                }
+            }
+        }, IntentFilter(baseContext.packageName + PERIOD_UPDATE))
         LocalBroadcastManager.getInstance(this).registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent) {
                 if (p1.getBooleanExtra("cVal", false)) {
