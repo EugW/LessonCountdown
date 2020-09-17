@@ -97,15 +97,16 @@ class MService : Service() {
                         val current = System.currentTimeMillis()
                         if (current in start..end) {
                             l1 = lessonTime.lesson
-                            if (index < lessonArray.size - 1)
+                            if (index < lessonArray.lastIndex) {
                                 l2 = lessonArray[index + 1].lesson
+                                cabinet = lessonArray[index + 1].cabinet
+                            }
                             text = appendable(end, current)
-                            cabinet = lessonTime.cabinet
                         } else if (current < lessonArray.first().start && index == 0) {
                             val nolS = lessonArray.first().start
                             text = appendable(nolS, current)
                             l2 = lessonArray.first().lesson
-                            cabinet = lessonTime.cabinet
+                            cabinet = lessonArray.first().cabinet
                         } else if (index < lessonArray.lastIndex) {
                             val nexS = lessonArray[index + 1].start
                             if (current in (end + 1) until nexS) {
