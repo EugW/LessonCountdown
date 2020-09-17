@@ -1,7 +1,6 @@
 package pro.eugw.lessoncountdown.list.schedule
 
 import android.view.View
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.schedule_element.view.*

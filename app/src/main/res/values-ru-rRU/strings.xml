@@ -9,11 +9,8 @@
     <string name="thursday">Четверг</string>
     <string name="friday">Пятница</string>
     <string name="dev"><a href="https://vk.com/dibrin">Страница разработчика в ВК</a></string>
-    <string name="networkErr">Сервер недоступен</string>
     <string name="configErr">Ошибка в конфиге</string>
     <string name="cancel">Отмена</string>
-    <string name="clear">Стереть</string>
-    <string name="homework">Домашнее задание</string>
     <string name="sec">сек</string>
     <string name="min">мин</string>
     <string name="lesson">Урок</string>
@@ -30,7 +27,6 @@
     <string name="chooseClass">Выбрать класс</string>
     <string name="searchClass">Поиск класса</string>
     <string name="notNumErr">Вы ввели не число</string>
-    <string name="address">Адрес</string>
     <string name="dowTitle">Дни недели</string>
     <string name="titleColor">Цвет урока</string>
     <string name="timeColor">Цвет времени</string>
@@ -39,7 +35,6 @@
     <string name="backgroundColor">Цвет фона</string>
     <string name="copyTo">Копировать конфиг в буфер обмена</string>
     <string name="pasteFrom">Вставить конфиг из буфера обмена</string>
-    <string name="pasteErr">Невозможно разобрать конфиг из буфера обмена</string>
     <string name="sunday">Воскресенье</string>
     <string name="navigation_drawer_open">Открыть меню</string>
     <string name="navigation_drawer_close">Закрыть меню</string>
@@ -47,14 +42,11 @@
     <string name="help">Помощь</string>
     <string name="cpv_select">Выбрать</string>
     <string name="hideEditionControls">Скрыть элементы управления режима редактирования</string>
-    <string name="utilities">Утилиты</string>
     <string name="privacyPolicy">Политика Конфиденциальности</string>
     <string name="requestPolicyAccept">Чтобы использовать мое приложение, вы должны принять <a href="http://lessoncountdown.brin.pw/privacy_policy.html">политику конфиденциальности</a> и <a href="http://lessoncountdown.brin.pw/terms_and_conditions.html">условия использования.</a></string>
     <string name="helpPrivacyPolicy"><a href="http://lessoncountdown.brin.pw/privacy_policy.html">Политика конфиденциальности</a></string>
     <string name="helpTermsAndConditions"><a href="http://lessoncountdown.brin.pw/terms_and_conditions.html">Условия использования</a></string>
-    <string name="set">Установить</string>
     <string name="cabinet">Кабинет</string>
-    <string name="scheduleGroup">Расписание</string>
     <string name="svcPeriod">Период сервиса</string>
     <string name="enterSVCPeriod">Введите период сервиса в мс</string>
 </resources>

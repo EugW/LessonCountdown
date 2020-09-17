@@ -4,7 +4,6 @@
     <string name="appVk"><a href="https://vk.com/brin_apps">LessonCountdown group in VK</a></string>
     <string name="whitespace" translatable="false"> </string>
     <string name="help">Help</string>
-    <string name="networkErr">Server is unreachable</string>
     <string name="configErr">Wrong config</string>
     <string name="timeErr">The xxx time entry field should look like: Hours:Minutes-Hours:Minutes</string>
     <string name="lessonErr">The xxx lesson entry field is blank</string>
@@ -21,8 +20,6 @@
     <string name="sec">sec</string>
     <string name="min">min</string>
     <string name="cancel">Cancel</string>
-    <string name="clear">Clear</string>
-    <string name="homework">Homework</string>
     <string name="on">Service online</string>
     <string name="off">Service offline</string>
     <string name="sunday">Sunday</string>
@@ -35,8 +32,6 @@
     <string name="settings">Settings</string>
     <string name="chooseClass">Choose class</string>
     <string name="searchClass">Search class</string>
-    <string name="ownServer">Set own server address</string>
-    <string name="address">Address</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="dowTitle">Days of the week</string>
@@ -56,16 +51,12 @@
     <string name="backgroundColor">Background color</string>
     <string name="copyTo">Copy config to clipboard</string>
     <string name="pasteFrom">Paste config from clipboard</string>
-    <string name="pasteErr">Could not parse config from clipboard</string>
     <string name="cpv_select">Select</string>
     <string name="hideEditionControls">Hide edition mode controls</string>
-    <string name="utilities">Utilities</string>
     <string name="privacyPolicy">Privacy Policy</string>
     <string name="requestPolicyAccept">To use my application you must accept <a href="http://lessoncountdown.eugw.ru/privacy_policy.html">the privacy policy</a> and <a href="http://lessoncountdown.eugw.ru/terms_and_conditions.html">terms and conditions.</a></string>
     <string name="helpPrivacyPolicy"><a href="http://lessoncountdown.eugw.ru/privacy_policy.html">Privacy Policy</a></string>
     <string name="helpTermsAndConditions"><a href="http://lessoncountdown.eugw.ru/terms_and_conditions.html">Terms and Conditions</a></string>
-    <string name="set">Set</string>
-    <string name="scheduleGroup">Schedule</string>
     <string name="svcPeriod">Service period</string>
     <string name="enterSVCPeriod">Enter service period in ms</string>
 </resources>
