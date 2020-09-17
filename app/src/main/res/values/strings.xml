@@ -67,4 +67,5 @@
     <string name="set">Set</string>
     <string name="scheduleGroup">Schedule</string>
     <string name="svcPeriod">Service period</string>
+    <string name="enterSVCPeriod">Enter service period in ms</string>
 </resources>

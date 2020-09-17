@@ -56,4 +56,5 @@
     <string name="cabinet">Кабинет</string>
     <string name="scheduleGroup">Расписание</string>
     <string name="svcPeriod">Период сервиса</string>
+    <string name="enterSVCPeriod">Введите период сервиса в мс</string>
 </resources>

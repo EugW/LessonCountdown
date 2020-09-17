@@ -43,10 +43,10 @@ class SettingsFragment : Fragment() {
             fragment.show(mActivity.supportFragmentManager, "search-dialog")
         }
         selectPeriod.setOnClickListener {
-            val periodView = EditText(mActivity)
+            val layout = mActivity.layoutInflater.inflate(R.layout.svc_period_dialog, null)
+            val periodView = layout.findViewById<EditText>(R.id.periodView)
             periodView.setText(mActivity.prefs.getLong(SERVICE_PERIOD, 5000).toString())
-            val builder = AlertDialog.Builder(mActivity)
-                    .setView(periodView)
+            AlertDialog.Builder(mActivity).setView(layout).setTitle(R.string.enterSVCPeriod)
                     .setPositiveButton("OK") { _, _ ->
                         try {
                             mActivity.prefs.edit(true) {
@@ -55,10 +55,10 @@ class SettingsFragment : Fragment() {
                             LocalBroadcastManager.getInstance(mActivity).sendBroadcast(Intent(mActivity.packageName + PERIOD_UPDATE)
                                     .putExtra("period", periodView.text.toString().toLong()))
                         } catch (e: Exception) {
+                            e.printStackTrace()
                             shortShow("Something wrong", mActivity)
                         }
-                    }.setNegativeButton(R.string.cancel) { _, _ -> }
-            builder.create().show()
+                    }.setNegativeButton(R.string.cancel) { _, _ -> }.create().show()
         }
         initCustomCfg()
         initCustomColors()
